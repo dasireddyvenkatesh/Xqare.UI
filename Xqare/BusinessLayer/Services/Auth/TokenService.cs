@@ -1,24 +1,56 @@
-﻿using Xqare.BusinessLayer.Interfaces.Auth;
+﻿using Microsoft.JSInterop;
+using Xqare.BusinessLayer.Interfaces.Auth;
 
-namespace Xqare.BusinessLayer.Classes.Auth
+namespace Xqare.BusinessLayer.Classes.Auth;
+
+public class TokenService : ITokenService
 {
-    public class TokenService : ITokenService
+    private readonly IJSRuntime _js;
+    private const string Key = "xq_access_token";
+
+    // In-memory cache so we don't call JS every single time
+    private string? _cachedToken;
+
+    public TokenService(IJSRuntime js)
     {
-        private string? _accessToken;
+        _js = js;
+    }
 
-        public Task<string?> GetAccessTokenAsync()
-            => Task.FromResult(_accessToken);
+    public async Task<string?> GetAccessTokenAsync()
+    {
+        // Return cache first — avoid JS round trip
+        if (!string.IsNullOrEmpty(_cachedToken))
+            return _cachedToken;
 
-        public Task SetTokenAsync(string accessToken)
+        try
         {
-            _accessToken = accessToken;
-            return Task.CompletedTask;
+            _cachedToken = await _js.InvokeAsync<string?>("storageHelper.get", Key);
+            return _cachedToken;
         }
-
-        public Task ClearAsync()
+        catch
         {
-            _accessToken = null;
-            return Task.CompletedTask;
+            // JS not ready yet (rare in WASM but safe to handle)
+            return null;
         }
+    }
+
+    public async Task SetTokenAsync(string accessToken)
+    {
+        _cachedToken = accessToken;
+        try
+        {
+            await _js.InvokeVoidAsync("storageHelper.set", Key, accessToken);
+        }
+        catch { /* ignore if JS not ready */ }
+    }
+
+    public async Task ClearAsync()
+    {
+        _cachedToken = null;
+        try
+        {
+            await _js.InvokeVoidAsync("storageHelper.remove", Key);
+        }
+        catch { /* ignore */ }
     }
 }
