@@ -2,8 +2,10 @@
 {
     public interface ITokenService
     {
+        Task<string?> GetAccessTokenAsync();
+
         Task SetTokenAsync(string accessToken);
-        Task<string> GetAccessTokenAsync();
+
         Task ClearAsync();
     }
 }

@@ -1,45 +1,24 @@
-﻿using System.Net.Http.Json;
-using Xqare.BusinessLayer.Interfaces.Auth;
+﻿using Xqare.BusinessLayer.Interfaces.Auth;
 
 namespace Xqare.BusinessLayer.Classes.Auth
 {
     public class TokenService : ITokenService
     {
+        private string? _accessToken;
 
-        private readonly HttpClient _http;
-        private readonly IConfiguration _configuration;
+        public Task<string?> GetAccessTokenAsync()
+            => Task.FromResult(_accessToken);
 
-        public TokenService(HttpClient http, IConfiguration configuration)
+        public Task SetTokenAsync(string accessToken)
         {
-            _http = http;
-            _configuration = configuration;
+            _accessToken = accessToken;
+            return Task.CompletedTask;
         }
 
-        public async Task SetTokenAsync(string accessToken)
+        public Task ClearAsync()
         {
-
-            await _http.PostAsJsonAsync($"{BaseUrl()}/api/auth/settoken", accessToken);
-        }
-
-        public async Task<string> GetAccessTokenAsync()
-        {
-            //var response = await _http.GetAsync($"{BaseUrl()}/api/auth/gettoken");
-
-            //if (response.IsSuccessStatusCode)
-            //{
-            //    return await response.Content.ReadAsStringAsync();
-            //}
-
-            return default!;
-        }
-
-        public async Task ClearAsync()
-        {
-            await _http.DeleteAsync($"{BaseUrl()}/api/auth/deletetoken");
-        }
-        private string BaseUrl()
-        {
-            return _configuration["ApiSettings:BaseUrl"] ?? default!;
+            _accessToken = null;
+            return Task.CompletedTask;
         }
     }
 }

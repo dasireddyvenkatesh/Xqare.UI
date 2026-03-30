@@ -1,5 +1,7 @@
 ﻿@page "/dashboard"
 @using Xqare.Wrappers.DashboardWrapper
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <MudBreakpointProvider OnBreakpointChanged="OnBreakpointChanged">
 
