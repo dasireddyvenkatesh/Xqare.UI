@@ -30,7 +30,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IContactUsService, ContactUsService>();
 builder.Services.AddScoped<IPartnershipService, PartnershipService>();
 builder.Services.AddScoped<IApiClient, ApiClient>();
-
 builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(p =>
     p.GetRequiredService<JwtAuthStateProvider>());

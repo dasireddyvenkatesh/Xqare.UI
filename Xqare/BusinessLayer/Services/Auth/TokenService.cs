@@ -23,12 +23,12 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task<string> GetAccessTokenAsync()
         {
-            var response = await _http.GetAsync($"{BaseUrl()}/api/auth/gettoken");
+            //var response = await _http.GetAsync($"{BaseUrl()}/api/auth/gettoken");
 
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
+            //if (response.IsSuccessStatusCode)
+            //{
+            //    return await response.Content.ReadAsStringAsync();
+            //}
 
             return default!;
         }

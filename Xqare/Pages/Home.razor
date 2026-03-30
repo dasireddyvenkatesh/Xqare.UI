@@ -1,7 +1,44 @@
 ﻿@page "/"
+@using MudBlazor
+@using Xqare.Wrappers.CommonWrapper
+@using Xqare.Wrappers.HomePageWrapper
 
-<PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+@code {
+    DateTime offerEnd = DateTime.UtcNow.AddHours(6);
+}
 
-Welcome to your new app.
+<AuthWrapper />
+<PromoBarWrapper IsExpired="true" OfferEndsAt="@offerEnd"
+                 SlotsLeft="50"
+                 RegisterUrl="/register" />
+<HeroContentWrapper ShowPromoChip="false" />
+<WhySection />
+<CareerGrowthPlatformWrapper />
+
+
+<JobOpportunitiesWrapper />
+
+<HowItWorksWrapper />
+
+<LimitedOfferWrapper isShow="false" TargetDate="@DateTime.Now.AddDays(7)" />
+
+<CareerGrowthProofWrapper isShow="false" />
+
+
+<AnimateOnVisible>
+
+    <CommunityStatsWrapper isShow="false" Mentors="500"
+                           Members="10000"
+                           JobsPosted="1000"
+                           SuccessStories="250" />
+
+</AnimateOnVisible>
+
+<MentorsWrapper isShow="false" />
+
+<FAQWrapper />
+<Footer/>
+
+
+

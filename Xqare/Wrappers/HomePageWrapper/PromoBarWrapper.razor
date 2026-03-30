@@ -1,0 +1,99 @@
+﻿@using MudBlazor
+@implements IDisposable
+
+@if (!IsExpired)
+{
+
+    <section class="promo-section">
+        <MudPaper Class="promo-bar" Elevation="0" Square="true">
+
+            <MudContainer MaxWidth="MaxWidth.Medium">
+
+                <MudStack Row AlignItems="AlignItems.Center"
+                          Justify="Justify.Center"
+                          Spacing="2"
+                          Wrap="Wrap.Wrap">
+
+                    <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" />
+
+                    @if (!string.IsNullOrWhiteSpace(OldPrice))
+                    {
+                        <MudText Class="old-price">@OldPrice</MudText>
+                    }
+
+                    <MudText Class="free-text">@HighlightText</MudText>
+
+                    <MudText Class="slots-text">
+                        — Only @SlotsLeft Slots Left!
+                    </MudText>
+
+                    <MudText Class="timer-text">@TimeLeft</MudText>
+
+                    <MudButton Variant="Variant.Filled"
+                               Href="@RegisterUrl"
+                               EndIcon="@Icons.Material.Filled.ArrowForward"
+                               Class="register-btn">
+                        @ButtonText
+                    </MudButton>
+
+                </MudStack>
+
+            </MudContainer>
+
+        </MudPaper>
+    </section>
+}
+
+@code {
+
+    [Parameter] public DateTime OfferEndsAt { get; set; }
+
+    [Parameter] public int SlotsLeft { get; set; } = 50;
+
+    [Parameter] public string OldPrice { get; set; } = "₹99,999";
+
+    [Parameter] public string HighlightText { get; set; } = "FREE";
+
+    [Parameter] public string ButtonText { get; set; } = "Register";
+
+    [Parameter] public string RegisterUrl { get; set; } = "#";
+
+    private string TimeLeft = "";
+    [Parameter] public bool IsExpired { get; set; }
+
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        UpdateTimer();
+
+        _timer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                UpdateTimer();
+                StateHasChanged();
+            });
+
+        }, null, 1000, 1000);
+    }
+
+    void UpdateTimer()
+    {
+        var diff = OfferEndsAt - DateTime.UtcNow;
+
+        if (diff <= TimeSpan.Zero)
+        {
+            IsExpired = true;
+            _timer?.Dispose();
+            return;
+        }
+
+        TimeLeft = $"{diff.Days:00}d:{diff.Hours:00}h:{diff.Minutes:00}m:{diff.Seconds:00}s";
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}

@@ -1,0 +1,76 @@
+﻿@using MudBlazor
+
+@if (isShow)
+{
+    <section class="hero-section">
+
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="text-center">
+
+            <!-- CHIP -->
+            @if (ShowPromoChip)
+            {
+                <MudChip Style="align-items:center" T="string"
+                         Color="Color.Warning"
+                         Variant="Variant.Filled"
+                         Class="hero-chip mx-auto">
+                    🎉 @PromoText
+                </MudChip>
+            }
+
+            <!-- TITLE -->
+            <MudText Typo="Typo.h2" Class="hero-title">
+                Build a Successful IT Career —
+            </MudText>
+
+            <MudText Typo="Typo.h2" Class="hero-title highlight">
+                Mentorship, Community & Real Job Opportunities
+            </MudText>
+
+            <!-- SUBTITLE -->
+            <MudText Typo="Typo.subtitle1" Class="hero-subtitle">
+                One powerful platform to guide your career, connect with industry mentors,
+                access curated resources, and apply for jobs — all in one place.
+            </MudText>
+
+            <!-- CTA -->
+            <MudStack Row Justify="Justify.Center" Spacing="3" Class="hero-actions">
+
+                <MudButton Href="/register" 
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Large"
+                           Class="cta-primary">
+                    Join XQARE →
+                </MudButton>
+
+                <MudButton Href="mailto:support@xqare.in?subject=Mentorship Enquiry"
+                           Variant="Variant.Outlined"
+                           Color="Color.Warning"
+                           Size="Size.Large"
+                           Class="cta-secondary">
+                    Become a Mentor
+                </MudButton>
+
+            </MudStack>
+
+            <!-- FOOT TEXT -->
+            <MudText Class="hero-foot">
+                Whether you are a <b>student</b>, a <b>recent graduate</b>, an
+                <b>early-career job seeker</b>, or an <b>experienced professional</b> —
+                this platform is designed to support you at every stage of your career journey.
+            </MudText>
+
+        </MudContainer>
+
+    </section>
+}
+
+@code {
+
+    [Parameter] public bool ShowPromoChip { get; set; } = false;
+    [Parameter] public bool isShow { get; set; } = true;
+
+    [Parameter]
+    public string PromoText { get; set; }
+        = "Limited-Time: Lifetime FREE Membership";
+}

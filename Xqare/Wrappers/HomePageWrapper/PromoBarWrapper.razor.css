@@ -1,0 +1,38 @@
+﻿.promo-section {
+    padding-top: 10px;
+}
+
+::deep .promo-bar {
+    padding-top: var(--mud-appbar-height) !important;
+    background: #da9b2f;
+    padding: 8px 0;
+}
+
+::deep .old-price {
+    text-decoration: line-through;
+    opacity: .8;
+}
+
+::deep .free-text {
+    font-weight: 800;
+}
+
+::deep .slots-text {
+    font-weight: 500;
+}
+
+::deep .timer-text {
+    font-weight: 700;
+}
+
+::deep .register-btn {
+    background: #0f2a44;
+    color: white;
+    border-radius: 999px;
+    padding: 6px 18px;
+    text-transform: none;
+}
+
+    ::deep .register-btn:hover {
+        background: #0b1f33;
+    }

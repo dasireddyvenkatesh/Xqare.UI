@@ -1,0 +1,73 @@
+﻿@using MudBlazor
+
+@if (isShow)
+{
+    <section class="faq-section pt-4 pb-4">
+
+        <MudContainer MaxWidth="MaxWidth.Medium">
+
+            <!-- HEADER -->
+            <MudStack AlignItems="AlignItems.Center"
+                      Spacing="1"
+                      Class="text-center faq-header">
+
+                <MudText Typo="Typo.h4" Class="faq-title">
+                    <MudIcon Icon="@Icons.Material.Outlined.HelpOutline"
+                             Class="me-2 faq-title-icon" />
+                    Frequently Asked Questions
+                </MudText>
+
+                <MudText Class="faq-subtitle">
+                    Got questions? We've got answers.
+                </MudText>
+
+            </MudStack>
+
+            <!-- FAQ ACCORDION -->
+            <MudExpansionPanels Elevation="0"
+                                MultiExpansion="true"
+                                Class="faq-panels">
+
+                @foreach (var item in Faqs)
+                {
+                    <MudExpansionPanel Text="@item.Question"
+                                       Class="faq-panel">
+
+                        <MudText Class="faq-answer">
+                            @item.Answer
+                        </MudText>
+
+                    </MudExpansionPanel>
+                }
+
+            </MudExpansionPanels>
+
+        </MudContainer>
+
+    </section>
+}
+
+@code {
+
+    [Parameter] public bool isShow { get; set; } = true;
+    public record FaqItem(string Question, string Answer);
+
+    List<FaqItem> Faqs = new()
+    {
+        new("Is this platform really free?",
+        "Yes! During our limited-time early access period, you get FREE membership. No credit card required, no hidden charges — ever."),
+
+        new("Who is this platform for?",
+        "Whether you're a student, recent graduate, early-career job seeker, or experienced professional looking to level up — this platform is built for anyone in IT who wants structured career growth."),
+
+        new("How does the mentorship work?",
+        "Once you create a profile, you can browse and connect with verified mentors in your field. Mentors offer guidance through structured sessions tailored to your career goals."),
+
+        new("How is this different from LinkedIn?",
+        "We combine mentorship, community, learning resources, and job tracking into one focused platform."),
+
+        new("Can I become a mentor?",
+        "Yes — experienced IT professionals can apply and get listed in our mentor directory."),
+
+    };
+}

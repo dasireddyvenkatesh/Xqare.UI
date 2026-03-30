@@ -1,0 +1,72 @@
+﻿::deep .why-item {
+    position: relative;
+    background: white;
+    border-radius: 18px;
+    padding: 32px 20px;
+    height: 100%;
+    transition: transform .35s ease, box-shadow .35s ease, border .35s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+    /* LIFT */
+    ::deep .why-item:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 22px 50px rgba(0,0,0,0.08);
+        border-color: #ef4444;
+    }
+
+    /* SOFT GLOW */
+    ::deep .why-item::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top, rgba(239, 68, 68, 0.18), transparent 70%);
+        opacity: 0;
+        transition: opacity .35s ease;
+    }
+
+    ::deep .why-item:hover::before {
+        opacity: 1;
+    }
+
+/* ICON BOX */
+::deep .icon-box {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    background: #fdecec;
+    color: #ef4444;
+    transition: transform .35s ease, background .35s ease, color .35s ease;
+}
+
+/* ICON ANIMATION */
+::deep .why-item:hover .icon-box {
+    transform: scale(1.15) rotate(8deg);
+    background: #ef4444;
+    color: white;
+}
+
+/* TITLE COLOR SHIFT */
+::deep .why-item-title {
+    transition: color .3s ease;
+}
+
+::deep .why-item:hover .why-item-title {
+    color: #ef4444;
+}
+
+/* DESCRIPTION */
+::deep .feature-desc {
+    color: #6b7a90;
+    max-width: 260px;
+}
+
+/* GRID SPACING FIX */
+::deep .mud-grid-item {
+    display: flex;
+}

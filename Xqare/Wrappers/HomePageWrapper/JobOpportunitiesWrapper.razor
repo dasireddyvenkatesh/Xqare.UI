@@ -1,0 +1,94 @@
+﻿@using MudBlazor
+
+@if (isShow)
+{
+    <section class="jobs-section pt-4 pb-4">
+
+        <MudContainer MaxWidth="MaxWidth.Medium">
+
+            <!-- HEADER -->
+            <MudStack AlignItems="AlignItems.Center"
+                      Spacing="1"
+                      Class="text-center jobs-header">
+
+                <MudText Typo="Typo.h4" Class="jobs-title">
+                    Because Talent Deserves Systematic Job Opportunities
+                </MudText>
+
+                <MudText Typo="Typo.subtitle1" Class="jobs-subtitle">
+                    <span class="highlight">Mentorship + Community + Jobs</span>
+                    — Real Career Outcomes
+                </MudText>
+
+            </MudStack>
+
+            <!-- CONTENT -->
+            <MudGrid GutterSize="6" Class="jobs-content">
+
+                <!-- LEFT -->
+                <MudItem xs="12" md="6">
+
+                    <MudStack Spacing="4">
+
+                        @LeftItem(Icons.Material.Outlined.Search,
+                        "Browse verified job openings from multiple companies")
+
+                    @LeftItem(Icons.Material.Outlined.WorkOutline,
+                                        "Apply to jobs directly from the platform")
+
+                    @LeftItem(Icons.Material.Outlined.TrackChanges,
+                                        "Track application progress (Applied → Interview → Hired)")
+
+                    @LeftItem(Icons.Material.Outlined.GpsFixed,
+                                        "No more lost applications or uncertainty")
+
+                </MudStack>
+
+            </MudItem>
+
+            <!-- RIGHT -->
+            <MudItem xs="12" md="6">
+
+                <MudStack Spacing="3">
+
+                    @StatusCard("Applied", false)
+                    @StatusCard("Interview Scheduled", false)
+                    @StatusCard("Hired 🎉", true)
+
+                </MudStack>
+
+            </MudItem>
+
+        </MudGrid>
+
+    </MudContainer>
+
+</section>
+}
+
+@code {
+
+    [Parameter] public bool isShow { get; set; } = true;
+
+    RenderFragment LeftItem(string icon, string text) => @<MudStack Row Spacing="2" AlignItems="AlignItems.Center" Class="left-item">
+
+        <div class="icon-box">
+            <MudIcon Icon="@icon" />
+        </div>
+
+        <MudText Typo="Typo.body1">@text</MudText>
+
+    </MudStack>;
+
+    RenderFragment StatusCard(string text, bool active) => @<MudPaper Class="@($"status-card {(active ? "active" : "")}")">
+
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Class="status-icon" />
+
+            <MudText Typo="Typo.subtitle1">@text</MudText>
+
+        </MudStack>
+
+    </MudPaper>;
+}

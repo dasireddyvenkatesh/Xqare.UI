@@ -1,0 +1,72 @@
+﻿.stats-section {
+    color: white;
+    background: radial-gradient(circle at top, #1b3a57, #0f2a44);
+}
+
+/* HEADER */
+
+::deep .stats-header {
+    margin-bottom: 70px;
+}
+
+::deep .stats-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+}
+
+@media (min-width: 960px) {
+    ::deep .stats-title {
+        font-size: 2.9rem;
+    }
+}
+
+::deep .section-caption {
+    letter-spacing: 3px;
+    opacity: .7;
+    font-size: 12px;
+}
+
+/* ITEMS */
+
+::deep .stat-item {
+    transition: transform .3s ease;
+}
+
+    ::deep .stat-item:hover {
+        transform: translateY(-6px);
+    }
+
+/* ICON */
+
+::deep .stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.08);
+    color: #f59e0b;
+    font-size: 30px;
+}
+
+/* NUMBER */
+
+::deep .stat-number {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #f59e0b;
+}
+
+@media (max-width: 600px) {
+    ::deep .stat-number {
+        font-size: 2.2rem;
+    }
+}
+
+/* LABEL */
+
+::deep .stat-label {
+    opacity: .75;
+    font-size: .95rem;
+}

@@ -1,0 +1,108 @@
+﻿.offer-section {
+    background: linear-gradient(135deg, rgba(218, 155, 47, 0.12), rgba(23, 51, 79, 0.08));
+}
+
+/* CONTENT WIDTH */
+
+::deep .offer-content {
+    max-width: 720px;
+    margin: auto;
+}
+
+/* TITLE */
+
+::deep .offer-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0f2a44;
+}
+
+@media (min-width: 960px) {
+    ::deep .offer-title {
+        font-size: 2.6rem;
+    }
+}
+
+/* PRICE */
+
+::deep .old-price {
+    text-decoration: line-through;
+    color: #94a3b8;
+    font-size: 1.4rem;
+}
+
+::deep .new-price {
+    color: #f59e0b;
+    font-weight: 900;
+    font-size: 2.4rem;
+}
+
+/* URGENCY */
+
+::deep .urgency-chip {
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+/* TEXT */
+
+::deep .offer-subtitle {
+    color: #6b7a90;
+    max-width: 600px;
+}
+
+::deep .timer-label {
+    font-weight: 600;
+    color: #0f2a44;
+}
+
+/* TIMER */
+
+::deep .time-wrapper {
+    min-width: 70px;
+}
+
+::deep .time-box {
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    background: #1e3a5f;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+::deep .time-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+::deep .time-label {
+    color: #6b7a90;
+    font-size: 0.75rem;
+}
+
+/* CTA */
+
+::deep .offer-cta {
+    margin-top: 12px;
+    padding: 14px 34px;
+    border-radius: 999px;
+    background: #1e3a5f;
+    color: white;
+    font-weight: 700;
+    text-transform: none;
+}
+
+    ::deep .offer-cta:hover {
+        background: #16304d;
+        transform: translateY(-2px);
+    }
+
+/* FOOTNOTE */
+
+::deep .offer-footnote {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}

@@ -1,0 +1,120 @@
+﻿@using MudBlazor
+@implements IDisposable
+
+@if (isShow)
+{
+
+    <section class="offer-section pt-4 pb-4">
+
+        <MudContainer MaxWidth="MaxWidth.Small">
+
+            <MudStack AlignItems="AlignItems.Center"
+                      Spacing="3"
+                      Class="text-center offer-content">
+
+                <!-- TITLE -->
+                <MudText Class="offer-title">
+                    🎉 Limited-Time Offer: Lifetime FREE Membership
+                </MudText>
+
+                <!-- PRICE -->
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+
+                    <MudText Class="old-price">₹99,999</MudText>
+                    <MudText Class="new-price">FREE</MudText>
+
+                </MudStack>
+
+                <!-- URGENCY -->
+                @if (ShowUrgency)
+                {
+                    <MudChip T="string" Color="Color.Error" Variant="Variant.Filled" Class="urgency-chip">
+                        🔥 Final Call: Only @SlotsLeft Slots Left!
+                    </MudChip>
+                }
+
+                <!-- SUBTITLE -->
+                <MudText Class="offer-subtitle">
+                    Register now and get lifetime access to all features — including
+                    mentorship, community, resources, and job portal.
+                </MudText>
+
+                <MudText Class="timer-label">Offer expires in:</MudText>
+
+                <!-- TIMER -->
+                <MudStack Row Spacing="3" Justify="Justify.Center" Wrap="Wrap.Wrap">
+
+                    @TimeBox(Days, "Days")
+                    @TimeBox(Hours, "Hours")
+                    @TimeBox(Minutes, "Minutes")
+                    @TimeBox(Seconds, "Seconds")
+
+                </MudStack>
+
+                <!-- CTA -->
+                <MudButton Href="/register"
+                           Variant="Variant.Filled"
+                           Size="Size.Large"
+                           Class="offer-cta">
+                    Register FREE Before Timer Ends →
+                </MudButton>
+
+                <MudText Class="offer-footnote">
+                    No hidden charges • Free forever for early members
+                </MudText>
+
+            </MudStack>
+
+        </MudContainer>
+
+    </section>
+}
+
+@code {
+
+    [Parameter] public bool isShow { get; set; } = true;
+    [Parameter] public DateTime TargetDate { get; set; }
+    [Parameter] public int SlotsLeft { get; set; } = 50;
+    [Parameter] public bool ShowUrgency { get; set; } = true;
+
+    private TimeSpan _timeLeft;
+    private Timer? _timer;
+
+    int Days => _timeLeft.Days;
+    int Hours => _timeLeft.Hours;
+    int Minutes => _timeLeft.Minutes;
+    int Seconds => _timeLeft.Seconds;
+
+    protected override void OnInitialized()
+    {
+        UpdateTime();
+
+        _timer = new Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                UpdateTime();
+                StateHasChanged();
+            });
+        }, null, 1000, 1000);
+    }
+
+    void UpdateTime()
+    {
+        _timeLeft = TargetDate - DateTime.Now;
+        if (_timeLeft < TimeSpan.Zero)
+            _timeLeft = TimeSpan.Zero;
+    }
+
+    RenderFragment TimeBox(int value, string label) => @<MudStack AlignItems="AlignItems.Center" Class="time-wrapper">
+
+        <MudPaper Class="time-box" Elevation="0">
+            <MudText Class="time-value">@value.ToString("00")</MudText>
+        </MudPaper>
+
+        <MudText Class="time-label">@label</MudText>
+
+    </MudStack>;
+
+    public void Dispose() => _timer?.Dispose();
+}

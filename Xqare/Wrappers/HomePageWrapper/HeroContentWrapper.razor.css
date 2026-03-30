@@ -1,0 +1,68 @@
+﻿/* HERO SECTION */
+.hero-section {
+    background: linear-gradient(135deg, #0f2a44, #1b3a57);
+    padding: 100px 20px 100px;
+    color: white;
+}
+
+/* TITLES */
+::deep .hero-title {
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+::deep .highlight {
+    color: #f59e0b;
+}
+
+/* SUBTITLE */
+::deep .hero-subtitle {
+    margin-top: 20px;
+    margin-bottom: 40px;
+    opacity: .85;
+}
+
+/* FOOT TEXT */
+::deep .hero-foot {
+    margin-top: 35px;
+    opacity: .75;
+    max-width: 720px;
+    margin-inline: auto;
+}
+
+/* CHIP */
+::deep .hero-chip {
+    margin-bottom: 28px;
+    font-weight: 600;
+}
+
+/* PRIMARY BUTTON */
+::deep .cta-primary.mud-button-root {
+    padding: 14px 32px;
+    border-radius: 14px;
+    box-shadow: 0 0 25px rgba(245, 158, 11, .35);
+    text-transform: none;
+}
+
+/* SECONDARY BUTTON */
+::deep .cta-secondary.mud-button-root {
+    padding: 14px 32px;
+    border-radius: 14px;
+    text-transform: none;
+}
+
+/* 📱 MOBILE */
+@media (max-width: 960px) {
+
+    ::deep .hero-section {
+        padding: 90px 20px 70px;
+    }
+
+    ::deep .hero-title {
+        font-size: 32px;
+    }
+
+    ::deep .hero-subtitle {
+        font-size: 16px;
+    }
+}

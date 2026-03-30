@@ -1,0 +1,88 @@
+﻿@using MudBlazor
+
+@if (isShow)
+{
+
+    <section class="how-section pt-4 pb-4">
+
+        <MudContainer MaxWidth="MaxWidth.Medium">
+
+            <!-- HEADER -->
+            <MudStack AlignItems="AlignItems.Center"
+                      Spacing="2"
+                      Class="how-header text-center">
+
+                <MudText Class="how-title">
+                    How It Works
+                </MudText>
+
+                <MudText Class="section-subtitle">
+                    Designed for students, professionals, and career switchers.
+                </MudText>
+
+            </MudStack>
+
+            <!-- STEPS -->
+            <MudGrid Style="text-align:center" GutterSize="6">
+
+                <MudItem xs="12" sm="6" md="3">
+                    @Step(1, Icons.Material.Outlined.PersonAdd,
+                    "Register for FREE",
+                                "Create your account in under a minute.")
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                @Step(2, Icons.Material.Outlined.TaskAlt,
+                                "Complete Your Profile",
+                                "Tell us about your skills and goals.")
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                @Step(3, Icons.Material.Outlined.Groups,
+                                "Connect & Learn",
+                                "Join mentors and the community.")
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3">
+                @Step(4, Icons.Material.Outlined.WorkOutline,
+                                "Apply & Track",
+                                "Apply to jobs and track progress.")
+            </MudItem>
+
+        </MudGrid>
+
+    </MudContainer>
+
+</section>
+}
+
+@code {
+
+    [Parameter] public bool isShow { get; set; } = true;
+
+    RenderFragment Step(int number, string icon, string title, string desc) => @<MudPaper Class="step-card">
+
+        <MudStack AlignItems="AlignItems.Center"
+                  Spacing="2"
+                  Class="step-content text-center">
+
+            <div class="icon-gradient">
+                <MudIcon Icon="@icon" Size="Size.Large" />
+            </div>
+
+            <MudText Class="step-number">
+                @number.ToString("00")
+            </MudText>
+
+            <MudText Class="step-title">
+                @title
+            </MudText>
+
+            <MudText Class="step-desc">
+                @desc
+            </MudText>
+
+        </MudStack>
+
+    </MudPaper>;
+}

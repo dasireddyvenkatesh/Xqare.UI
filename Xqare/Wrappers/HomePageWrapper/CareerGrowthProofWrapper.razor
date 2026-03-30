@@ -1,0 +1,96 @@
+﻿@using MudBlazor
+
+@if (isShow)
+{
+
+    <section class="proof-section pt-4 pb-4">
+
+        <MudContainer MaxWidth="MaxWidth.Large">
+
+            <!-- HEADER -->
+            <MudStack AlignItems="AlignItems.Center" Class="text-center proof-header">
+
+                <MudText Class="proof-title">
+                    Built for Serious Career Growth
+                </MudText>
+
+            </MudStack>
+
+            <!-- TOP FEATURE CARDS -->
+            <MudGrid style="text-align:center" GutterSize="4" Class="mb-8">
+
+                <MudItem xs="12" sm="6" md="4">
+                    @Feature(Icons.Material.Outlined.VerifiedUser,
+                    "Mentor-verified profiles")
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="4">
+                @Feature(Icons.Material.Outlined.ChatBubbleOutline,
+                                "Community-driven knowledge sharing")
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="4">
+                @Feature(Icons.Material.Outlined.RemoveRedEye,
+                                "Structured & transparent job tracking")
+            </MudItem>
+
+        </MudGrid>
+
+        <!-- TESTIMONIAL CARDS -->
+        <MudGrid GutterSize="4">
+
+            <MudItem xs="12" sm="6" md="4">@Testimonial()</MudItem>
+            <MudItem xs="12" sm="6" md="4">@Testimonial()</MudItem>
+            <MudItem xs="12" sm="6" md="4">@Testimonial()</MudItem>
+
+        </MudGrid>
+
+    </MudContainer>
+
+</section>
+}
+
+@code {
+
+    [Parameter] public bool isShow { get; set; } = true;
+
+    RenderFragment Feature(string icon, string text) => @<MudPaper Class="feature-card" Elevation="0">
+
+        <MudStack AlignItems="AlignItems.Center"
+                  Justify="Justify.Center"
+                  Class="feature-content"
+                  Spacing="2">
+
+            <MudIcon Icon="@icon" Class="feature-icon" />
+
+            <MudText Class="feature-text">
+                @text
+            </MudText>
+
+        </MudStack>
+
+    </MudPaper>;
+
+    RenderFragment Testimonial() => @<MudPaper Class="testimonial-card" Elevation="0">
+
+        <MudStack style="text-align:center" AlignItems="AlignItems.Center"
+                  Justify="Justify.Center"
+                  Spacing="2"
+                  Class="testimonial-content">
+
+            <MudRating SelectedValue="5"
+                       ReadOnly="true"
+                       Color="Color.Warning" />
+
+            <MudText Class="testimonial-text">
+                "This platform changed how I approach my IT career."
+            </MudText>
+
+            <MudText Class="testimonial-author">
+                — IT Professional
+            </MudText>
+
+        </MudStack>
+
+    </MudPaper>;
+}

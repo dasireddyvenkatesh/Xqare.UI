@@ -1,0 +1,91 @@
+﻿.how-section {
+    background: #f8fafc;
+}
+
+/* HEADER */
+
+::deep .how-header {
+    margin-bottom: 70px;
+}
+
+::deep .how-title {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #0f2a44;
+}
+
+@media (min-width: 960px) {
+    ::deep .how-title {
+        font-size: 3rem;
+    }
+}
+
+::deep .section-subtitle {
+    max-width: 640px;
+    color: #6b7a90;
+}
+
+/* CARD */
+
+::deep .step-card {
+    height: 100%;
+    padding: 38px 24px;
+    border-radius: 18px;
+    background: white;
+    border: 1px solid #eef2f7;
+    box-shadow: none;
+    transition: all .35s ease;
+}
+
+    ::deep .step-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 45px rgba(15, 42, 68, 0.08);
+    }
+
+/* CONTENT ALIGNMENT */
+
+::deep .step-content {
+    height: 100%;
+}
+
+/* ICON */
+
+::deep .icon-gradient {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background: linear-gradient(135deg, #0f2a44, #f59e0b);
+    transition: transform .35s ease;
+}
+
+::deep .step-card:hover .icon-gradient {
+    transform: scale(1.1);
+}
+
+/* NUMBER */
+
+::deep .step-number {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #f59e0b;
+}
+
+/* TITLE */
+
+::deep .step-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f2a44;
+}
+
+/* DESC */
+
+::deep .step-desc {
+    color: #6b7a90;
+    max-width: 220px;
+}

@@ -1,0 +1,49 @@
+﻿@using MudBlazor
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+@using Microsoft.AspNetCore.Components.Web
+
+@if (isShow)
+{
+    <CascadingValue Value="isVisible">
+        <div @ref="elementRef">
+            @ChildContent
+        </div>
+    </CascadingValue>
+}
+
+@code {
+
+    [Parameter] public bool isShow { get; set; } = true;
+    private ElementReference elementRef;
+    private DotNetObjectReference<AnimateOnVisible>? objRef;
+
+    bool isVisible;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+
+            await JS.InvokeVoidAsync("observeElement", elementRef, objRef);
+        }
+    }
+
+    [JSInvokable]
+    public void Trigger()
+    {
+        isVisible = true;
+        StateHasChanged();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        objRef?.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}
+

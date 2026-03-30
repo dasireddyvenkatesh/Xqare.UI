@@ -1,0 +1,121 @@
+﻿@using MudBlazor
+
+@if (isShow)
+{
+
+    <section class="stats-section pt-4 pb-4">
+
+        <MudContainer MaxWidth="MaxWidth.Large">
+
+            <!-- HEADER -->
+            <MudStack AlignItems="AlignItems.Center" Class="text-center stats-header">
+
+                <MudText Class="section-caption">
+                    OUR GROWING COMMUNITY
+                </MudText>
+
+                <MudText Class="stats-title">
+                    Numbers That Speak for Themselves
+                </MudText>
+
+            </MudStack>
+
+            <!-- STATS -->
+            <MudGrid GutterSize="6">
+
+                @foreach (var stat in Stats)
+                {
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="stat-item">
+
+                            <div class="stat-icon">
+                                <MudIcon Icon="@stat.Icon" />
+                            </div>
+
+                            <MudText Class="stat-number">
+                                @stat.DisplayValue.ToString("N0")+
+                            </MudText>
+
+                            <MudText Class="stat-label">
+                                @stat.Label
+                            </MudText>
+
+                        </MudStack>
+                    </MudItem>
+                }
+
+            </MudGrid>
+
+        </MudContainer>
+
+    </section>
+}
+
+@code {
+
+    [CascadingParameter] public bool IsVisible { get; set; }
+    [Parameter] public bool isShow { get; set; } = true;
+    [Parameter] public int Mentors { get; set; }
+    [Parameter] public int Members { get; set; }
+    [Parameter] public int JobsPosted { get; set; }
+    [Parameter] public int SuccessStories { get; set; }
+
+    bool started;
+
+    List<StatModel> Stats = new();
+
+    protected override void OnParametersSet()
+    {
+        Stats = new()
+        {
+            new(Icons.Material.Outlined.Groups, Mentors, "Mentors"),
+            new(Icons.Material.Outlined.Person, Members, "Members"),
+            new(Icons.Material.Outlined.WorkOutline, JobsPosted, "Jobs Posted"),
+            new(Icons.Material.Outlined.TrendingUp, SuccessStories, "Success Stories")
+        };
+
+        if (IsVisible && !started)
+        {
+            started = true;
+            _ = AnimateAll();
+        }
+    }
+
+    async Task AnimateAll()
+    {
+        int duration = 1500;
+        int steps = 60;
+        int delay = duration / steps;
+
+        for (int i = 0; i <= steps; i++)
+        {
+            double progress = i / (double)steps;
+
+            foreach (var stat in Stats)
+                stat.DisplayValue = (int)(stat.Value * progress);
+
+            StateHasChanged();
+            await Task.Delay(delay);
+        }
+
+        foreach (var stat in Stats)
+            stat.DisplayValue = stat.Value;
+
+        StateHasChanged();
+    }
+
+    class StatModel
+    {
+        public string Icon { get; }
+        public int Value { get; }
+        public string Label { get; }
+        public int DisplayValue { get; set; }
+
+        public StatModel(string icon, int value, string label)
+        {
+            Icon = icon;
+            Value = value;
+            Label = label;
+        }
+    }
+}

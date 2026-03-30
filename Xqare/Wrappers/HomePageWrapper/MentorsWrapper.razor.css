@@ -1,0 +1,93 @@
+﻿.mentors-section {
+    background: #f9f8f6;
+}
+
+/* HEADER */
+
+::deep .mentors-header {
+    margin-bottom: 70px;
+}
+
+::deep .mentors-title {
+    font-weight: 800;
+}
+
+::deep .section-subtitle {
+    max-width: 640px;
+    color: #64748b;
+}
+
+/* GRID */
+
+::deep .mentor-grid {
+    row-gap: 30px;
+}
+
+/* CARD BASE */
+
+::deep .mentor-card {
+    padding: 32px 24px;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    transition: all .35s ease;
+    opacity: 0;
+    transform: translateY(40px);
+}
+
+    /* SCROLL ANIMATION */
+
+    ::deep .mentor-card.animate-in {
+        animation: mentorFadeUp .6s ease forwards;
+    }
+
+@keyframes mentorFadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* HOVER */
+
+::deep .mentor-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 45px rgba(15, 42, 68, 0.08);
+}
+
+/* AVATAR */
+
+::deep .mentor-avatar {
+    border: 3px solid #fbbf24;
+}
+
+/* TEXT */
+
+::deep .mentor-name {
+    font-weight: 600;
+}
+
+::deep .mentor-role {
+    color: #64748b;
+    font-size: .9rem;
+}
+
+/* CTA */
+
+::deep .mentors-cta-wrap {
+    margin-top: 70px;
+}
+
+::deep .mentor-cta {
+    border-width: 2px;
+    padding: 12px 28px;
+    border-radius: 999px;
+    text-transform: none;
+    font-weight: 600;
+    transition: all .3s ease;
+}
+
+    ::deep .mentor-cta:hover {
+        background: #f59e0b;
+        color: white;
+    }

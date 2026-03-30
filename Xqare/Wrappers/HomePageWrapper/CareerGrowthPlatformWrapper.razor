@@ -1,0 +1,81 @@
+﻿@using MudBlazor
+
+@if (isShow)
+{
+
+    <section class="growth-section pt-4 pb-4">
+
+        <MudContainer MaxWidth="MaxWidth.Large">
+
+            <!-- HEADER -->
+            <MudStack AlignItems="AlignItems.Center"
+                      Spacing="2"
+                      Class="mb-12 growth-header">
+
+                <MudText Typo="Typo.h3" Class="growth-title">
+                    A Simple, Centralized Career Growth Platform
+                </MudText>
+
+                <MudText Typo="Typo.subtitle1" Class="section-subtitle">
+                    Everything you need — structured, supportive, and career-focused.
+                </MudText>
+
+            </MudStack>
+
+            <!-- CARDS -->
+            <MudGrid style="text-align:center" GutterSize="4">
+
+            @Feature(Icons.Material.Outlined.Forum,
+                "IT-Focused Community",
+                        "Join discussions with like-minded professionals and learners.")
+
+            @Feature(Icons.Material.Outlined.PersonAdd,
+                        "Expert Mentorship",
+                        "Get one-on-one guidance from experienced industry experts.")
+
+            @Feature(Icons.Material.Outlined.MenuBook,
+                        "Curated Resources",
+                        "Access career guidance, resources, and structured learning paths.")
+
+            @Feature(Icons.Material.Outlined.BarChart,
+                        "Track Your Growth",
+                        "Monitor your career progress journey all in one place.")
+
+        </MudGrid>
+
+    </MudContainer>
+
+</section>
+}
+
+@code {
+
+    [Parameter] public bool isShow { get; set; } = true;
+
+    RenderFragment Feature(string icon, string title, string desc) => @<MudItem xs="12" sm="6" md="3">
+
+        <MudPaper Class="feature-card">
+
+            <MudStack AlignItems="AlignItems.Center"
+                      Justify="Justify.Center"
+                      Spacing="2"
+                      Class="text-center feature-content">
+
+                <div class="icon-box">
+                    <MudIcon Icon="@icon" Size="Size.Large" />
+                </div>
+
+                <MudText Typo="Typo.h6" Class="feature-title">
+                    @title
+                </MudText>
+
+                <MudText Typo="Typo.body2" Class="feature-desc">
+                    @desc
+                </MudText>
+
+            </MudStack>
+
+        </MudPaper>
+
+    </MudItem>;
+}

@@ -1,0 +1,117 @@
+﻿@using MudBlazor
+
+@if (isShow)
+{
+
+    <section class="mentors-section pt-4 pb-4">
+
+        <MudContainer MaxWidth="MaxWidth.Large">
+
+            <!-- HEADER -->
+            <MudStack AlignItems="AlignItems.Center" Class="text-center mentors-header">
+
+                <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled">
+                    ✨ Industry Experts
+                </MudChip>
+
+                <MudText Typo="Typo.h3" Class="mentors-title mt-4">
+                    Meet Our Mentors
+                </MudText>
+
+                <MudText Class="section-subtitle">
+                    Learn from experienced professionals who are passionate about helping you grow.
+                </MudText>
+
+            </MudStack>
+
+            <!-- CARDS -->
+            <MudGrid Class="mentor-grid">
+
+                @foreach (var mentor in Mentors.Select((m, i) => new { m, i }))
+                {
+                    <MudItem xs="12" sm="6" md="3" Class="d-flex">
+
+                        <MudPaper Class="@($"mentor-card d-flex flex-column flex-grow-1 {(IsVisible ? "animate-in" : "")}")"
+                                  Style=@($"animation-delay:{mentor.i * 0.12}s")>
+
+                            <!-- TOP -->
+                            <MudStack AlignItems="AlignItems.Center" Spacing="1">
+
+                                <MudAvatar Size="Size.Large"
+                                           Image="@mentor.m.Image"
+                                           Class="mentor-avatar mb-2" />
+
+                                <MudText Class="mentor-name">@mentor.m.Name</MudText>
+
+                                <MudText Class="mentor-role">@mentor.m.Role</MudText>
+
+                                <MudChip T="string"
+                                         Size="Size.Small"
+                                         Variant="Variant.Outlined"
+                                         Color="Color.Warning"
+                                         Class="mt-1">
+                                    @mentor.m.Experience
+                                </MudChip>
+
+                            </MudStack>
+
+                            <MudDivider Class="my-4" />
+
+                            <!-- SKILLS -->
+                            <MudStack Row Wrap="Wrap.Wrap"
+                                      Justify="Justify.Center"
+                                      Spacing="1"
+                                      Class="mt-auto">
+
+                                @foreach (var skill in mentor.m.Skills)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
+                                        @skill
+                                    </MudChip>
+                                }
+
+                            </MudStack>
+
+                        </MudPaper>
+
+                    </MudItem>
+                }
+
+            </MudGrid>
+
+            <!-- CTA -->
+            <MudStack AlignItems="AlignItems.Center" Class="mentors-cta-wrap">
+
+                <MudButton Href="/register"
+                           Variant="Variant.Outlined"
+                           Color="Color.Warning"
+                           Size="Size.Large"
+                           EndIcon="@Icons.Material.Filled.ArrowForward"
+                           Class="mentor-cta">
+
+                    Become a Mentor
+
+                </MudButton>
+
+            </MudStack>
+
+        </MudContainer>
+
+    </section>
+}
+
+@code {
+
+    [Parameter] public bool isShow { get; set; } = true;
+    [CascadingParameter] public bool IsVisible { get; set; } = true;
+
+    List<Mentor> Mentors = new()
+    {
+        new("Priya Sharma","Senior Cloud Architect","12+ years experience","images/p1.jpg", new[]{"AWS","DevOps","Kubernetes"}),
+        new("Rajesh Kumar","Staff Software Engineer","15+ years experience","images/p2.jpg", new[]{"React","Node.js","System Design"}),
+        new("Ananya Patel","Data Science Lead","10+ years experience","images/p3.jpg", new[]{"Python","ML","AI"}),
+        new("Vikram Singh","Cybersecurity Director","18+ years experience","images/p4.jpg", new[]{"Security","Networking","Compliance"})
+    };
+
+    public record Mentor(string Name, string Role, string Experience, string Image, string[] Skills);
+}

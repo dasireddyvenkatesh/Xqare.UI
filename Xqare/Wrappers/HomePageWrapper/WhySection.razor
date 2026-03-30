@@ -1,0 +1,80 @@
+﻿@using MudBlazor
+
+@if (isShow)
+{
+    <section class="why-section pt-4 pb-4">
+
+        <MudContainer MaxWidth="MaxWidth.Medium">
+
+            <!-- HEADER -->
+            <MudStack AlignItems="AlignItems.Center"
+                      Spacing="2"
+                      Class="mb-12">
+
+                <MudText Typo="Typo.h3" Class="fw-bold">
+                    Why Most IT Careers Get Stuck
+                </MudText>
+
+                <MudText Typo="Typo.subtitle1" Class="section-subtitle">
+                    Talented professionals often struggle — not due to lack of skill,
+                    but due to lack of the right guidance and opportunities.
+                </MudText>
+
+            </MudStack>
+
+            <!-- ITEMS -->
+            <MudGrid style="text-align:center" GutterSize="3">
+
+                <MudItem xs="12" sm="6" md="3" Class="justify-center">
+                    @Feature(Icons.Material.Outlined.Explore,
+                    "Lack of Clear Career Guidance",
+                                "No roadmap or structured path to follow in the IT industry.")
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3" Class="justify-center">
+                @Feature(Icons.Material.Outlined.Groups,
+                                "No Access to Experienced Mentors",
+                                "Hard to find professionals willing to share their knowledge.")
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3" Class="justify-center">
+                @Feature(Icons.Material.Outlined.Psychology,
+                                "Confusing Learning Paths",
+                                "Unstructured and overwhelming resources scattered everywhere.")
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="3" Class="justify-center">
+                @Feature(Icons.Material.Outlined.Layers,
+                                "Fragmented Communities",
+                                "Multiple platforms with no single place for career growth.")
+            </MudItem>
+
+        </MudGrid>
+
+    </MudContainer>
+
+</section>
+}
+
+@code {
+
+    [Parameter] public bool isShow { get; set; } = true;
+
+    RenderFragment Feature(string icon, string title, string desc) => @<MudStack Spacing="2"
+                                                                                     AlignItems="AlignItems.Center"
+                                                                                     Class="why-item text-center">
+
+        <div class="icon-box">
+            <MudIcon Icon="@icon" Size="Size.Large" />
+        </div>
+
+        <MudText Typo="Typo.h6" Class="why-item-title fw-bold">
+            @title
+        </MudText>
+
+        <MudText Typo="Typo.body2" Class="feature-desc">
+            @desc
+        </MudText>
+
+    </MudStack>;
+}
