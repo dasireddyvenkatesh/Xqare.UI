@@ -1,0 +1,10 @@
+﻿@using Xqare.BusinessLayer.Interfaces.Auth
+@inject IAuthService AuthService
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthService.Logout();
+
+    }
+}

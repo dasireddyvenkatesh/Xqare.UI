@@ -98,7 +98,9 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 jwtAuthStateProvider.NotifyUserLogout();
             }
 
-            _nav.NavigateTo("/login", true);
+            var returnUrl = Uri.EscapeDataString(_nav.Uri);
+
+            _nav.NavigateTo($"/login?returnUrl={returnUrl}", false);
         }
 
         public async Task LoginWithGoogle()
