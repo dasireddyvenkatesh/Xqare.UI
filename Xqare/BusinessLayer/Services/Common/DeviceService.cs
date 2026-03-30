@@ -1,8 +1,9 @@
 ﻿using Microsoft.JSInterop;
+using Xqare.BusinessLayer.Interfaces.Common;
 
 namespace Xqare.BusinessLayer.Classes.Common
 {
-    public class DeviceService
+    public class DeviceService : IDeviceService
     {
         private readonly IJSRuntime _js;
 
