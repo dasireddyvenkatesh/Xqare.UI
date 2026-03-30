@@ -1,0 +1,55 @@
+﻿/* Wrapper spacing */
+.welcome-wrapper {
+    padding: 10px 0px;
+}
+
+/* Card */
+::deep .welcome-card {
+    background: linear-gradient(135deg, #1a2540, #22345a);
+    border-radius: 18px;
+    padding: 32px;
+    color: white;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* Content */
+::deep .welcome-content {
+    max-width: 600px;
+}
+
+/* Title */
+::deep .welcome-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* Subtitle */
+::deep .welcome-subtitle {
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 20px;
+}
+
+/* Buttons container */
+::deep .welcome-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+/* Primary button */
+::deep .primary-btn {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Secondary button */
+::deep .secondary-btn {
+    border-radius: 10px;
+    color: white;
+    border-color: rgba(255,255,255,0.4);
+}
+
+/* Footer text */
+::deep .welcome-footer {
+    color: rgba(255,255,255,0.6);
+}

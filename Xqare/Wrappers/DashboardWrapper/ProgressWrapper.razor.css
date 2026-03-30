@@ -1,0 +1,93 @@
+﻿/* Card */
+.progress-wrapper{
+    padding:10px 0px;
+}
+
+::deep.progress-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+/* Title */
+::deep .progress-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+/* Top row */
+::deep .progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+/* Label */
+::deep .progress-label {
+    color: #374151;
+}
+
+/* Percentage */
+::deep .progress-percent {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+/* Progress bar */
+::deep .progress-bar {
+    height: 8px;
+    border-radius: 999px;
+    margin-bottom: 18px;
+}
+
+/* Items */
+::deep .progress-items {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Item row */
+::deep .progress-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    /* Left side */
+    ::deep .progress-item .left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #374151;
+    }
+
+    /* Icon styles */
+    ::deep .progress-item .mud-icon-root {
+        font-size: 20px;
+        color: #9ca3af;
+    }
+
+    /* Done */
+    ::deep .progress-item.done .mud-icon-root {
+        color: #f59e0b;
+    }
+
+/* Status */
+::deep .status {
+    font-size: 14px;
+}
+
+    /* Success */
+    ::deep .status.success {
+        color: #f59e0b;
+        font-weight: 500;
+    }
+
+    /* Pending */
+    ::deep .status.pending {
+        color: #6b7280;
+    }

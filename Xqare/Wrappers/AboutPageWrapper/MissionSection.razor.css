@@ -1,0 +1,128 @@
+﻿/* Wrapper */
+ .mission-wrapper {
+    padding: 50px 0;
+    background: #f9fafb;
+}
+
+/* ===== ORBIT SYSTEM ===== */
+
+::deep .orbit-container {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: auto;
+}
+
+/* Circles */
+::deep .orbit {
+    position: absolute;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 50%;
+}
+
+::deep .orbit-1 {
+    width: 320px;
+    height: 320px;
+}
+
+::deep .orbit-2 {
+    width: 250px;
+    height: 250px;
+    top: 35px;
+    left: 35px;
+}
+
+::deep .orbit-3 {
+    width: 180px;
+    height: 180px;
+    top: 70px;
+    left: 70px;
+}
+
+/* Center */
+::deep .orbit-center {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    background: #fff3cd;
+    border-radius: 50%;
+    top: 90px;
+    left: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+    ::deep .orbit-center .mud-icon-root {
+        color: #fbbf24;
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+
+/* Icons around */
+::deep .orbit-icon {
+    position: absolute;
+    background: #f3f4f6;
+    border-radius: 50%; 
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    color: #d4a017;
+}
+
+/* Positions */
+::deep .icon-top {
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+::deep .icon-right {
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+::deep .icon-bottom {
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+::deep .icon-left {
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* ===== TEXT ===== */
+
+::deep .mission-content {
+    max-width: 500px;
+}
+
+::deep .section-tag {
+    color: #fbbf24;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+::deep .mission-title {
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+::deep .highlight {
+    color: #fbbf24;
+}
+
+::deep .mission-text {
+    margin-bottom: 12px;
+    color: #555;
+}

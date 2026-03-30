@@ -1,0 +1,46 @@
+﻿@using MudBlazor
+<section class="cta-wrapper">
+
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="cta-container">
+
+        @if (!string.IsNullOrEmpty(Title))
+        {
+            <MudText Typo="Typo.h3" Class="cta-title">
+                @Title
+            </MudText>
+        }
+
+        @if (!string.IsNullOrEmpty(Subtitle))
+        {
+            <MudText Typo="Typo.subtitle1" Class="cta-subtitle">
+                @Subtitle
+            </MudText>
+        }
+
+        <div class="cta-actions">
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Warning"
+                       Class="cta-primary"
+                       Href="@($"/{GetStartedLink}")">
+                Get Started
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Class="cta-secondary"
+                       Href="@($"/{ExplorePlatformLink}")">
+                Explore Platform
+            </MudButton>
+
+        </div>
+
+    </MudContainer>
+
+</section>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Build Your Dream Team with XQARE";
+    [Parameter] public string Subtitle { get; set; } = "Join companies already leveraging the XQARE ecosystem to discover and hire skilled professionals.";
+    [Parameter] public string GetStartedLink { get; set; } = default!;
+    [Parameter] public string ExplorePlatformLink { get; set; } = default!;
+}

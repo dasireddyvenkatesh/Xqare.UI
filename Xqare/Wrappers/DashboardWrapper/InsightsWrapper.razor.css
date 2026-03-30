@@ -1,0 +1,71 @@
+﻿/* Card */
+.insights-wrapper{
+    padding:10px 0px;
+}
+
+::deep.insights-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+/* Header */
+::deep .insights-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+/* Title */
+::deep .insights-title {
+    font-weight: 600;
+}
+
+/* View all */
+::deep .view-all {
+    color: #f59e0b;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* List */
+::deep .insights-list {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Item */
+::deep .insight-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-top: 1px solid #f1f3f7;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+    /* First item remove border */
+    ::deep .insight-item:first-child {
+        border-top: none;
+    }
+
+    /* Hover */
+    ::deep .insight-item:hover {
+        background: #f9fafb;
+    }
+
+/* Title */
+::deep .insight-title {
+    font-weight: 500;
+    color: #1f2937;
+}
+
+/* Description */
+::deep .insight-desc {
+    font-size: 14px;
+    color: #6b7280;
+}

@@ -1,0 +1,112 @@
+﻿@using MudBlazor
+@inject NavigationManager Nav
+
+<section class="xq-sidebar @(_sidebarOpen ? "xq-sidebar--open" : "xq-sidebar--collapsed")">
+
+    <!-- SIDEBAR -->
+
+        <!-- Header -->
+        <div class="xq-sidebar-header">
+            @if (_sidebarOpen)
+            {
+                <MudText Typo="Typo.h6" Class="xq-brand">XQARE</MudText>
+                <MudIconButton Icon="@Icons.Material.Filled.Close"
+                               Color="Color.Inherit"
+                               Size="Size.Small"
+                               OnClick="ToggleSidebar"
+                               Class="xq-close-btn" />
+            }
+            else
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                               Color="Color.Inherit"
+                               Size="Size.Small"
+                               OnClick="ToggleSidebar"
+                               Class="xq-menu-btn" />
+            }
+        </div>
+
+        <!-- Nav Items -->
+        <div class="xq-nav">
+            <MudNavMenu Class="xq-nav-menu">
+
+                <div class="xq-nav-item @(IsActive("/dashboard") ? "xq-nav-item--active" : "")"
+                     onclick="@GoDashboard">
+                    <MudIcon Icon="@Icons.Material.Filled.Dashboard" Class="xq-nav-icon" />
+
+                    @if (_sidebarOpen)
+                    {
+                        <MudText Class="xq-nav-label">Dashboard</MudText>
+                    }
+                </div>
+
+                <div class="xq-nav-item @(IsActive("/community") ? "xq-nav-item--active" : "")"
+                     onclick="@GoCommunity">
+                    <MudIcon Icon="@Icons.Material.Filled.Group" Class="xq-nav-icon" />
+                    @if (_sidebarOpen)
+                    {
+                        <MudText Class="xq-nav-label">Community</MudText>
+                    }
+                </div>
+
+                <div class="xq-nav-item @(IsActive("/insights") ? "xq-nav-item--active" : "")"
+                     onclick="@GoInsights">
+                    <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="xq-nav-icon" />
+                    @if (_sidebarOpen)
+                    {
+                        <MudText Class="xq-nav-label">Insights</MudText>
+                    }
+                </div>
+
+                <div class="xq-nav-item @(IsActive("/profile") ? "xq-nav-item--active" : "")"
+                     onclick="@GoProfile">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Class="xq-nav-icon" />
+                    @if (_sidebarOpen)
+                    {
+                        <MudText Class="xq-nav-label">Profile</MudText>
+                    }
+                </div>
+
+                <div class="xq-nav-item @(IsActive("/settings") ? "xq-nav-item--active" : "")"
+                     onclick="@GoSettings">
+
+                    <MudIcon Icon="@Icons.Material.Filled.Settings" Class="xq-nav-icon" />
+
+                    @if (_sidebarOpen)
+                    {
+                        <MudText Class="xq-nav-label">Settings</MudText>
+                    }
+                </div>
+
+            </MudNavMenu>
+        </div>
+
+        <!-- User Footer -->
+@*         <div class="xq-user-footer">
+            <MudAvatar Color="Color.Warning" Size="Size.Small" Class="xq-avatar">XQ</MudAvatar>
+            @if (_sidebarOpen)
+            {
+                <div class="xq-user-info">
+                    <MudText Typo="Typo.body2" Class="xq-user-name">Xqare</MudText>
+                    <MudText Typo="Typo.caption" Class="xq-user-email">support@xqare.in</MudText>
+                </div>
+            }
+        </div> *@
+
+</section>
+
+@code {
+
+    [Parameter] public bool _sidebarOpen { get; set; } = true;
+    private void ToggleSidebar() => _sidebarOpen = !_sidebarOpen;
+    private bool IsActive(string url)
+    {
+        return Nav.ToBaseRelativePath(Nav.Uri)
+                  .StartsWith(url.TrimStart('/'), StringComparison.OrdinalIgnoreCase);
+    }
+    void GoDashboard() => Nav.NavigateTo("/dashboard");
+    void GoCommunity() => Nav.NavigateTo("/community");
+    void GoInsights() => Nav.NavigateTo("/insights");
+    void GoProfile() => Nav.NavigateTo("/profile");
+    void GoSettings() => Nav.NavigateTo("/settings");
+}

@@ -1,0 +1,178 @@
+﻿.hero-wrapper {
+    background: linear-gradient(135deg, #0f2a44 0%, #1f3f5b 100%);
+    padding: 80px 0;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Background wrapper */
+::deep .hero-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Shapes */
+::deep .bg-shape {
+    position: absolute;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    transform: rotate(25deg);
+}
+
+/* Large left shape */
+::deep .shape-1 {
+    width: 400px;
+    height: 250px;
+    left: 5%;
+    top: 35%;
+}
+
+/* Right shape */
+::deep .shape-2 {
+    width: 350px;
+    height: 220px;
+    right: 10%;
+    top: 20%;
+    transform: rotate(-25deg);
+}
+
+/* Icons */
+::deep .bg-icon {
+    position: absolute;
+    color: #fbbf24;
+    opacity: 0.12;
+    font-size: 40px;
+    animation: float 6s ease-in-out infinite, fadePulse 4s ease-in-out infinite;
+}
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+/* ON/OFF fade (breathing effect) */
+@keyframes fadePulse {
+    0% {
+        opacity: 0.05;
+    }
+
+    50% {
+        opacity: 0.18;
+    }
+
+    100% {
+        opacity: 0.05;
+    }
+}
+
+/* Positions */
+::deep .icon-1 {
+    top: 20%;
+    left: 10%;
+}
+
+::deep .icon-2 {
+    bottom: 25%;
+    left: 25%;
+}
+
+::deep .icon-3 {
+    top: 30%;
+    right: 25%;
+}
+
+::deep .icon-4 {
+    bottom: 20%;
+    right: 15%;
+}
+
+
+    /* Background glow */
+    ::deep .hero-wrapper::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.05), transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.05), transparent 40%);
+    }
+
+/* Content */
+::deep .hero-content {
+    max-width: 850px;
+    margin: auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* Chip */
+::deep .hero-chip {
+    font-weight: 500;
+    border-radius: 999px;
+    letter-spacing: 0.4px;
+}
+
+/* Title */
+::deep .hero-title {
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+/* Highlight */
+::deep .hero-highlight {
+    display: block;
+    color: #fbbf24;
+}
+
+/* Subtitle */
+::deep .hero-subtitle {
+    opacity: 0.85;
+    max-width: 700px;
+}
+
+/* Actions */
+::deep .hero-actions {
+    margin-top: 16px;
+}
+
+/* Buttons */
+::deep .hero-btn-primary {
+    border-radius: 999px;
+    padding: 12px 28px;
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(251, 191, 36, 0.25);
+}
+
+::deep .hero-btn-secondary {
+    border-radius: 999px;
+    padding: 12px 28px;
+    color: white;
+}
+
+/* MudBlazor overrides */
+::deep .mud-button-root {
+    text-transform: none;
+    transition: all 0.2s ease;
+}
+
+::deep .mud-button-outlined {
+    border-color: rgba(255,255,255,0.4);
+}
+
+::deep .mud-button-root:hover {
+    transform: translateY(-2px);
+}
+
+::deep .mud-chip {
+    padding-left: 12px;
+    padding-right: 12px;
+}

@@ -1,0 +1,122 @@
+﻿/* WRAPPER */
+.founders-wrapper {
+    padding: 50px 0;
+    background: #1f3f5b;
+    color: white;
+    position: relative;
+}
+
+    /* GRID OVERLAY */
+    ::deep .founders-wrapper::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    /* CONTENT LAYER FIX */
+    ::deep .founders-wrapper > * {
+        position: relative;
+        z-index: 1;
+    }
+
+/* CONTENT */
+::deep .founders-content {
+    max-width: 520px;
+}
+
+/* BADGE */
+::deep .founders-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    color: #fbbf24;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+/* TITLE */
+::deep .founders-title {
+    margin: 16px 0;
+    font-weight: 700;
+}
+
+    ::deep .founders-title span {
+        color: #fbbf24;
+    }
+
+/* TEXT */
+::deep .founders-text {
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 18px;
+}
+
+/* SUBTITLE */
+::deep .founders-subtitle {
+    margin-bottom: 10px;
+}
+
+/* LIST */
+::deep .founders-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 18px;
+}
+
+    ::deep .founders-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+/* CHECK ICON */
+::deep .check-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #fbbf24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    ::deep .check-icon::after {
+        content: "✓";
+        font-size: 12px;
+        color: #fbbf24;
+    }
+
+/* NOTE */
+::deep .founders-note {
+    color: rgba(255,255,255,0.7);
+}
+
+/* IMAGE WRAPPER */
+::deep .founders-image-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+/* GLOW */
+::deep .founders-glow {
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: radial-gradient( circle, rgba(251,191,36,0.35) 0%, rgba(251,191,36,0.15) 35%, transparent 70% );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    /* IMAGE */
+    ::deep .founders-glow img {
+        width: 400px; 
+        max-width: 100%;
+        border-radius: 50%;
+    }

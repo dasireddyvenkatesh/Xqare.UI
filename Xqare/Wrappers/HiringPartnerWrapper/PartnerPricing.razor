@@ -1,0 +1,230 @@
+﻿@using MudBlazor
+
+<section class="partner-pricing">
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="pricing-title">
+        Partnership Pricing
+    </MudText>
+
+    <MudText Typo="Typo.body1" Align="Align.Center" Class="pricing-subtitle">
+        Transparent pricing designed to align success with value.
+    </MudText>
+
+    <MudGrid Class="pricing-grid">
+
+        <!-- LEFT CARD -->
+        <MudItem xs="12" md="6">
+
+            <MudPaper Class="pricing-card pricing-card-left">
+
+                <div class="pricing-launch">
+                    FREE FOR FIRST YEAR — LAUNCH OFFER
+                </div>
+
+                    <div class="pricing-header">
+
+                        <div class="header-icon-box">
+                            <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" />
+                        </div>
+
+                        <div>
+                            <div class="pricing-header-title">Platform Access Fee</div>
+                            <div class="pricing-header-sub">Annual Partnership Subscription</div>
+                        </div>
+
+                    </div>
+
+                <div class="pricing-highlight">
+
+                        <div class="first-year-label">
+
+                            <MudIcon Icon="@Icons.Material.Filled.Schedule" Class="first-year-icon" />
+
+                            <span>FIRST YEAR PRICE</span>
+
+                        </div>
+
+                    <div class="price-row">
+                        <span class="old-price">₹7,999</span>
+                        <span class="arrow">→</span>
+                        <span class="new-price">₹0</span>
+                    </div>
+
+                    <div class="save-badge">SAVE ₹7,999 per year</div>
+
+                </div>
+
+                    <div class="after-box">
+                        <MudIcon Icon="@Icons.Material.Filled.Shield" Class="after-icon" />
+                        <span>
+                            After Year 1: ₹7,999/year — still one of the most affordable hiring platforms.
+                        </span>
+                    </div>
+
+                    <div class="pricing-features">
+
+                        <div class="feature-item">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                            Access to XQARE Vetted Talent Pool
+                        </div>
+
+                        <div class="feature-item">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                            AI-Powered Candidate Matching
+                        </div>
+
+                        <div class="feature-item">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                            Dedicated Hiring Dashboard
+                        </div>
+
+                        <div class="feature-item">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                            Priority Candidate Shortlisting
+                        </div>
+
+                        <div class="feature-item">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                            Direct Messaging with Candidates
+                        </div>
+
+                        <div class="feature-item">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                            Application Tracking & Pipeline View
+                        </div>
+
+                        <div class="feature-item">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                            Employer Brand Profile on XQARE
+                        </div>
+
+                        <div class="feature-item">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                            Dedicated Partnership Manager
+                        </div>
+
+                    </div>
+
+                <MudButton Variant="Variant.Filled" Color="Color.Warning" Class="pricing-button">
+                    Claim Free Year — Get Started
+                </MudButton>
+
+            </MudPaper>
+
+        </MudItem>
+
+        <!-- RIGHT CARD -->
+        <MudItem xs="12" md="6">
+
+            <MudPaper Class="pricing-card pricing-card-right">
+
+                    <div class="success-header">
+
+                        <div class="success-icon-box">
+                            <MudIcon Icon="@Icons.Material.Filled.Percent" />
+                        </div>
+
+                        <div>
+                            <div class="success-title">Success-Based Fee</div>
+                            <div class="success-sub">Pay Only When You Hire</div>
+                        </div>
+
+                    </div>
+
+                <div class="success-highlight">
+
+                        <div class="percent-label">
+
+                            <MudIcon Icon="@Icons.Material.Outlined.TrendingUp" Class="percent-icon" />
+
+                            <span>PER SUCCESSFUL HIRE</span>
+
+                        </div>
+
+                    <div class="percent">2%</div>
+
+                    <div class="percent-desc">
+                        of candidate CTC. Charged only after successful hire.
+                    </div>
+
+                </div>
+
+                <div class="example-box">
+
+                    <div class="example-title">Example Calculation</div>
+
+                    <div class="example-row">
+                        <span>Candidate CTC</span>
+                        <span>₹12,00,000</span>
+                    </div>
+
+                    <div class="example-row highlight">
+                        <span>XQARE Fee (2%)</span>
+                        <span>₹24,000</span>
+                    </div>
+
+                </div>
+
+                <div class="benefits">
+
+                        <div class="benefit-item">
+                            <MudIcon Icon="@Icons.Material.Filled.Security" />
+                            Zero risk — pay only for results
+                        </div>
+
+                        <div class="benefit-item">
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" />
+                            Industry-low 2% fee vs 8–15% agencies
+                        </div>
+
+                        <div class="benefit-item">
+                            <MudIcon Icon="@Icons.Material.Filled.People" />
+                            Pre-vetted mentorship-trained candidates
+                        </div>
+
+                        <div class="benefit-item">
+                            <MudIcon Icon="@Icons.Material.Filled.Bolt" />
+                            No hidden charges
+                        </div>
+
+                </div>
+
+                <MudButton Variant="Variant.Outlined" Color="Color.Warning" Class="success-button">
+                    Become a Hiring Partner →
+                </MudButton>
+
+            </MudPaper>
+
+        </MudItem>
+
+    </MudGrid>
+
+        <div class="pricing-trust">
+
+            <div class="trust-item">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                <span>No Credit Card Required</span>
+            </div>
+
+            <div class="trust-item">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                <span>Cancel Anytime</span>
+            </div>
+
+            <div class="trust-item">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                <span>Dedicated Support</span>
+            </div>
+
+            <div class="trust-item">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" />
+                <span>Transparent Pricing</span>
+            </div>
+
+        </div>
+
+</MudContainer>
+
+</section>

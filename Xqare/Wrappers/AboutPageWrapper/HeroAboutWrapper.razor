@@ -1,0 +1,72 @@
+﻿@using MudBlazor
+<section class="hero-wrapper">
+    <!-- Background Elements -->
+    <div class="hero-bg">
+        <div class="bg-shape shape-1"></div>
+        <div class="bg-shape shape-2"></div>
+
+        <MudIcon Icon="@Icons.Material.Filled.Groups" Class="bg-icon icon-1" />
+        <MudIcon Icon="@Icons.Material.Filled.MenuBook" Class="bg-icon icon-2" />
+        <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Class="bg-icon icon-3" />
+        <MudIcon Icon="@Icons.Material.Filled.Handshake" Class="bg-icon icon-4" />
+    </div>
+
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudStack AlignItems="AlignItems.Center"
+                  Justify="Justify.Center"
+                  Spacing="4"
+                  Class="hero-content">
+
+            <!-- Tag -->
+            <MudChip T="string" Variant="Variant.Outlined"
+                     Color="Color.Warning"
+                     Class="hero-chip">
+                ✨ About XQARE
+            </MudChip>
+
+            <!-- Heading -->
+            <MudText Typo="Typo.h2"
+                     Align="Align.Center"
+                     Class="hero-title">
+
+                Building the Future of
+                <span class="hero-highlight">Career Growth</span>
+
+            </MudText>
+
+            <!-- Subtitle -->
+            <MudText Typo="Typo.body1"
+                     Align="Align.Center"
+                     Class="hero-subtitle">
+
+                XQARE is a modern career development ecosystem designed to help individuals navigate,
+                grow, and succeed in their professional journey through mentorship, community, and
+                intelligent career resources.
+
+            </MudText>
+
+            <!-- Buttons -->
+            <MudStack Row="true" Spacing="2" Class="hero-actions">
+
+                <MudButton Href="/register" Variant="Variant.Filled"
+                           Color="Color.Warning"
+                           Size="Size.Large"
+                           Class="hero-btn-primary">
+
+                    Join XQARE →
+                </MudButton>
+
+                <MudButton Href="/" Variant="Variant.Outlined"
+                           Color="Color.Default"
+                           Size="Size.Large"
+                           Class="hero-btn-secondary">
+
+                    Explore the Platform
+                </MudButton>
+
+            </MudStack>
+
+        </MudStack>
+    </MudContainer>
+
+</section>

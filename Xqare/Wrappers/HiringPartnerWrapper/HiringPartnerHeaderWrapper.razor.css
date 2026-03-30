@@ -1,0 +1,28 @@
+﻿.partner-hero {
+    padding: 80px 20px 140px 20px;
+    background: linear-gradient(135deg,#1e3a56,#243f5e);
+    color: white;
+}
+
+::deep .hero-container {
+    text-align: center;
+}
+
+::deep .hero-chip {
+    margin-bottom: 25px;
+    font-weight: 500;
+    padding: 6px 14px;
+}
+
+::deep .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+::deep .hero-subtitle {
+    max-width: 700px;
+    margin: auto;
+    opacity: 0.9;
+    line-height: 1.7;
+}

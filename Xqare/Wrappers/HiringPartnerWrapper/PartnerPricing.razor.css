@@ -1,0 +1,439 @@
+﻿/* ============================= */
+/* PRICING SECTION WRAPPER */
+/* ============================= */
+
+.partner-pricing {
+    padding: 50px 0;
+    background: #f8fafc;
+}
+
+
+/* ============================= */
+/* HEADER */
+/* ============================= */
+
+::deep .pricing-title {
+    font-weight: 700;
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+::deep .pricing-card-left {
+    border: 1px solid #f4b400;
+}
+
+::deep .pricing-subtitle {
+    color: #6b7280;
+    margin-bottom: 60px;
+}
+
+::deep .pricing-card {
+    transition: all .25s ease;
+}
+
+    ::deep .pricing-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+    }
+
+
+/* ============================= */
+/* GRID */
+/* ============================= */
+
+::deep .pricing-grid {
+    align-items: stretch;
+}
+
+
+/* ============================= */
+/* MAIN CARD */
+/* ============================= */
+
+::deep .pricing-card {
+    border-radius: 18px;
+    padding: 36px;
+    background: white;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    height: 100%;
+    transition: all .25s ease;
+}
+
+    ::deep .pricing-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+    }
+
+
+/* ============================= */
+/* LAUNCH OFFER STRIP */
+/* ============================= */
+
+::deep .pricing-launch {
+    background: #f4b400;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+    margin: -36px -36px 25px -36px;
+    font-size: 14px;
+}
+
+
+/* ============================= */
+/* HEADER BLOCK */
+/* ============================= */
+
+::deep .pricing-header {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+::deep .pricing-header-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+::deep .pricing-header-sub {
+    font-size: 15px;
+    color: #64748b;
+    margin-top: 3px;
+}
+
+::deep .success-title {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+::deep .success-sub {
+    font-size: 15px;
+    color: #64748b;
+}
+
+
+/* ============================= */
+/* DARK PRICE BOX */
+/* ============================= */
+
+::deep .pricing-highlight {
+    background: #0f2747;
+    color: white;
+    padding: 26px;
+    border-radius: 14px;
+    margin: 24px 0;
+}
+
+::deep .first-year-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    margin-bottom: 10px;
+    color: #f4b400;
+}
+
+::deep .first-year-icon {
+    font-size: 18px;
+    color: #f4b400;
+}
+
+
+/* ============================= */
+/* PRICE ROW */
+/* ============================= */
+
+::deep .price-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+::deep .old-price {
+    text-decoration: line-through;
+    opacity: 0.6;
+    font-size: 18px;
+}
+
+::deep .arrow {
+    font-size: 20px;
+}
+
+::deep .new-price {
+    font-size: 64px;
+    font-weight: 800;
+    color: #f4b400;
+}
+
+
+/* ============================= */
+/* SAVE BADGE */
+/* ============================= */
+
+::deep .save-badge {
+    margin-top: 12px;
+    font-size: 12px;
+    background: #f4b400;
+    color: black;
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: inline-block;
+    font-weight: 600;
+}
+
+
+/* ============================= */
+/* AFTER YEAR NOTE */
+/* ============================= */
+
+::deep .after-box {
+    background: #f3f4f6;
+    padding: 16px 18px;
+    border-radius: 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 20px 0;
+}
+
+::deep .after-icon {
+    color: #f4b400;
+    font-size: 20px;
+}
+
+/*::deep .after-note {
+    font-size: 14px;
+    color: #475569;
+    margin-bottom: 18px;
+}*/
+
+
+/* ============================= */
+/* FEATURE LIST */
+/* ============================= */
+
+::deep .feature-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #334155;
+}
+
+    ::deep .feature-item .mud-icon-root {
+        color: #f4b400;
+        font-size: 18px;
+    }
+
+
+::deep .pricing-features div {
+    margin-bottom: 10px;
+    color: #334155;
+    font-size: 14px;
+}
+
+
+/* ============================= */
+/* PRIMARY BUTTON */
+/* ============================= */
+
+::deep .pricing-button {
+    margin-top: 26px;
+    width: 100%;
+    height: 46px;
+    font-weight: 600;
+    border-radius:25px;
+}
+
+
+/* ============================= */
+/* SUCCESS FEE SIDE */
+/* ============================= */
+
+::deep .success-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+::deep .success-icon-box {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #fef3c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    ::deep .success-icon-box .mud-icon-root {
+        color: #f4b400;
+        font-size: 22px;
+    }
+
+::deep .success-highlight {
+    background: #f3f4f6;
+    padding: 28px;
+    border-radius: 18px;
+    margin: 22px 0;
+}
+
+::deep .success-title {
+    font-weight: 600;
+}
+
+::deep .success-sub {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+
+/* ============================= */
+/* PERCENT BOX */
+/* ============================= */
+
+::deep .success-highlight {
+    background: #f3f4f6;
+    padding: 22px;
+    border-radius: 14px;
+    margin: 22px 0;
+}
+
+::deep .percent-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    color: #f4b400;
+    margin-bottom: 8px;
+}
+::deep .percent-icon {
+    font-size: 18px;
+    color: #f4b400;
+}
+
+::deep .percent {
+    font-size: 64px;
+    font-weight: 800;
+    color: #1c3854;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+::deep .percent-desc {
+    font-size: 15px;
+    color: #475569;
+    max-width: 380px;
+}
+
+
+/* ============================= */
+/* EXAMPLE CALCULATION */
+/* ============================= */
+
+::deep .example-box {
+    background: #f3f4f6;
+    border-radius: 14px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+::deep .example-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+::deep .example-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+    ::deep .example-row.highlight {
+        color: #f4b400;
+        font-weight: 600;
+    }
+
+
+/* ============================= */
+/* BENEFITS LIST */
+/* ============================= */
+
+::deep .benefits div {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #334155;
+}
+
+::deep .header-icon-box {
+    width: 44px;
+    height: 44px;
+    background: #0f2747;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    ::deep .header-icon-box .mud-icon-root {
+        color: #f4b400;
+        font-size: 22px;
+    }
+
+::deep .benefit-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #334155;
+}
+
+    ::deep .benefit-item .mud-icon-root {
+        color: #f4b400;
+        font-size: 18px;
+    }
+
+
+/* ============================= */
+/* SECONDARY BUTTON */
+/* ============================= */
+
+::deep .success-button {
+    width: 100%;
+    margin-top: 26px;
+    height: 46px;
+    font-weight: 600;
+    border-radius:25px;
+}
+
+::deep .pricing-trust {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+::deep .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+    ::deep .trust-item .mud-icon-root {
+        color: #f4b400;
+        font-size: 18px;
+    }

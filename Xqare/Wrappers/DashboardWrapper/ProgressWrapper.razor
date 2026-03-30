@@ -1,0 +1,52 @@
+﻿@using MudBlazor
+
+<section class="progress-wrapper">
+
+    <div class="progress-card">
+
+        <!-- Title -->
+        <MudText Typo="Typo.h6" Class="progress-title">
+            Your Progress
+        </MudText>
+
+        <!-- Label + Percentage -->
+        <div class="progress-top">
+            <MudText Typo="Typo.body2" Class="progress-label">
+                Profile Completion
+            </MudText>
+
+            <MudText Typo="Typo.body2" Class="progress-percent">
+                60%
+            </MudText>
+        </div>
+
+        <!-- Progress Bar -->
+        <MudProgressLinear Value="60"
+                           Color="Color.Warning"
+                           Rounded="true"
+                           Class="progress-bar" />
+
+        <!-- Status Items -->
+        <div class="progress-items">
+
+            <div class="progress-item done">
+                <div class="left">
+                    <MudIcon Icon="@Icons.Material.Filled.CheckCircleOutline" />
+                    <span>Community Joined</span>
+                </div>
+                <span class="status success">Yes</span>
+            </div>
+
+            <div class="progress-item">
+                <div class="left">
+                    <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" />
+                    <span>First Interaction</span>
+                </div>
+                <span class="status pending">Not yet</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

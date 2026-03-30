@@ -1,0 +1,85 @@
+﻿@using MudBlazor
+<section class="difference-wrapper">
+
+    <MudContainer MaxWidth="MaxWidth.Large">
+
+        <!-- Header -->
+        <MudStack AlignItems="AlignItems.Center" Spacing="1" Class="difference-header">
+
+            <MudText Class="section-tag">OUR DIFFERENCE</MudText>
+
+            <MudText Typo="Typo.h4" Class="section-title">
+                What Makes XQARE <span class="highlight">Different</span>
+            </MudText>
+
+        </MudStack>
+
+        <!-- Cards -->
+        <MudGrid Spacing="4" Class="difference-grid">
+
+            @foreach (var item in Differences)
+            {
+                <MudItem xs="12" md="6" Class="d-flex">
+
+                    <MudCard Class="difference-card group">
+
+                        <MudCardContent Class="d-flex flex-column h-100">
+
+                            <div class="difference-icon">
+                                <MudIcon Icon="@item.Icon" />
+                            </div>
+
+                            <MudText Typo="Typo.h6" Class="difference-title">
+                                @item.Title
+                            </MudText>
+
+                            <MudText Class="difference-text">
+                                @item.Description
+                            </MudText>
+
+                        </MudCardContent>
+
+                    </MudCard>
+
+                </MudItem>
+            }
+
+        </MudGrid>
+
+    </MudContainer>
+
+</section>
+
+@code{
+
+    public class ProblemItem
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Icon { get; set; }
+    }
+
+    List<ProblemItem> Differences = new()
+{
+    new() {
+        Title = "Mentorship First",
+        Description = "Access guidance from experienced professionals who have already walked the path you aspire to follow.",
+        Icon = Icons.Material.Filled.Handshake
+    },
+    new() {
+        Title = "Community Driven Growth",
+        Description = "Connect with ambitious peers and professionals who share knowledge, insights, and opportunities.",
+        Icon = Icons.Material.Filled.FavoriteBorder
+    },
+    new() {
+        Title = "Career Development Ecosystem",
+        Description = "XQARE combines mentorship, networking, learning, and career insights into one unified platform.",
+        Icon = Icons.Material.Filled.Layers
+    },
+    new() {
+        Title = "Long-Term Career Focus",
+        Description = "Designed for continuous career growth, not just job searching.",
+        Icon = Icons.Material.Filled.TrendingUp
+    }
+};
+}

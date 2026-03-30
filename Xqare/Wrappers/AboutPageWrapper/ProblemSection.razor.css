@@ -1,0 +1,101 @@
+﻿/* Wrapper */
+.problem-wrapper {
+    padding: 50px 0;
+    background: #ffffff;
+}
+
+/* Header */
+::deep .problem-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+::deep .section-tag {
+    color: #fbbf24;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+::deep .section-title {
+    font-weight: 700;
+}
+
+::deep .section-subtitle {
+    color: #6b7280;
+    max-width: 600px;
+}
+
+/* Grid */
+::deep .problem-grid {
+    margin-top: 20px;
+}
+
+/* Card */
+::deep .problem-card {
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: none;
+    transition: all 0.25s ease;
+}
+
+    /* Hover */
+    ::deep .problem-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border-color: rgba(251, 191, 36, 0.3);
+    }
+
+/* Icon */
+::deep .problem-icon {
+    width: 44px;
+    height: 44px;
+    background: #f9fafb;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+    ::deep .problem-icon .mud-icon-root {
+        color: #fbbf24;
+    }
+
+/* Title */
+::deep .problem-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* Text */
+::deep .problem-text {
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+::deep .problem-footer {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: 999px;
+    background: #fef3c7; /* soft yellow */
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Icon */
+::deep .footer-icon {
+    color: #f59e0b;
+}
+
+/* Text */
+::deep .footer-text {
+    font-size: 0.95rem;
+    color: #92400e;
+}

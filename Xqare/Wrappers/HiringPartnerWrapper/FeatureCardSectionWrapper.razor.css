@@ -1,0 +1,41 @@
+﻿.features-section {
+    margin-top: -80px;
+    padding-bottom: 50px;
+}
+
+::deep .feature-card {
+    padding: 20px;
+    border-radius: 14px;
+    transition: all .3s ease;
+    height: 100%;
+}
+
+    ::deep .feature-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+::deep .icon-box {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff4db;
+    border-radius: 10px;
+    margin-bottom: 14px;
+}
+
+    ::deep .icon-box .mud-icon-root {
+        color: #f4b400;
+    }
+
+::deep .card-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+::deep .card-desc {
+    color: #6b7280;
+    line-height: 1.6;
+}

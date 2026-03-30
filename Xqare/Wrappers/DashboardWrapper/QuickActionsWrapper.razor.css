@@ -1,0 +1,45 @@
+﻿/* Grid layout */
+.actions-grid {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 10px 0px;
+}
+
+/* Card */
+::deep .action-card {
+    flex: 1;
+    min-width: 220px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    
+}
+
+    /* Hover effect */
+    ::deep .action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        border-color: rgba(251, 191, 36, 0.3);
+    }
+
+/* Icon */
+::deep .action-icon {
+    font-size: 32px;
+    color: #f5a623;
+    margin-bottom: 10px;
+}
+
+/* Title */
+::deep .action-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* Description */
+::deep .action-desc {
+    color: #6b7280;
+}

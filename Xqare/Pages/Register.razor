@@ -1,0 +1,278 @@
+﻿@page "/register"
+@using System.Timers
+@using MudBlazor
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.Auth
+@using Xqare.BusinessLayer.Validators
+@using Xqare.BusinessLayer.Validators.FluentValidation
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IAuthService AuthService
+
+<section>
+
+    <MudGrid Class="login-wrapper" GutterSize="0">
+
+        <!-- LEFT PANEL -->
+        <MudItem xs="12" md="6" Class="left-panel d-none d-md-flex">
+            <MudStack Class="left-content">
+
+                <MudText Class="logo-text">
+                    X<span>QARE</span>
+                </MudText>
+
+                @if (ShowTrialBadge)
+                {
+                    <MudChip T="string" Color="Color.Warning"
+                             Variant="Variant.Text"
+                             Class="trial-badge mt-6">
+                        6-MONTH FREE TRIAL
+                    </MudChip>
+                }
+
+                <MudText Class="hero-title mt-8">
+                    Start your <span>career growth</span> journey today
+                </MudText>
+
+@*                 <MudText Class="hero-sub mt-4">
+                    Join 5,000+ professionals transforming their careers with XQARE.
+                </MudText>
+
+                <MudStack Spacing="3" Class="mt-8 benefits">
+                    <MudText>✔ Full mentor access for 6 months</MudText>
+                    <MudText>✔ Community forums & networking</MudText>
+                    <MudText>✔ Curated job board access</MudText>
+                    <MudText>✔ Career resources & learning paths</MudText>
+                </MudStack> *@
+
+                @if (ShowTrialPrice)
+                {
+                    <MudPaper Class="trial-box mt-8" Elevation="0">
+                        <MudText Class="trial-price">
+                            £0 <span>/ 6 months</span>
+                        </MudText>
+                        <MudText Class="trial-note">
+                            NO CREDIT CARD REQUIRED
+                        </MudText>
+                    </MudPaper>
+                }
+
+            </MudStack>
+        </MudItem>
+
+        <!-- RIGHT PANEL -->
+        <MudItem xs="12" md="6" Class="right-panel">
+
+            <MudPaper Elevation="0" Class="auth-container">
+
+                <MudText Class="mobile-logo d-block d-md-none">
+                    X<span>QARE</span>
+                </MudText>
+
+                <MudText Class="auth-title">
+                    Create your free account
+                </MudText>
+
+                <MudText Class="auth-subtitle">
+                    Already have an account?
+                    <MudButton Href="/Login">Sign in</MudButton>
+                </MudText>
+
+                <!-- SOCIAL -->
+                <MudGrid Class="social-grid mt-6">
+                    <MudItem xs="6">
+                        <MudButton FullWidth Class="social-btn"
+                                   StartIcon="@Icons.Custom.Brands.Google"
+                                   OnClick="RegisterWithGoogle">
+                                   
+                            Google
+                        </MudButton>
+                    </MudItem>
+
+                    <MudItem xs="6">
+                        <MudButton FullWidth Class="social-btn"
+                                   StartIcon="@Icons.Custom.Brands.GitHub">
+                            GitHub
+                        </MudButton>
+                    </MudItem>
+
+                    <MudItem xs="6">
+                        <MudButton FullWidth Class="social-btn"
+                                   StartIcon="@Icons.Custom.Brands.LinkedIn">
+                            LinkedIn
+                        </MudButton>
+                    </MudItem>
+
+                    <MudItem xs="6">
+                        <MudButton FullWidth Class="social-btn"
+                                   StartIcon="@Icons.Custom.Brands.Twitter">
+                            Twitter
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+
+                <!-- DIVIDER -->
+                <MudGrid Class="mt-6 mb-6 align-center">
+                    <MudItem xs="5">
+                        <MudDivider Class="divider-line-1" />
+                    </MudItem>
+                    <MudItem xs="2">
+                        <MudText Class="divider-text d-flex justify-center">
+                            OR SIGN UP WITH EMAIL
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="5">
+                        <MudDivider Class="divider-line-2" />
+                    </MudItem>
+                </MudGrid>
+
+                <!-- FORM -->
+                <MudForm @ref="form"
+                         Model="registerRequest"
+                         Validation="validationRules.ToMudValidator()"
+                         OnValidSubmit="Submit">
+
+                    <MudTextField Label="Full Name"
+                                  Variant="Variant.Outlined"
+                                  @bind-Value="registerRequest.FullName"
+                                  For="@(() => registerRequest.FullName)"
+                                  HelperText="Please enter your legal name"
+                                  HelperTextOnFocus="true"
+                                  Immediate="true"/>
+
+                    <MudTextField Label="Email Address"
+                                  InputType="InputType.Email"
+                                  Variant="Variant.Outlined" 
+                                  @bind-Value="registerRequest.Email"
+                                  For="@(() => registerRequest.Email)"
+                                  HelperText="Please enter your personal email id"
+                                  HelperTextOnFocus="true"/>
+
+                    <MudTextField Label="Password"
+                                  Variant="Variant.Outlined"
+                                  InputType="@(showPassword? InputType.Text: InputType.Password)"
+                                  @bind-Value="registerRequest.Password"
+                                  For="@(() => registerRequest.Password)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@(showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                  OnAdornmentClick="TogglePassword" />
+
+                    <MudTextField Label="Confirm Password"
+                                  Variant="Variant.Outlined"
+                                  InputType="@(showConfirmPassword? InputType.Text: InputType.Password)"
+                                  @bind-Value="registerRequest.ConfirmPassword"
+                                  For="@(() => registerRequest.ConfirmPassword)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@(showConfirmPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                  OnAdornmentClick="ToggleConfirmPassword" />
+
+                    <MudButton FullWidth
+                               Variant="Variant.Filled"
+                               OnClick="Submit"
+                               Class="register-btn">                            
+                        Register
+                    </MudButton>
+
+                    @if (ShowNoCardNote)
+                    {
+                        <MudText Class="security-text">
+                            🔒 No credit card required · Cancel anytime
+                        </MudText>
+                    }
+
+                    <MudText Class="signup-text">
+                         By signing up, you agree to our Terms of Service & Privacy Policy
+                    </MudText>
+
+                </MudForm>
+
+            </MudPaper>
+        </MudItem>
+
+    </MudGrid>
+</section>
+
+@code {
+
+    [Parameter] public bool ShowTrialBadge { get; set; } = false;
+    [Parameter] public bool ShowTrialPrice { get; set; } = false;
+    [Parameter] public bool ShowNoCardNote { get; set; } = false;
+
+    MudForm form = new();
+    RegisterRequest registerRequest = new();
+    VerifyOtpRequest otpRequest = new();
+
+    RegisterRequestValidator validationRules = new();
+    OtpRequestValidator otpValidator = new();
+
+    bool isMfaStep = false;
+    bool showPassword;
+    bool showConfirmPassword;
+    bool isResendDisabled = true;
+    int secondsRemaining = 30;
+    Timer timer = new();
+
+    void TogglePassword() => showPassword = !showPassword;
+    void ToggleConfirmPassword() => showConfirmPassword = !showConfirmPassword;
+
+    async Task Submit()
+    {
+        await form.ValidateAsync();
+
+        if (!form.IsValid)
+            return;
+    }
+
+    void StartTimer()
+    {
+        isResendDisabled = true;
+        secondsRemaining = 30;
+
+        timer?.Dispose();
+
+        timer = new Timer(1000);
+        timer.Elapsed += OnTimerTick;
+        timer.Start();
+    }
+
+    void OnTimerTick(object? sender, ElapsedEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            if (secondsRemaining > 0)
+                secondsRemaining--;
+            else
+            {
+                isResendDisabled = false;
+                timer.Stop();
+            }
+
+            StateHasChanged();
+        });
+    }
+
+    async Task RegisterWithGoogle()
+    {
+        await AuthService.LoginWithGoogle();
+
+        var response = new LoginResponse();
+
+        if (!response.IsSuccess)
+        {
+            Snackbar.Add("Invalid credentials", Severity.Error);
+            return;
+        }
+
+        if (response.RequiresMfa)
+        {
+            otpRequest.Email = registerRequest.Email;
+            isMfaStep = true;
+            StartTimer();
+            Snackbar.Add("OTP sent to your email");
+            return;
+        }
+    }
+    void LoginWithTwitter() => Nav.NavigateTo("api/auth/twitter", true);
+    void LoginWithGitHub() => Nav.NavigateTo("api/auth/github", true);
+    void LoginWithLinkedIn() => Nav.NavigateTo("api/auth/github", true);
+}

@@ -1,0 +1,361 @@
+﻿@page "/login"
+@using System.Timers
+@using MudBlazor
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.Auth
+@using Xqare.BusinessLayer.Validators
+@using Xqare.BusinessLayer.Validators.FluentValidation
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IAuthService AuthService
+
+<section>
+
+    <MudGrid Class="login-wrapper" GutterSize="0">
+
+        <!-- LEFT PANEL -->
+        <MudItem xs="12" md="6" Class="left-panel d-none d-md-flex">
+            <MudStack Class="left-content">
+
+                <MudText Class="logo-text">
+                    X<span>QARE</span>
+                </MudText>
+
+                <MudText Class="hero-title mt-8">
+                    Welcome back to your <span>career growth</span> journey
+                </MudText>
+
+                <MudText Class="hero-sub mt-4">
+                    Built for every stage of your career — from first step to leadership.
+                </MudText>
+
+@*                 <MudStack Direction="Row" Spacing="8" Class="stats mt-10">
+                    <MudStack>
+                        <MudText Class="stat-number">5,000+</MudText>
+                        <MudText Class="stat-label">Members</MudText>
+                    </MudStack>
+
+                    <MudStack>
+                        <MudText Class="stat-number">200+</MudText>
+                        <MudText Class="stat-label">Mentors</MudText>
+                    </MudStack>
+
+                    <MudStack>
+                        <MudText Class="stat-number">92%</MudText>
+                        <MudText Class="stat-label">Growth Rate</MudText>
+                    </MudStack>
+                </MudStack> *@
+
+            </MudStack>
+        </MudItem>
+
+        <!-- RIGHT PANEL -->
+        <MudItem xs="12" md="6" Class="right-panel">
+
+            <MudPaper Elevation="0" Class="auth-container">
+                <MudText Class="mobile-logo d-block d-md-none">
+                    X<span>QARE</span>
+                </MudText>
+                <MudText Class="auth-title">
+                    Sign in to your account
+                </MudText>
+
+                <MudText Class="auth-subtitle">
+                    Don’t have an account?
+                    <MudButton Href="/register">Create one free</MudButton>
+                </MudText>
+
+                @if (!isMfaStep)
+                {
+                    <!-- SOCIAL 2x2 -->
+                    <MudGrid Class="social-grid mt-6">
+                        <MudItem xs="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.Google"
+                                       OnClick="LoginWithGoogle">
+                                Google
+                            </MudButton>
+                        </MudItem>
+
+                        <MudItem xs="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.GitHub"
+                                       OnClick="LoginWithGitHub">
+                                GitHub
+                            </MudButton>
+                        </MudItem>
+
+                        <MudItem xs="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.LinkedIn"
+                                       OnClick="LoginWithLinkedIn">
+                                LinkedIn
+                            </MudButton>
+                        </MudItem>
+
+                        <MudItem xs="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.Twitter"
+                                       OnClick="LoginWithTwitter">
+                                Twitter
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudGrid Class="mt-6 mb-6 align-center">
+
+                        <MudItem xs="5">
+                            <MudDivider Class="divider-line-1" />
+                        </MudItem>
+
+                        <MudItem xs="2">
+                            <MudText Class="divider-text d-flex justify-center">
+                                OR CONTINUE WITH EMAIL
+                            </MudText>
+                        </MudItem>
+
+                        <MudItem xs="5">
+                            <MudDivider Class="divider-line-2" />
+                        </MudItem>
+
+                    </MudGrid>
+
+                    <!-- LOGIN FORM -->
+                    <MudForm @ref="form"
+                             Model="loginRequest"
+                             Validation="loginValidator.ToMudValidator()"
+                             OnValidSubmit="Submit">
+
+                        <MudTextField Label="Email Address"
+                                      Variant="Variant.Outlined"
+                                      @bind-Value="loginRequest.Email"
+                                      For="@(() => loginRequest.Email)"
+                                      Immediate="true" />
+
+                        <MudTextField Label="Password"
+                                      Variant="Variant.Outlined"
+                                      @bind-Value="loginRequest.Password"
+                                      For="@(() => loginRequest.Password)"
+                                      InputType="@(showPassword? InputType.Text: InputType.Password)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="TogglePassword" />
+
+                        <MudButton FullWidth
+                                   Variant="Variant.Filled"
+                                   OnClick="Submit"
+                                   Class="login-btn">
+                            Sign In →
+                        </MudButton>
+                        <MudText Class="security-text">
+                            🔒 Your data is protected with enterprise-grade encryption
+                        </MudText>
+                    </MudForm>
+                }
+                else
+                {
+                    <!-- OTP FORM -->
+                    <MudForm @ref="form"
+                             Model="otpRequest"
+                             Validation="otpValidator.ToMudValidator()"
+                             OnValidSubmit="Submit"
+                             Class="mt-6">
+
+                        <MudButton Variant="Variant.Text"
+                                   OnClick="BackToLogin"
+                                   Class="back-btn">
+                            ← Back to login
+                        </MudButton>
+
+                        <MudTextField Label="Email"
+                                      Value="loginRequest.Email"
+                                      Variant="Variant.Outlined"
+                                      ReadOnly="true" />
+
+                        <MudTextField Label="Enter OTP"
+                                      Variant="Variant.Outlined"
+                                      @bind-Value="otpRequest.OtpCode"
+                                      For="@(() => otpRequest.OtpCode)"
+                                      MaxLength="6"
+                                      Immediate="true"
+                                      InputMode="InputMode.numeric" />
+
+                        <MudButton Variant="Variant.Text"
+                                   Disabled="@isResendDisabled"
+                                   OnClick="ResendOtp"
+                                   Class="resend-btn">
+                            @if (isResendDisabled)
+                            {
+                                <span>Resend in @secondsRemaining s</span>
+                            }
+                            else
+                            {
+                                <span>Resend OTP</span>
+                            }
+                        </MudButton>
+
+                        <MudButton FullWidth
+                                   Variant="Variant.Filled"
+                                   OnClick="Submit"
+                                   Class="login-btn">
+                            Verify OTP →
+                        </MudButton>
+
+                    </MudForm>
+                }
+
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</section>
+
+@code {
+
+    MudForm form = new();
+    LoginRequest loginRequest = new();
+    VerifyOtpRequest otpRequest = new();
+
+    LoginRequestValidator loginValidator = new();
+    OtpRequestValidator otpValidator = new();
+
+    bool isMfaStep = false;
+    bool showPassword;
+
+    bool isResendDisabled = true;
+    int secondsRemaining = 30;
+    Timer timer = new();
+
+    void TogglePassword() => showPassword = !showPassword;
+
+    async Task Submit()
+    {
+        await form.ValidateAsync();
+
+        if (!form.IsValid)
+            return;
+
+        if (!isMfaStep)
+        {
+            // 🔐 CALL LOGIN API
+            var response = await AuthService.LoginAsync(loginRequest);
+
+            if (!response.IsSuccess)
+            {
+                Snackbar.Add("Invalid credentials", Severity.Error);
+                return;
+            }
+
+            if (response.RequiresMfa)
+            {
+                otpRequest.Email = loginRequest.Email;
+                isMfaStep = true;
+                StartTimer();
+                Snackbar.Add("OTP sent to your email");
+                return;
+            }
+
+            Nav.NavigateTo("/dashboard");
+        }
+        else
+        {
+            var success = await AuthService.VerifyOtpAsync(otpRequest);
+
+            if (!success)
+            {
+                Snackbar.Add("Invalid OTP", Severity.Error);
+                return;
+            }
+
+            Snackbar.Add("Login successful", Severity.Success);
+            Nav.NavigateTo("/dashboard");
+        }
+    }
+
+    async Task ResendOtp()
+    {
+        var response = await AuthService.ResendOtpAsync(loginRequest.Email);
+
+        if (response)
+        {
+            Snackbar.Add("OTP resent", Severity.Success);
+            StartTimer();
+        }
+        else
+        {
+            Snackbar.Add("Failed to resend OTP", Severity.Error);
+        }
+
+
+    }
+
+    void StartTimer()
+    {
+        isResendDisabled = true;
+        secondsRemaining = 30;
+
+        timer?.Dispose();
+
+        timer = new Timer(1000);
+        timer.Elapsed += OnTimerTick;
+        timer.Start();
+    }
+
+    void OnTimerTick(object? sender, ElapsedEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            if (secondsRemaining > 0)
+                secondsRemaining--;
+            else
+            {
+                isResendDisabled = false;
+                timer.Stop();
+            }
+
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+
+    void BackToLogin()
+    {
+        isMfaStep = false;
+        otpRequest = new();
+    }
+    async Task LoginWithGoogle()
+    {
+        await AuthService.LoginWithGoogle();
+
+    }
+    void LoginWithTwitter() => Nav.NavigateTo("api/auth/twitter", true);
+    void LoginWithGitHub() => Nav.NavigateTo("api/auth/github", true);
+    void LoginWithLinkedIn() => Nav.NavigateTo("api/auth/github", true);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+
+        if (!uri.Query.Contains("data"))
+            return;
+
+        var (success, requiresMfa) =
+            await AuthService.HandleExternalLoginCallbackAsync(Nav.Uri);
+
+        if (!success)
+            return;
+
+        if (requiresMfa)
+        {
+            isMfaStep = true;
+            Snackbar.Add("OTP sent to your email");
+            StartTimer();
+            return;
+        }
+
+        // Nav.NavigateTo("/dashboard");
+    }
+}

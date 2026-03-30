@@ -1,0 +1,44 @@
+﻿@page "/dashboard"
+@using Xqare.Wrappers.DashboardWrapper
+
+<MudBreakpointProvider OnBreakpointChanged="OnBreakpointChanged">
+
+    <section class="layout"> 
+            <SidebarWrapper _sidebarOpen="@_sidebar" />
+
+        <MudContainer class="main">
+
+            @if (IsShow)
+            {
+                <TopbarWrapper />
+            }
+            <WelcomeWrapper></WelcomeWrapper>
+            <QuickActionsWrapper></QuickActionsWrapper>
+            <ProgressWrapper></ProgressWrapper>
+            <InsightsWrapper></InsightsWrapper>
+            <LaunchWrapper></LaunchWrapper>
+
+        </MudContainer>
+
+    </section>
+</MudBreakpointProvider>
+
+@code {
+    private bool _sidebar;
+
+    void OnBreakpointChanged(Breakpoint breakpoint)
+    {
+        if (breakpoint < Breakpoint.Md)
+        {
+            _sidebar = false;
+        }
+        else
+        {
+            _sidebar = true;
+        }
+
+        StateHasChanged();
+    }
+
+    public bool IsShow = false;
+}

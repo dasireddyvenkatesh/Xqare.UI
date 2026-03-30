@@ -1,0 +1,51 @@
+﻿/* Wrapper */
+.vision-wrapper {
+    padding: 50px 0;
+    background: #ffffff;
+}
+
+/* Content */
+::deep .vision-content {
+    text-align: center;
+}
+
+/* Tag */
+::deep .section-tag {
+    color: #fbbf24;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* Title */
+::deep .vision-title {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* Highlight statement */
+::deep .vision-highlight {
+    font-size: 1.1rem;
+    max-width: 700px;
+    color: #374151;
+}
+
+    ::deep .vision-highlight span {
+        font-weight: 700;
+        color: #111827;
+    }
+
+/* Paragraphs */
+::deep .vision-text {
+    max-width: 650px;
+    color: #6b7280;
+    line-height: 1.7;
+}
+
+/* Bottom line */
+::deep .vision-line {
+    margin-top: 30px;
+    width: 150px;
+    height: 4px;
+    border-radius: 10px;
+    background: linear-gradient(to right, #fbbf24, #fde68a);
+}

@@ -1,0 +1,296 @@
+﻿@page "/contact"
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.ContactUs
+@using Xqare.BusinessLayer.Validators
+@using Xqare.BusinessLayer.Validators.FluentValidation
+@using Xqare.Wrappers.CommonWrapper
+@inject ISnackbar Snackbar
+@inject IContactUsService ContactUsService
+
+<section class="contact-page">
+
+    <!-- HERO -->
+    <MudPaper Class="contact-hero">
+
+        <MudContainer MaxWidth="MaxWidth.Large">
+
+            <MudText Typo="Typo.h2" Align="Align.Center" Class="hero-title">
+                Get in Touch
+            </MudText>
+
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="hero-subtitle">
+                We'd love to hear from you. Reach out for support, partnerships,
+                or general inquiries about XQARE.
+            </MudText>
+
+        </MudContainer>
+
+    </MudPaper>
+
+
+    <!-- CONTACT CARDS -->
+    <MudContainer MaxWidth="MaxWidth.Large" Class="contact-cards">
+
+        <MudGrid>
+
+            <MudItem xs="12" md="4">
+
+                <MudPaper Class="contact-card">
+
+                    <MudAvatar Size="Size.Large" Variant="Variant.Filled" Color="Color.Dark" Class="card-icon">
+                        <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Large" />
+                    </MudAvatar>
+
+                    <MudText Typo="Typo.h6">General Enquiry</MudText>
+
+                    <MudText Class="card-text">
+                        Have a question about the platform or community?
+                        Contact us and our team will respond shortly.
+                    </MudText>
+
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Warning"
+                               StartIcon="@Icons.Material.Filled.Email"
+                               Href="mailto:support@xqare.in?subject=General Inquiry">
+
+                        Send Message
+
+                    </MudButton>
+
+                </MudPaper>
+
+            </MudItem>
+
+
+            <MudItem xs="12" md="4">
+
+                <MudPaper Class="contact-card">
+
+                    <MudAvatar Size="Size.Large" Variant="Variant.Filled" Color="Color.Dark" Class="card-icon">
+                        <MudIcon Icon="@Icons.Material.Filled.Handshake" Size="Size.Large" />
+                    </MudAvatar>
+
+                    <MudText Typo="Typo.h6">Hiring Partnership</MudText>
+
+                    <MudText Class="card-text">
+                        Companies can partner with XQARE to connect with skilled professionals
+                        and discover talent through our ecosystem.
+                    </MudText>
+
+                    <MudButton Href="/hiringpartner" Variant="Variant.Outlined" Color="Color.Warning">
+                        Partner With XQARE
+                    </MudButton>
+
+                </MudPaper>
+
+            </MudItem>
+
+
+            <MudItem xs="12" md="4">
+
+                <MudPaper Class="contact-card">
+
+                    <MudAvatar Size="Size.Large" Variant="Variant.Filled" Color="Color.Dark" Class="card-icon">
+                        <MudIcon Icon="@Icons.Material.Filled.School" Size="Size.Large" />
+                    </MudAvatar>
+
+                    <MudText Typo="Typo.h6">Become a Mentor</MudText>
+
+                    <MudText Class="card-text">
+                        Experienced professionals can join XQARE as mentors
+                        and guide the next generation of talent.
+                    </MudText>
+
+                    <MudButton Href="mailto:support@xqare.in?subject=Mentorship Enquiry" Variant="Variant.Outlined" Color="Color.Warning">
+                        Apply as Mentor
+                    </MudButton>
+
+                </MudPaper>
+
+            </MudItem>
+
+        </MudGrid>
+
+    </MudContainer>
+
+
+    <!-- CONTACT FORM -->
+
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="contact-form">
+
+        <MudGrid GutterSize="3">
+
+            <!-- LEFT COLUMN -->
+            <MudItem xs="12" md="7">
+
+                <MudText Typo="Typo.h5" Class="form-title mb-4">
+                    Send Us a Message
+                </MudText>
+
+                <MudForm @ref="_form"
+                         Model="_model"
+                         Validation="contactusValidator.ToMudValidator()"
+                         OnValidSubmit="Submit" Spacing="3">
+
+                    <MudTextField Label="Full Name"
+                                  Variant="Variant.Outlined"
+                                  @bind-Value="_model.FullName"
+                                  For="@(() => _model.FullName)"
+                                  Placeholder="Your full name"
+                                  Immediate=" true" />
+
+                    <MudTextField Label="Email Address"
+                                  Variant="Variant.Outlined"
+                                  @bind-Value="_model.Email"
+                                  For="@(() => _model.Email)"
+                                  Placeholder="you@example.com" />
+
+                    <MudTextField Label="Subject"
+                                  Variant="Variant.Outlined"
+                                  @bind-Value="_model.Subject"
+                                  For="@(() => _model.Subject)"
+                                  Placeholder="What's this about?" />
+
+                    <MudTextField Label="Message"
+                                  Variant="Variant.Outlined"
+                                  Lines="5"
+                                  @bind-Value="_model.Message"
+                                  For="@(() => _model.Message)"
+                                  Placeholder="Tell us more..." />
+
+                    <MudButton Disabled="@_processing"
+                               Variant="Variant.Filled"
+                               Color="Color.Warning"
+                               OnClick="Submit"
+                               StartIcon="@(!_processing ? Icons.Material.Filled.Send : null)"
+                               Size="Size.Large">
+
+                        <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+
+                            @if (_processing)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                <MudText>Processing...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Send Message</MudText>
+                            }
+
+                        </MudStack>
+
+                    </MudButton>
+
+                    <MudText Class="form-note">
+                        We typically respond within 24–48 hours.
+                    </MudText>
+
+                </MudForm>
+
+            </MudItem>
+
+
+            <!-- RIGHT COLUMN -->
+            <MudItem xs="12" md="5">
+
+                <MudStack Spacing="4">
+
+                    <MudPaper Class="info-card pa-5">
+
+                        <MudText Typo="Typo.h6">Support</MudText>
+
+                        <MudText>
+                            For technical support or platform assistance,
+                            please email our support team.
+                        </MudText>
+
+                        <MudLink Class="user-email" Href="mailto:support@xqare.in">
+                            support@xqare.in
+                        </MudLink>
+
+                    </MudPaper>
+
+
+                    <MudPaper Class="info-card pa-5">
+
+                        <MudText Typo="Typo.h6" Class="mb-2">
+                            Follow Us
+                        </MudText>
+
+                        <MudStack Class="social-grid" Direction="Row" Spacing="2">
+
+                            <MudIconButton Icon="@Icons.Custom.Brands.Twitter"
+                                           Href="https://x.com/XQARE_official"
+                                           Class="social-icon" />
+
+                            <MudIconButton Icon="@Icons.Custom.Brands.LinkedIn"
+                                           Href="https://www.linkedin.com/company/xqare"
+                                           Class="social-icon" />
+                            <MudIconButton Icon="@Icons.Custom.Brands.Instagram"
+                                           Href="https://www.instagram.com/xqare_official"
+                                           Class="social-icon" />
+
+                            <MudIconButton Icon="@Icons.Custom.Brands.GitHub"
+                                           Href="https://github.com/XQARE-official"
+                                           Class="social-icon" />
+
+                        </MudStack>
+
+                    </MudPaper>
+
+                </MudStack>
+
+            </MudItem>
+
+        </MudGrid>
+
+    </MudContainer>
+
+    <Footer/>
+
+</section>
+
+@code {
+
+    MudForm _form = new();
+    ContactUsRequest _model = new();
+    ContactusValidator contactusValidator = new();
+
+    private bool _processing = false;
+
+    async Task Submit()
+    {
+        await _form.ValidateAsync();
+
+        if (!_form.IsValid)
+            return;
+
+        _processing = true;
+
+        try
+        {
+            var response = await ContactUsService.SendContactUsMessageAsync(_model);
+
+            if (response.IsSuccess)
+            {
+                Snackbar.Add(response.Message, Severity.Success);
+                _model = new();
+
+                await _form.ResetAsync();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch
+        {
+            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
+        }
+        
+    }
+}

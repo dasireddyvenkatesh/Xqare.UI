@@ -1,0 +1,103 @@
+﻿@using MudBlazor
+<section class="problem-wrapper">
+
+    <MudContainer MaxWidth="MaxWidth.Large">
+
+        <!-- Header -->
+        <MudStack AlignItems="AlignItems.Center" Spacing="1" Class="problem-header">
+
+            <MudText Class="section-tag">THE PROBLEM</MudText>
+
+            <MudText Typo="Typo.h4" Class="section-title">
+                Why XQARE Exists
+            </MudText>
+
+            <MudText Class="section-subtitle">
+                Many students and professionals face common challenges while navigating their careers.
+            </MudText>
+
+        </MudStack>
+
+        <!-- Cards -->
+        <MudGrid Spacing="3" Class="problem-grid">
+
+            @foreach (var item in Problems)
+            {
+                <MudItem xs="12" sm="6" md="4">
+
+                    <MudCard Class="problem-card">
+
+                        <MudCardContent>
+
+                            <div class="problem-icon">
+                                <MudIcon Icon="@item.Icon" />
+                            </div>
+
+                            <MudText Typo="Typo.h6" Class="problem-title">
+                                @item.Title
+                            </MudText>
+
+                            <MudText Class="problem-text">
+                                @item.Description
+                            </MudText>
+
+                        </MudCardContent>
+
+                    </MudCard>
+
+                </MudItem>
+            }
+
+        </MudGrid>
+        <!-- Bottom Highlight -->
+        <div class="problem-footer">
+
+            <MudIcon Icon="@Icons.Material.Filled.Bolt" Class="footer-icon" />
+
+            <MudText Class="footer-text">
+                XQARE brings mentorship, community, and career insights together into one powerful platform.
+            </MudText>
+
+        </div>
+
+    </MudContainer>
+
+</section>
+
+@code{
+    public class ProblemItem
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Icon { get; set; }
+    }
+
+    List<ProblemItem> Problems = new()
+{
+    new() {
+        Title = "Unclear Career Direction",
+        Description = "Many individuals struggle to identify the right career path.",
+        Icon = Icons.Material.Filled.Explore
+    },
+    new() {
+        Title = "Limited Access to Mentors",
+        Description = "Finding experienced guidance can be difficult.",
+        Icon = Icons.Material.Filled.Groups
+    },
+    new() {
+        Title = "Career Transition Challenges",
+        Description = "Switching roles or industries often lacks structured support.",
+        Icon = Icons.Material.Filled.SwapHoriz
+    },
+    new() {
+        Title = "Skill Development Confusion",
+        Description = "Professionals are unsure which skills truly matter.",
+        Icon = Icons.Material.Filled.Lightbulb
+    },
+    new() {
+        Title = "Fragmented Career Resources",
+        Description = "Guidance is scattered across different platforms.",
+        Icon = Icons.Material.Filled.Public
+    }
+};
+}

@@ -1,0 +1,50 @@
+﻿.partner-inquiry {
+    padding: 50px 0;
+    background: #f8fafc;
+}
+::deep .inquiry-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+::deep .inquiry-icon {
+    font-size: 34px;
+    color: #f4b400;
+    margin-bottom: 10px;
+}
+
+::deep .inquiry-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+::deep .inquiry-subtitle {
+    color: #64748b;
+    max-width: 600px;
+    margin: auto;
+}
+
+::deep .inquiry-card {
+    padding: 40px;
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+}
+
+::deep .submit-btn {
+    margin-top: 10px;
+    height: 48px;
+    font-weight: 600;
+    border-radius:25px;
+}
+
+::deep .submit-note {
+    display: block;
+    margin-top: 8px;
+    color: #64748b;
+}
+
+::deep .form-note {
+    color: #777;
+    font-size: 14px;
+    margin-top: 10px;
+}

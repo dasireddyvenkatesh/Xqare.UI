@@ -1,0 +1,79 @@
+﻿::deep .contact-hero {
+    background: #1f3f5b;
+    padding: 100px 0;
+    color: white;
+    text-align: center;
+}
+
+::deep .hero-title {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+::deep .hero-subtitle {
+    opacity: .9;
+}
+
+::deep .contact-cards {
+    margin-top: -60px;
+    margin-bottom: 60px;
+}
+
+::deep .contact-card {
+    padding: 40px;
+    text-align: center;
+    border-radius: 12px;
+    height: 100%;
+}
+
+::deep .card-icon {
+    margin: auto;
+    margin-bottom: 20px;
+}
+
+::deep .card-text {
+    margin: 15px 0;
+    color: #666;
+}
+
+::deep .contact-form {
+    margin-bottom: 80px;
+}
+
+::deep .form-title {
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+::deep .form-note {
+    color: #777;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+::deep .info-card {
+    padding: 25px;
+    border-radius: 12px;
+}
+
+::deep .user-email {
+    color: #f9b710 !important;
+}
+
+::deep .social-grid {
+    flex-direction: row !important;
+}
+
+::deep .social-icon {
+    background: #f3f4f6;
+    border-radius: 50%;
+    transition: all .25s ease;
+}
+    ::deep .social-icon:hover {
+        transform: translateY(-3px);
+        background: #f5b400;
+        color: white;
+        box-shadow: 0 8px 18px rgba(0,0,0,.15);
+    }
+
+    

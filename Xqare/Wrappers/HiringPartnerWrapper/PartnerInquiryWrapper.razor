@@ -1,0 +1,250 @@
+﻿@using MudBlazor
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.PartnerShip
+@using Xqare.BusinessLayer.Validators
+@using Xqare.BusinessLayer.Validators.FluentValidation
+@inject ISnackbar Snackbar
+@inject IPartnershipService PartnershipService
+
+<section class="partner-inquiry">
+
+    <MudContainer MaxWidth="MaxWidth.Small">
+
+        <div class="inquiry-header">
+
+            <MudIcon Icon="@Icons.Material.Filled.BusinessCenter" Class="inquiry-icon" />
+
+            <MudText Typo="Typo.h4" Class="inquiry-title">
+                Partnership Inquiry Form
+            </MudText>
+
+            <MudText Typo="Typo.body1" Class="inquiry-subtitle">
+                Tell us about your company and hiring needs. Our team will reach out within 2 business days.
+            </MudText>
+
+        </div>
+
+
+        <MudPaper Class="inquiry-card">
+
+            <MudForm @ref="_form"
+                     Model="_model"
+                     Validation="_validator.ToMudValidator()"
+                     OnValidSubmit="SubmitInquiry">
+
+                <MudGrid GutterSize="3">
+
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Company Name"
+                                      Variant="Variant.Outlined"
+                                      Immediate="true"
+                                      Disabled="_processing"
+                                      @bind-Value="_model.CompanyName"
+                                      For="@(() => _model.CompanyName)" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Contact Person"
+                                      Variant="Variant.Outlined"
+                                      Disabled="_processing"
+                                      @bind-Value="_model.ContactPerson"
+                                      For="@(() => _model.ContactPerson)" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Work Email"
+                                      Variant="Variant.Outlined"
+                                      InputType="InputType.Email"
+                                      Disabled="_processing"
+                                      @bind-Value="_model.Email"
+                                      For="@(() => _model.Email)" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Phone Number"
+                                      Variant="Variant.Outlined"
+                                      Disabled="_processing"
+                                      InputType="InputType.Telephone"
+                                      Adornment="Adornment.Start"
+                                      AdornmentText="+91"
+                                      Pattern="[0-9]*"
+                                      MaxLength="10"
+                                      @bind-Value="_model.Phone"
+                                      For="@(() => _model.Phone)" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Company Website"
+                                      Variant="Variant.Outlined"
+                                      Disabled="_processing"
+                                      @bind-Value="_model.CompanyWebsite"
+                                      For="@(() => _model.CompanyWebsite)" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSelect Label="Company Size"
+                                   Variant="Variant.Outlined"
+                                   Disabled="_processing"
+                                   @bind-Value="_model.CompanySize"
+                                   For="@(() => _model.CompanySize)">
+
+                            @foreach (var size in _companySizes)
+                            {
+                                <MudSelectItem Value="@size">@size</MudSelectItem>
+                            }
+
+                        </MudSelect>
+
+                    </MudItem>
+
+
+                    <MudItem xs="12">
+
+                        <MudSelect T="string"
+                                   Label="Industry"
+                                   Variant="Variant.Outlined"
+                                   Disabled="_processing"
+                                   @bind-Value="_model.Industry"
+                                   For="@(() => _model.Industry)">
+
+                            @foreach (var industry in _industries)
+                            {
+                                <MudSelectItem Value="@industry">@industry</MudSelectItem>
+                            }
+
+                        </MudSelect>
+
+                    </MudItem>
+
+
+                    <MudItem xs="12">
+
+                        <MudTextField Label="Roles You're Hiring For"
+                                      Variant="Variant.Outlined"
+                                      Disabled="_processing"
+                                      @bind-Value="_model.Roles"
+                                      For="@(() => _model.Roles)"
+                                      Placeholder="Cloud Engineer, Data Analyst, etc." />
+
+                    </MudItem>
+
+
+                    <MudItem xs="12">
+
+                        <MudTextField Label="Additional Details"
+                                      Variant="Variant.Outlined"
+                                      Lines="4"
+                                      TextArea="true"
+                                      Disabled="_processing"
+                                      @bind-Value="_model.Details"
+                                      For="@(() => _model.Details)" />
+
+                    </MudItem>
+
+
+                    <MudItem xs="12">
+
+                        <MudButton Disabled="_processing"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Warning"
+                                   OnClick="SubmitInquiry"
+                                   FullWidth="true"
+                                   StartIcon="@(!_processing ? Icons.Material.Filled.Send : null)"
+                                   Size="Size.Large">
+
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    <MudText>Processing...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Submit Partnership Inquiry</MudText>
+                                }
+
+                            </MudStack>
+
+                        </MudButton>
+
+                        <MudText Class="form-note">
+                            We typically respond within 24–48 hours.
+                        </MudText>
+
+                    </MudItem>
+
+                </MudGrid>
+
+            </MudForm>
+
+        </MudPaper>
+
+    </MudContainer>
+
+</section>
+
+@code {
+
+    MudForm _form = new();
+
+    PartnershipInquiryRequest _model = new();
+
+    PartnershipInquiryValidator _validator = new();
+
+    bool _processing = false;
+
+    List<string> _companySizes = new()
+{
+"1-50",
+"51-200",
+"201-500",
+"501-1000",
+"1000+"
+};
+
+    List<string> _industries = new()
+{
+"Information Technology",
+"Finance",
+"Healthcare",
+"Retail",
+"Education",
+"Manufacturing",
+"Consulting",
+"Other"
+};
+    async Task SubmitInquiry()
+    {
+        await _form.ValidateAsync();
+
+        if (!_form.IsValid)
+            return;
+
+        _processing = true;
+
+        try
+        {
+            var response = await PartnershipService.SubmitInquiryAsync(_model);
+
+            if (response.IsSuccess)
+            {
+                Snackbar.Add(response.Message, Severity.Success);
+                _model = new();
+
+                await _form.ResetAsync();
+            }
+            else
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+            }
+        }
+        catch
+        {
+            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
+        }
+    }
+}

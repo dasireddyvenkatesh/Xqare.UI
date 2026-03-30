@@ -1,0 +1,101 @@
+﻿@using MudBlazor
+<section class="opportunities-wrapper">
+
+    <MudContainer MaxWidth="MaxWidth.Large">
+
+        <!-- Header -->
+        <MudStack AlignItems="AlignItems.Center" Spacing="1" Class="opportunities-header">
+
+            <MudText Class="section-tag">
+                CAREER OPPORTUNITIES
+            </MudText>
+
+            <MudText Typo="Typo.h4" Class="section-title">
+                Real Opportunities from Leading Global Companies
+            </MudText>
+
+            <MudText Class="section-subtitle">
+                XQARE connects you with real career opportunities that help you grow and succeed.
+            </MudText>
+
+        </MudStack>
+
+        <!-- Cards -->
+        <MudGrid Spacing="3" Class="opportunities-grid">
+
+            @foreach (var item in Opportunities)
+            {
+                <MudItem xs="12" sm="6" md="4" Class="d-flex">
+
+                    <MudCard Class="opportunity-card group">
+
+                        <MudCardContent Class="d-flex flex-column h-100">
+
+                            <div class="opportunity-icon">
+                                <MudIcon Icon="@item.Icon" />
+                            </div>
+
+                            <MudText Typo="Typo.h6" Class="opportunity-title">
+                                @item.Title
+                            </MudText>
+
+                            <MudText Class="opportunity-text">
+                                @item.Description
+                            </MudText>
+
+                        </MudCardContent>
+
+                    </MudCard>
+
+                </MudItem>
+            }
+
+        </MudGrid>
+
+    </MudContainer>
+
+</section>
+
+@code{
+
+    public class ProblemItem
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Icon { get; set; }
+    }
+
+    List<ProblemItem> Opportunities = new()
+{
+    new() {
+        Title = "Internships",
+        Description = "Gain real-world experience through curated internship opportunities.",
+        Icon = Icons.Material.Filled.WorkOutline
+    },
+    new() {
+        Title = "Full-Time Roles",
+        Description = "Access job opportunities aligned with your skills and career goals.",
+        Icon = Icons.Material.Filled.BusinessCenter
+    },
+    new() {
+        Title = "Mentorship Programs",
+        Description = "Learn directly from experienced professionals in your field.",
+        Icon = Icons.Material.Filled.School
+    },
+    new() {
+        Title = "Networking Opportunities",
+        Description = "Connect with industry experts and like-minded professionals.",
+        Icon = Icons.Material.Filled.Groups
+    },
+    new() {
+        Title = "Skill-Based Projects",
+        Description = "Work on real projects that enhance your portfolio.",
+        Icon = Icons.Material.Filled.Build
+    },
+    new() {
+        Title = "Global Exposure",
+        Description = "Explore opportunities beyond borders and expand your career horizon.",
+        Icon = Icons.Material.Filled.Public
+    }
+};
+}

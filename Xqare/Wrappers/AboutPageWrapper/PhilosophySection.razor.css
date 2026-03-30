@@ -1,0 +1,51 @@
+﻿/* WRAPPER */
+.philosophy-wrapper {
+    padding: 50px 0;
+    background: #ffffff;
+}
+
+/* CONTENT */
+::deep .philosophy-content {
+    text-align: center;
+}
+
+/* TAG */
+::deep .section-tag {
+    color: #fbbf24;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* TITLE */
+::deep .philosophy-title {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* TEXT */
+::deep .philosophy-text {
+    color: #4b5563;
+    font-size: 1rem;
+}
+
+/* SUB TEXT */
+::deep .philosophy-sub {
+    margin-top: 16px;
+    color: #6b7280;
+}
+
+/* BIG HIGHLIGHT 🔥 */
+::deep .philosophy-highlight {
+    margin-top: 10px;
+    font-weight: 800;
+    font-size: 3rem;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* FOOTER */
+::deep .philosophy-footer {
+    margin-top: 10px;
+    color: #6b7280;
+}

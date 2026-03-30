@@ -1,0 +1,19 @@
+﻿@page "/hiringpartner"
+@using Xqare.Wrappers.CommonWrapper
+@using Xqare.Wrappers.HiringPartnerWrapper
+
+<HiringPartnerHeaderWrapper/>
+<FeatureCardSectionWrapper/>
+<PartnerStepsWrapper/>
+@if (IsShow)
+{
+    <PartnerPricing></PartnerPricing>
+}
+<PartnerInquiryWrapper></PartnerInquiryWrapper>
+<CtaSection GetStartedLink=""></CtaSection>
+<Footer/>
+
+
+@code{
+    public bool IsShow = false;
+}

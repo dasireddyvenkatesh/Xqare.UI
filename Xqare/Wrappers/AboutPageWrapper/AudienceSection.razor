@@ -1,0 +1,101 @@
+﻿@using MudBlazor
+<section class="audience-wrapper">
+
+    <MudContainer MaxWidth="MaxWidth.Large">
+
+        <!-- Header -->
+        <MudStack AlignItems="AlignItems.Center" Spacing="1" Class="audience-header">
+
+            <MudText Class="section-tag">
+                OUR COMMUNITY
+            </MudText>
+
+            <MudText Typo="Typo.h4" Class="section-title">
+                Built for Every Stage of Your Career
+            </MudText>
+
+            <MudText Class="section-subtitle">
+                Whether you're starting out or scaling up, XQARE supports your journey.
+            </MudText>
+
+        </MudStack>
+
+        <!-- Cards -->
+        <MudGrid Spacing="3" Class="audience-grid">
+
+            @foreach (var item in Audience)
+            {
+                <MudItem xs="12" sm="6" md="4" Class="d-flex">
+
+                    <MudCard Class="audience-card group">
+
+                        <MudCardContent Class="d-flex flex-column h-100">
+
+                            <div class="audience-icon">
+                                <MudIcon Icon="@item.Icon" />
+                            </div>
+
+                            <MudText Typo="Typo.h6" Class="audience-title">
+                                @item.Title
+                            </MudText>
+
+                            <MudText Class="audience-text">
+                                @item.Description
+                            </MudText>
+
+                        </MudCardContent>
+
+                    </MudCard>
+
+                </MudItem>
+            }
+
+        </MudGrid>
+
+    </MudContainer>
+
+</section>
+
+@code{
+
+    public class ProblemItem
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Icon { get; set; }
+    }
+
+    List<ProblemItem> Audience = new()
+{
+    new() {
+        Title = "Students",
+        Description = "Explore career paths, gain clarity, and connect with mentors early.",
+        Icon = Icons.Material.Filled.School
+    },
+    new() {
+        Title = "Job Seekers",
+        Description = "Find opportunities aligned with your skills and career goals.",
+        Icon = Icons.Material.Filled.Search
+    },
+    new() {
+        Title = "Working Professionals",
+        Description = "Upskill, grow, and transition into better roles with confidence.",
+        Icon = Icons.Material.Filled.Work
+    },
+    new() {
+        Title = "Career Switchers",
+        Description = "Navigate career changes with structured guidance and support.",
+        Icon = Icons.Material.Filled.SwapHoriz
+    },
+    new() {
+        Title = "Mentors",
+        Description = "Share your experience and guide the next generation of professionals.",
+        Icon = Icons.Material.Filled.Handshake
+    },
+    new() {
+        Title = "Lifelong Learners",
+        Description = "Continuously evolve your skills and stay ahead in your career.",
+        Icon = Icons.Material.Filled.AutoGraph
+    }
+};
+}

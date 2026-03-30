@@ -1,0 +1,122 @@
+﻿@page "/privacy"
+@using Xqare.Wrappers.CommonWrapper
+<section>
+    <MudPaper Class="privacy-hero">
+
+        <MudContainer MaxWidth="MaxWidth.Large">
+
+            <MudText Typo="Typo.h3" Align="Align.Center" Class="hero-title">
+                Privacy Policy
+            </MudText>
+
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="hero-subtitle">
+                Effective Date: January 2026
+            </MudText>
+
+        </MudContainer>
+
+    </MudPaper>
+
+
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="privacy-container">
+
+        <MudPaper Elevation="1" Class="privacy-card">
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                1. Information We Collect
+            </MudText>
+
+            <MudList T=string Dense="true">
+                <MudListItem>Name, email, contact details</MudListItem>
+                <MudListItem>Professional information</MudListItem>
+                <MudListItem>Payment information (processed securely)</MudListItem>
+                <MudListItem>Usage data & analytics</MudListItem>
+            </MudList>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                2. How We Use Information
+            </MudText>
+
+            <MudList T=string Dense="true">
+                <MudListItem>Provide platform services</MudListItem>
+                <MudListItem>Improve user experience</MudListItem>
+                <MudListItem>Send service updates</MudListItem>
+            </MudList>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                3. Data Protection
+            </MudText>
+
+            <MudText Class="section-text">
+                We implement industry-standard security measures to protect your personal data.
+            </MudText>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                4. Data Sharing
+            </MudText>
+
+            <MudText Class="section-text">
+                We do not sell personal data. Limited sharing may occur with payment providers or legal authorities when required.
+            </MudText>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                5. Cookies
+            </MudText>
+
+            <MudText Class="section-text">
+                XQARE uses cookies for analytics, performance monitoring, and platform functionality.
+            </MudText>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                6. User Rights
+            </MudText>
+
+            <MudList T="string" Dense="true">
+                <MudListItem>Request access to your data</MudListItem>
+                <MudListItem>Request correction</MudListItem>
+                <MudListItem>Request deletion (subject to legal requirements)</MudListItem>
+            </MudList>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                7. Data Retention
+            </MudText>
+
+            <MudText Class="section-text">
+                Data is retained only as long as necessary to operate services or comply with legal obligations.
+            </MudText>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                8. Policy Updates
+            </MudText>
+
+            <MudText Class="section-text">
+                We may update this Privacy Policy periodically. Updates will be reflected on this page.
+            </MudText>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                9. Contact
+            </MudText>
+
+            <MudText Class="d-flex section-text">
+                <MudIcon Icon="@Icons.Material.Filled.Email" />
+
+                <MudLink class="ps-2" Href="mailto:support@xqare.in">
+                    support@xqare.in
+                </MudLink>
+            </MudText>
+
+        </MudPaper>
+
+    </MudContainer>
+
+    <Footer />
+
+</section>

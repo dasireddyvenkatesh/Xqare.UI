@@ -1,0 +1,98 @@
+﻿@page "/refund-policy"
+@using Xqare.Wrappers.CommonWrapper
+
+<section>
+
+    <MudPaper Class="privacy-hero">
+
+        <MudContainer MaxWidth="MaxWidth.Large">
+
+            <MudText Typo="Typo.h3" Align="Align.Center" Class="hero-title">
+                Refund Policy
+            </MudText>
+
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="hero-subtitle">
+                Effective Date: January 2026
+            </MudText>
+
+        </MudContainer>
+
+    </MudPaper>
+
+
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="privacy-container">
+
+        <MudPaper Elevation="1" Class="privacy-card">
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                1. Founding Membership Fees
+            </MudText>
+
+            <MudText Class="section-text">
+                All Founding Membership contributions are one-time payments and are generally non-refundable.
+                These contributions help support the early development of the XQARE platform.
+            </MudText>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                2. Exceptional Refund Cases
+            </MudText>
+
+            <MudText Class="section-text">
+                Refunds may be considered only in specific situations such as duplicate transactions,
+                accidental payments, or technical payment processing errors. All such cases are subject
+                to review and verification by the XQARE team.
+            </MudText>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                3. Refund Review Process
+            </MudText>
+
+            <MudText Class="section-text">
+                Refund requests must be submitted within 7 days of the payment date.
+                If approved, refunds will typically be processed within 7–14 business days
+                through the original payment method.
+            </MudText>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                4. Non-Refundable Scenarios
+            </MudText>
+
+            <MudList T="string" Dense="true">
+                <MudListItem>Change of mind after completing registration</MudListItem>
+                <MudListItem>Partial use of platform services or benefits</MudListItem>
+                <MudListItem>Inactivity or lack of engagement after joining</MudListItem>
+            </MudList>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                5. Policy Updates
+            </MudText>
+
+            <MudText Class="section-text">
+                XQARE reserves the right to update or modify this Refund Policy at any time.
+                Changes will be reflected on this page and will take effect immediately.
+            </MudText>
+
+
+            <MudText Typo="Typo.h5" Class="section-title">
+                6. Contact
+            </MudText>
+
+            <MudText Class="d-flex section-text">
+                <MudIcon Icon="@Icons.Material.Filled.Email" />
+
+                <MudLink class="ps-2" Href="mailto:support@xqare.in">
+                    support@xqare.in
+                </MudLink>
+            </MudText>
+
+        </MudPaper>
+
+    </MudContainer>
+
+    <Footer />
+
+</section>

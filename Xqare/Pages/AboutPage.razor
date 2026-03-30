@@ -1,0 +1,24 @@
+﻿@page "/About"
+@using Xqare.Wrappers.AboutPageWrapper
+@using Xqare.Wrappers.CommonWrapper
+
+<HeroAboutWrapper></HeroAboutWrapper>
+<MissionSection></MissionSection>
+<ProblemSection></ProblemSection>
+<DifferenceSection></DifferenceSection>
+<VisionSection></VisionSection>
+<OpportunitiesSection></OpportunitiesSection>
+<AudienceSection></AudienceSection>
+@if (Isshow)
+{
+    <FoundersSection></FoundersSection>
+}
+<PhilosophySection></PhilosophySection>
+<CtaSection GetStartedLink="register" Title="Be Part of the XQARE Journey"
+    Subtitle="Join a growing ecosystem of ambitious individuals, mentors, and professionals building meaningful careers together."></CtaSection>
+<Footer/>
+
+
+@code{
+    public bool Isshow = false;
+}

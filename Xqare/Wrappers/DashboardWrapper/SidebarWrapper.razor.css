@@ -1,0 +1,123 @@
+﻿/* Everything inside — ::deep */
+.xq-sidebar {
+    background: #1a2540;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.28s cubic-bezier(.4,0,.2,1);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+::deep .xq-sidebar--open {
+    width: 240px;
+}
+
+::deep .xq-sidebar--collapsed {
+    width: 64px;
+}
+
+::deep .xq-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 12px;
+    min-height: 64px;
+}
+
+::deep .xq-brand {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.5px !important;
+    white-space: nowrap;
+}
+
+::deep .xq-close-btn {
+    color: #8a97b0 !important;
+}
+
+::deep .xq-menu-btn {
+    color: #8a97b0 !important;
+    margin: 0 auto;
+}
+
+::deep .xq-nav {
+    flex: 1;
+    padding: 0 10px;
+}
+
+::deep .xq-nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+::deep .xq-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #8a97b0;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+    ::deep .xq-nav-item:hover {
+        background: rgba(255,255,255,0.07);
+        color: #ffffff;
+    }
+
+::deep .xq-nav-item--active {
+    background: #f5a623 !important;
+    color: #1a2540 !important;
+}
+
+    ::deep .xq-nav-item--active .xq-nav-icon,
+    ::deep .xq-nav-item--active .xq-nav-label {
+        color: #1a2540 !important;
+    }
+
+::deep .xq-nav-icon {
+    font-size: 20px !important;
+    flex-shrink: 0;
+    color: inherit;
+}
+
+::deep .xq-nav-label {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: inherit !important;
+}
+
+::deep .xq-user-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 14px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+::deep .xq-avatar {
+    flex-shrink: 0;
+    font-weight: 700 !important;
+}
+
+::deep .xq-user-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+::deep .xq-user-name {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    white-space: nowrap;
+}
+
+::deep .xq-user-email {
+    color: #8a97b0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

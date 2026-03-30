@@ -1,0 +1,47 @@
+﻿@using Xqare.BusinessLayer.Classes
+@inject VisitCounterService visitCounter
+@implements IDisposable
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudCard Class="pa-4">
+            <MudText Typo="Typo.h6">Total Visitors</MudText>
+            <MudText Typo="Typo.h3" Color="Color.Primary">
+                @visitCounter.Total
+            </MudText>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" md="6">
+        <MudCard Class="pa-4">
+            <MudText Typo="Typo.h6">Visitors This Hour</MudText>
+            <MudText Typo="Typo.h3" Color="Color.Success">
+                @visitCounter.ThisHour
+            </MudText>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+
+
+@code {
+    private Action? _handler;
+
+    protected override void OnInitialized()
+    {
+        _handler = async () => await InvokeAsync(StateHasChanged);
+        visitCounter.OnChange += _handler;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            visitCounter.Increment();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_handler is not null)
+            visitCounter.OnChange -= _handler;
+    }
+}
