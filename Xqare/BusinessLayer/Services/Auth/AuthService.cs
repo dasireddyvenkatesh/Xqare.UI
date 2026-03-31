@@ -90,9 +90,8 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task Logout()
         {
-            string sessionId = string.Empty;
-            await _tokenService.ClearAsync();
-            await _api.PostAsync<string, bool>("api/auth/logout", sessionId);
+            await _api.CookieCredential<string>("api/auth/logout");
+            await _tokenService.ClearAsync();       
             if (_authStateProvider is JwtAuthStateProvider jwtAuthStateProvider)
             {
                 jwtAuthStateProvider.NotifyUserLogout();

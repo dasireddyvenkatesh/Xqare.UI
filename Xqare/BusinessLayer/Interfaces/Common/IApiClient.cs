@@ -11,5 +11,7 @@ namespace Xqare.BusinessLayer.Interfaces.Common
         Task<ApiResponse<TResponse>> PutAsync<TRequest, TResponse>(string url, TRequest data);
 
         Task<ApiResponse<bool>> DeleteAsync(string url);
+
+        Task<ApiResponse<TResponse>> CookieCredential<TResponse>(string url);
     }
 }

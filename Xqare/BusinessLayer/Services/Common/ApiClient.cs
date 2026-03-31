@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using MudBlazor;
 using System.Net;
 using System.Net.Http.Headers;
@@ -46,7 +47,8 @@ namespace Xqare.BusinessLayer.Services.Common
 
             try
             {
-                var response = await _http.PostAsync("api/auth/refresh-token", null);
+
+                var response = await _http.SendAsync(CreateRequest(HttpMethod.Post, "api/auth/refresh-token", new StringContent("")));
 
                 if (!response.IsSuccessStatusCode)
                     return false;
@@ -137,7 +139,13 @@ namespace Xqare.BusinessLayer.Services.Common
             }
         }
 
-
+        private HttpRequestMessage CreateRequest(HttpMethod method, string url, HttpContent? content = null)
+        {
+            var request = new HttpRequestMessage(method, url);
+            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+            if (content != null) request.Content = content;
+            return request;
+        }
 
         public Task<ApiResponse<TResponse>> GetAsync<TResponse>(string url)
             => SendAsync<TResponse>(() => _http.GetAsync(url));
@@ -150,5 +158,9 @@ namespace Xqare.BusinessLayer.Services.Common
 
         public Task<ApiResponse<bool>> DeleteAsync(string url)
             => SendAsync<bool>(() => _http.DeleteAsync(url));
+
+        public Task<ApiResponse<TResponse>> CookieCredential<TResponse>(string url)
+            => SendAsync<TResponse>(() => _http.SendAsync(CreateRequest(HttpMethod.Post, url,
+                new StringContent(""))));
     }
 }
