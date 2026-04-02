@@ -331,9 +331,21 @@
         await AuthService.LoginWithGoogle();
 
     }
-    void LoginWithTwitter() => Nav.NavigateTo("api/auth/twitter", true);
-    void LoginWithGitHub() => Nav.NavigateTo("api/auth/github", true);
-    void LoginWithLinkedIn() => Nav.NavigateTo("api/auth/github", true);
+
+    async Task LoginWithGitHub()
+    {
+        await AuthService.LoginWithGitHub();
+    }
+
+    async Task LoginWithLinkedIn()
+    {
+        await AuthService.LoginWithLinkedIn();
+    }
+
+    async Task LoginWithTwitter()
+    {
+        await AuthService.LoginWithTwitter();
+    }
 
     protected override async Task OnInitializedAsync()
     {

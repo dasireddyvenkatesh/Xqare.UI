@@ -9,6 +9,9 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
         Task<bool> VerifyOtpAsync(VerifyOtpRequest request);
         Task<bool> ResendOtpAsync(string email);
         Task LoginWithGoogle();
+        Task LoginWithGitHub();
+        Task LoginWithLinkedIn();
+        Task LoginWithTwitter();
         Task<(bool success, bool requiresMfa)> HandleExternalLoginCallbackAsync(string url);
         Task Logout();
     }

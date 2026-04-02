@@ -159,7 +159,7 @@ namespace Xqare.BusinessLayer.Services.Common
         public Task<ApiResponse<bool>> DeleteAsync(string url)
             => SendAsync<bool>(() => _http.DeleteAsync(url));
 
-        public Task<ApiResponse<TResponse>> CookieCredential<TResponse>(string url)
+        public Task CookieCredential<TResponse>(string url)
             => SendAsync<TResponse>(() => _http.SendAsync(CreateRequest(HttpMethod.Post, url,
                 new StringContent(""))));
     }

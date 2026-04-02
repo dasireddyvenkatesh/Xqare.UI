@@ -112,6 +112,36 @@ namespace Xqare.BusinessLayer.Classes.Auth
             _nav.NavigateTo(url, true);
         }
 
+        public async Task LoginWithGitHub()
+        {
+            string deviceId = await _device.GetDeviceIdAsync();
+            string deviceName = await _device.GetDeviceNameAsync();
+
+            string url = $"{_configuration["ApiSettings:BaseUrl"]}/api/auth/github-login?deviceId={deviceId}&deviceName={deviceName}";
+
+            _nav.NavigateTo(url, true);
+        }
+
+        public async Task LoginWithLinkedIn()
+        {
+            string deviceId = await _device.GetDeviceIdAsync();
+            string deviceName = await _device.GetDeviceNameAsync();
+
+            string url = $"{_configuration["ApiSettings:BaseUrl"]}/api/auth/linkedin-login?deviceId={deviceId}&deviceName={deviceName}";
+
+            _nav.NavigateTo(url, true);
+        }
+
+        public async Task LoginWithTwitter()
+        {
+            string deviceId = await _device.GetDeviceIdAsync();
+            string deviceName = await _device.GetDeviceNameAsync();
+
+            string url = $"{_configuration["ApiSettings:BaseUrl"]}/api/auth/twitter-login?deviceId={deviceId}&deviceName={deviceName}";
+
+            _nav.NavigateTo(url, true);
+        }
+
         public async Task<(bool success, bool requiresMfa)> HandleExternalLoginCallbackAsync(string url)
         {
             var uri = _nav.ToAbsoluteUri(url);
