@@ -1,11 +1,5 @@
-﻿window.storageHelper = {
-    set: function (key, value) {
-        localStorage.setItem(key, value);
-    },
-    get: function (key) {
-        return localStorage.getItem(key);
-    },
-    remove: function (key) {
-        localStorage.removeItem(key);
-    }
+﻿window.sessionStorageHelper = {
+    set: (key, value) => sessionStorage.setItem(key, value),
+    get: (key) => sessionStorage.getItem(key),
+    remove: (key) => sessionStorage.removeItem(key)
 };

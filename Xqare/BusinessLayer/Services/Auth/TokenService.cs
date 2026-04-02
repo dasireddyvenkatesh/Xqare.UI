@@ -24,7 +24,7 @@ public class TokenService : ITokenService
 
         try
         {
-            _cachedToken = await _js.InvokeAsync<string?>("storageHelper.get", Key);
+            _cachedToken = await _js.InvokeAsync<string?>("sessionStorageHelper.get", Key);
             return _cachedToken;
         }
         catch
@@ -39,7 +39,7 @@ public class TokenService : ITokenService
         _cachedToken = accessToken;
         try
         {
-            await _js.InvokeVoidAsync("storageHelper.set", Key, accessToken);
+            await _js.InvokeVoidAsync("sessionStorageHelper.set", Key, accessToken);
         }
         catch { /* ignore if JS not ready */ }
     }
@@ -49,7 +49,7 @@ public class TokenService : ITokenService
         _cachedToken = null;
         try
         {
-            await _js.InvokeVoidAsync("storageHelper.remove", Key);
+            await _js.InvokeVoidAsync("sessionStorageHelper.remove", Key);
         }
         catch { /* ignore */ }
     }
