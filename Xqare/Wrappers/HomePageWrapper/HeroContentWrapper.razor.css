@@ -42,6 +42,12 @@
     border-radius: 14px;
     box-shadow: 0 0 25px rgba(245, 158, 11, .35);
     text-transform: none;
+    background-color: #0f2942
+}
+
+/* Hover state */
+::deep .cta-primary.mud-button-root:hover {
+    background-color: #081521;
 }
 
 /* SECONDARY BUTTON */
