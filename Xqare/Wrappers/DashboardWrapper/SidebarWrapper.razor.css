@@ -8,11 +8,11 @@
     flex-shrink: 0;
 }
 
-::deep .xq-sidebar--open {
-    width: 340px;
+.xq-sidebar--open {
+    width: 240px;
 }
 
-::deep .xq-sidebar--collapsed {
+.xq-sidebar--collapsed {
     width: 64px;
 }
 
@@ -85,7 +85,7 @@
 }
 
 ::deep .xq-nav-label {
-    font-size: 12px !important;
+    font-size: 14px !important;
     font-weight: 500 !important;
     color: inherit !important;
 }
