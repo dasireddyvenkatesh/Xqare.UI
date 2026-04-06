@@ -316,7 +316,7 @@
 
                 if (!response.IsSuccess)
                 {
-                    Snackbar.Add("Registration failed", Severity.Error);
+                    Snackbar.Add(response.Message, Severity.Error);
                     return;
                 }
 
@@ -325,7 +325,7 @@
                     otpRequest.Email = registerRequest.Email;
                     isOtpStep = true;
 
-                    Snackbar.Add("OTP sent to your email");
+                    Snackbar.Add(response.Message);
                     StartTimer();
                     return;
                 }

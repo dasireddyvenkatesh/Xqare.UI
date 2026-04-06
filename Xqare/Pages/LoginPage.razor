@@ -271,7 +271,7 @@
 
                 if (!response.IsSuccess)
                 {
-                    Snackbar.Add("Invalid credentials", Severity.Error);
+                    Snackbar.Add(response.Message!, Severity.Error);
                     return;
                 }
 

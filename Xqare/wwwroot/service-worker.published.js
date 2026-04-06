@@ -40,18 +40,30 @@ async function onActivate(event) {
 }
 
 async function onFetch(event) {
-    let cachedResponse = null;
-    if (event.request.method === 'GET') {
-        // For all navigation requests, try to serve index.html from cache,
-        // unless that request is for an offline resource.
-        // If you need some URLs to be server-rendered, edit the following check to exclude those URLs
-        const shouldServeIndexHtml = event.request.mode === 'navigate'
-            && !manifestUrlList.some(url => url === event.request.url);
-
-        const request = shouldServeIndexHtml ? 'index.html' : event.request;
-        const cache = await caches.open(cacheName);
-        cachedResponse = await cache.match(request);
+    if (event.request.method !== 'GET') {
+        return fetch(event.request);
     }
+
+    const url = event.request.url;
+
+    if (
+        url.includes('.dll') ||
+        url.includes('.wasm') ||
+        url.includes('blazor.boot.json') ||
+        url.endsWith('/') ||               
+        url.endsWith('index.html')        
+    ) {
+        return fetch(event.request, { cache: 'no-store' });
+    }
+
+    const cache = await caches.open(cacheName);
+
+    const shouldServeIndexHtml = event.request.mode === 'navigate'
+        && !manifestUrlList.some(url => url === event.request.url);
+
+    const request = shouldServeIndexHtml ? 'index.html' : event.request;
+
+    const cachedResponse = await cache.match(request);
 
     return cachedResponse || fetch(event.request);
 }
