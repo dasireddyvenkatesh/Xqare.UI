@@ -39,18 +39,20 @@ async function onActivate(event) {
         .map(key => caches.delete(key)));
 }
 
-// inside service-worker.js
 async function onFetch(event) {
     if (event.request.method !== 'GET') return fetch(event.request);
 
     const url = new URL(event.request.url);
 
-    if (url.pathname.includes('blazor.boot.json') || url.pathname.includes('service-worker-assets.js')) {
-        return fetch(event.request, { cache: 'no-cache' });
+    // SIMPLE RULE: If it's a boot file or the main page, ALWAYS fetch from network
+    if (url.pathname.includes('blazor.boot.json') ||
+        url.pathname.includes('service-worker-assets.js') ||
+        url.pathname.endsWith('/')) {
+        return fetch(event.request, { cache: 'no-store' });
     }
 
+    // For everything else (dlls, images), try cache first
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(event.request);
-
     return cachedResponse || fetch(event.request);
 }
