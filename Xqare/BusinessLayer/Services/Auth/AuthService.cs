@@ -92,7 +92,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task<bool> ResendOtpAsync(string email)
         {
-            var response = await _api.PostAsync<string, bool>("api/auth/resend-otp", email);
+            var response = await _api.PostAsync<string, bool>("api/auth/resend-email-otp", email);
 
             return true;
         }
