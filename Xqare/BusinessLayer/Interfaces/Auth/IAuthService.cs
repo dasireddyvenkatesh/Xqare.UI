@@ -6,7 +6,8 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
     {
         Task InitializeAsync();
         Task<LoginResponse> LoginAsync(LoginRequest request);
-        Task<bool> VerifyOtpAsync(VerifyOtpRequest request);
+        Task<RegisterResponse> RegisterAsync(RegisterRequest request);
+        Task<VerifyEmailOtpResponse> VerifyOtpAsync(VerifyEmailOtpRequest request);
         Task<bool> ResendOtpAsync(string email);
         Task LoginWithGoogle();
         Task LoginWithGitHub();

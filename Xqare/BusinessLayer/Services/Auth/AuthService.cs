@@ -31,7 +31,6 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task InitializeAsync()
         {
-
             var response = await _api.PostAsync<object, RefreshTokenResponse>(
                 "api/auth/refresh-token", default!);
 
@@ -39,17 +38,18 @@ namespace Xqare.BusinessLayer.Classes.Auth
             {
                 await _tokenService.SetTokenAsync(response.Data.AccessToken);
 
-                if (_authStateProvider is JwtAuthStateProvider jwtAuthStateProvider)
-                {
-                    jwtAuthStateProvider.NotifyUserAuthentication();
-                }
+                if (_authStateProvider is JwtAuthStateProvider jwt)
+                    jwt.NotifyUserAuthentication();
             }
             else
             {
+                // Refresh token expired or invalid — clear everything
                 await _tokenService.ClearAsync();
+                if (_authStateProvider is JwtAuthStateProvider jwt)
+                    jwt.NotifyUserLogout();
 
-                if (_authStateProvider is JwtAuthStateProvider jwtAuthStateProvider)
-                    jwtAuthStateProvider.NotifyUserLogout();
+                var returnUrl = Uri.EscapeDataString(_nav.Uri);
+                _nav.NavigateTo($"/login?returnUrl={returnUrl}", false);
             }
         }
 
@@ -75,6 +75,21 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         }
 
+        public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
+        {
+
+            request.DeviceId = await _device.GetDeviceIdAsync();
+            request.DeviceName = await _device.GetDeviceNameAsync();
+
+            var response = await _api.PostAsync<RegisterRequest, RegisterResponse>("api/auth/register", request);
+
+            if (!response.IsSuccess || response.Data == null)
+                return response.Data!;
+
+            return response.Data;
+
+        }
+
         public async Task<bool> ResendOtpAsync(string email)
         {
             var response = await _api.PostAsync<string, bool>("api/auth/resend-otp", email);
@@ -82,10 +97,13 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return true;
         }
 
-        public async Task<bool> VerifyOtpAsync(VerifyOtpRequest request)
+        public async Task<VerifyEmailOtpResponse> VerifyOtpAsync(VerifyEmailOtpRequest request)
         {
-            //var response = await _http.PostAsJsonAsync("api/auth/verify-otp", request);
-            return true;
+            request.DeviceId = await _device.GetDeviceIdAsync();
+            request.DeviceName = await _device.GetDeviceNameAsync();
+
+            var response = await _api.PostAsync<VerifyEmailOtpRequest, VerifyEmailOtpResponse>("api/auth/verify-register-email-otp", request);
+            return response.Data;
         }
 
         public async Task Logout()

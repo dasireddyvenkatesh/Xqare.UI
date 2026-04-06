@@ -213,7 +213,7 @@
 
     MudForm form = new();
     LoginRequest loginRequest = new();
-    VerifyOtpRequest otpRequest = new();
+    VerifyEmailOtpRequest otpRequest = new();
 
     LoginRequestValidator loginValidator = new();
     OtpRequestValidator otpValidator = new();
@@ -258,9 +258,9 @@
         }
         else
         {
-            var success = await AuthService.VerifyOtpAsync(otpRequest);
+            var otpResponse = await AuthService.VerifyOtpAsync(otpRequest);
 
-            if (!success)
+            if (!otpResponse.IsSuccess)
             {
                 Snackbar.Add("Invalid OTP", Severity.Error);
                 return;

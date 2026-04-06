@@ -1,6 +1,6 @@
 ﻿namespace Xqare.BusinessLayer.DTO
 {
-    public class VerifyOtpRequest
+    public class VerifyEmailOtpRequest
     {
         public string Email { get; set; } = default!;
         public string OtpCode { get; set; } = default!;
