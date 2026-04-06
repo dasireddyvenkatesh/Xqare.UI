@@ -29,7 +29,7 @@
                     Built for every stage of your career — from first step to leadership.
                 </MudText>
 
-@*                 <MudStack Direction="Row" Spacing="8" Class="stats mt-10">
+                @*                 <MudStack Direction="Row" Spacing="8" Class="stats mt-10">
                     <MudStack>
                         <MudText Class="stat-number">5,000+</MudText>
                         <MudText Class="stat-label">Members</MudText>
@@ -141,11 +141,24 @@
                                       AdornmentIcon="@(showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                                       OnAdornmentClick="TogglePassword" />
 
-                        <MudButton FullWidth
+                        <MudButton Disabled="@_processing"
+                                   FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
                                    Class="login-btn">
-                            Sign In →
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    <MudText>Processing...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Sign In →</MudText>
+                                }
+
+                            </MudStack>
                         </MudButton>
                         <MudText Class="security-text">
                             🔒 Your data is protected with enterprise-grade encryption
@@ -194,11 +207,24 @@
                             }
                         </MudButton>
 
-                        <MudButton FullWidth
+                        <MudButton Disabled="@_processing"
+                                   FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
                                    Class="login-btn">
-                            Verify OTP →
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    <MudText>Processing...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Verify OTP →</MudText>
+                                }
+
+                            </MudStack>
                         </MudButton>
 
                     </MudForm>
@@ -218,6 +244,7 @@
     LoginRequestValidator loginValidator = new();
     OtpRequestValidator otpValidator = new();
 
+    private bool _processing = false;
     bool isMfaStep = false;
     bool showPassword;
 
@@ -234,40 +261,52 @@
         if (!form.IsValid)
             return;
 
-        if (!isMfaStep)
+        _processing = true;
+        try
         {
-            // 🔐 CALL LOGIN API
-            var response = await AuthService.LoginAsync(loginRequest);
-
-            if (!response.IsSuccess)
+            if (!isMfaStep)
             {
-                Snackbar.Add("Invalid credentials", Severity.Error);
-                return;
-            }
+                // 🔐 CALL LOGIN API
+                var response = await AuthService.LoginAsync(loginRequest);
 
-            if (response.RequiresMfa)
+                if (!response.IsSuccess)
+                {
+                    Snackbar.Add("Invalid credentials", Severity.Error);
+                    return;
+                }
+
+                if (response.RequiresMfa)
+                {
+                    otpRequest.Email = loginRequest.Email;
+                    isMfaStep = true;
+                    StartTimer();
+                    Snackbar.Add("OTP sent to your email");
+                    return;
+                }
+
+                Nav.NavigateTo("/dashboard");
+            }
+            else
             {
-                otpRequest.Email = loginRequest.Email;
-                isMfaStep = true;
-                StartTimer();
-                Snackbar.Add("OTP sent to your email");
-                return;
-            }
+                var otpResponse = await AuthService.VerifyOtpAsync(otpRequest);
 
-            Nav.NavigateTo("/dashboard");
+                if (!otpResponse.IsSuccess)
+                {
+                    Snackbar.Add("Invalid OTP", Severity.Error);
+                    return;
+                }
+
+                Snackbar.Add("Login successful", Severity.Success);
+                Nav.NavigateTo("/dashboard");
+            }
         }
-        else
+        catch
         {
-            var otpResponse = await AuthService.VerifyOtpAsync(otpRequest);
-
-            if (!otpResponse.IsSuccess)
-            {
-                Snackbar.Add("Invalid OTP", Severity.Error);
-                return;
-            }
-
-            Snackbar.Add("Login successful", Severity.Success);
-            Nav.NavigateTo("/dashboard");
+            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
         }
     }
 
