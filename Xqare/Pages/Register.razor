@@ -34,7 +34,7 @@
                     Start your <span>career growth</span> journey today
                 </MudText>
 
-@*                 <MudText Class="hero-sub mt-4">
+                @*                 <MudText Class="hero-sub mt-4">
                     Join 5,000+ professionals transforming their careers with XQARE.
                 </MudText>
 
@@ -85,8 +85,8 @@
                     <MudGrid Class="social-grid mt-6">
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
-                            StartIcon="@Icons.Custom.Brands.Google"
-                            OnClick="RegisterWithGoogle">
+                                       StartIcon="@Icons.Custom.Brands.Google"
+                                       OnClick="RegisterWithGoogle">
 
                                 Google
                             </MudButton>
@@ -94,21 +94,21 @@
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
-                            StartIcon="@Icons.Custom.Brands.GitHub">
+                                       StartIcon="@Icons.Custom.Brands.GitHub">
                                 GitHub
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
-                            StartIcon="@Icons.Custom.Brands.LinkedIn">
+                                       StartIcon="@Icons.Custom.Brands.LinkedIn">
                                 LinkedIn
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
-                            StartIcon="@Icons.Custom.Brands.Twitter">
+                                       StartIcon="@Icons.Custom.Brands.Twitter">
                                 Twitter
                             </MudButton>
                         </MudItem>
@@ -131,49 +131,62 @@
 
                     <!-- FORM -->
                     <MudForm @ref="form"
-                    Model="registerRequest"
-                    Validation="validationRules.ToMudValidator()"
-                    OnValidSubmit="Submit">
+                             Model="registerRequest"
+                             Validation="validationRules.ToMudValidator()"
+                             OnValidSubmit="Submit">
 
                         <MudTextField Label="Full Name"
-                        Variant="Variant.Outlined"
-                        @bind-Value="registerRequest.FullName"
-                        For="@(() => registerRequest.FullName)"
-                        HelperText="Please enter your legal name"
-                        HelperTextOnFocus="true"
-                        Immediate="true"/>
+                                      Variant="Variant.Outlined"
+                                      @bind-Value="registerRequest.FullName"
+                                      For="@(() => registerRequest.FullName)"
+                                      HelperText="Please enter your legal name"
+                                      HelperTextOnFocus="true"
+                                      Immediate="true" />
 
                         <MudTextField Label="Email Address"
-                        InputType="InputType.Email"
-                        Variant="Variant.Outlined" 
-                        @bind-Value="registerRequest.Email"
-                        For="@(() => registerRequest.Email)"
-                        HelperText="Please enter your personal email id"
-                        HelperTextOnFocus="true"/>
+                                      InputType="InputType.Email"
+                                      Variant="Variant.Outlined"
+                                      @bind-Value="registerRequest.Email"
+                                      For="@(() => registerRequest.Email)"
+                                      HelperText="Please enter your personal email id"
+                                      HelperTextOnFocus="true" />
 
                         <MudTextField Label="Password"
-                        Variant="Variant.Outlined"
-                        InputType="@(showPassword? InputType.Text: InputType.Password)"
-                        @bind-Value="registerRequest.Password"
-                        For="@(() => registerRequest.Password)"
-                        Adornment="Adornment.End"
-                        AdornmentIcon="@(showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                        OnAdornmentClick="TogglePassword" />
+                                      Variant="Variant.Outlined"
+                                      InputType="@(showPassword? InputType.Text: InputType.Password)"
+                                      @bind-Value="registerRequest.Password"
+                                      For="@(() => registerRequest.Password)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="TogglePassword" />
 
                         <MudTextField Label="Confirm Password"
-                        Variant="Variant.Outlined"
-                        InputType="@(showConfirmPassword? InputType.Text: InputType.Password)"
-                        @bind-Value="registerRequest.ConfirmPassword"
-                        For="@(() => registerRequest.ConfirmPassword)"
-                        Adornment="Adornment.End"
-                        AdornmentIcon="@(showConfirmPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                        OnAdornmentClick="ToggleConfirmPassword" />
+                                      Variant="Variant.Outlined"
+                                      InputType="@(showConfirmPassword? InputType.Text: InputType.Password)"
+                                      @bind-Value="registerRequest.ConfirmPassword"
+                                      For="@(() => registerRequest.ConfirmPassword)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showConfirmPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="ToggleConfirmPassword" />
 
-                        <MudButton FullWidth
-                        Variant="Variant.Filled"
-                        OnClick="Submit"
-                        Class="register-btn">                            
-                            Register
+                        <MudButton Disabled="@_processing"
+                                   FullWidth
+                                   Variant="Variant.Filled"
+                                   OnClick="Submit"
+                                   Class="register-btn">
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    <MudText>Processing...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Register</MudText>
+                                }
+
+                            </MudStack>
                         </MudButton>
 
                         @if (ShowNoCardNote)
@@ -231,11 +244,24 @@
                             }
                         </MudButton>
 
-                        <MudButton FullWidth
+                        <MudButton Disabled="@_processing"
+                                   FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
                                    Class="register-btn">
-                            Verify OTP →
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    <MudText>Processing...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Verify OTP →</MudText>
+                                }
+
+                            </MudStack>
                         </MudButton>
 
                     </MudForm>
@@ -260,6 +286,7 @@
     RegisterRequestValidator validationRules = new();
     OtpRequestValidator otpValidator = new();
 
+    private bool _processing = false;
     bool isOtpStep = false;
     bool showPassword;
     bool showConfirmPassword;
@@ -277,40 +304,54 @@
         if (!form.IsValid)
             return;
 
-        if (!isOtpStep)
+        _processing = true;
+
+        try
         {
-            // STEP 1: REGISTER
-            var response = await AuthService.RegisterAsync(registerRequest);
 
-            if (!response.IsSuccess)
+            if (!isOtpStep)
             {
-                Snackbar.Add("Registration failed", Severity.Error);
-                return;
+                // STEP 1: REGISTER
+                var response = await AuthService.RegisterAsync(registerRequest);
+
+                if (!response.IsSuccess)
+                {
+                    Snackbar.Add("Registration failed", Severity.Error);
+                    return;
+                }
+
+                if (response.RequiresEmailVerification)
+                {
+                    otpRequest.Email = registerRequest.Email;
+                    isOtpStep = true;
+
+                    Snackbar.Add("OTP sent to your email");
+                    StartTimer();
+                    return;
+                }
             }
-
-            if (response.RequiresEmailVerification)
+            else
             {
-                otpRequest.Email = registerRequest.Email;
-                isOtpStep = true;
+                // STEP 2: VERIFY OTP
+                var otpResponse = await AuthService.VerifyOtpAsync(otpRequest);
 
-                Snackbar.Add("OTP sent to your email");
-                StartTimer();
-                return;
+                if (!otpResponse.IsSuccess)
+                {
+                    Snackbar.Add("Invalid OTP", Severity.Error);
+                    return;
+                }
+
+                Snackbar.Add("Registration successful", Severity.Success);
+                Nav.NavigateTo("/dashboard");
             }
         }
-        else
+        catch
         {
-            // STEP 2: VERIFY OTP
-            var otpResponse = await AuthService.VerifyOtpAsync(otpRequest);
-
-            if (!otpResponse.IsSuccess)
-            {
-                Snackbar.Add("Invalid OTP", Severity.Error);
-                return;
-            }
-
-            Snackbar.Add("Registration successful", Severity.Success);
-            Nav.NavigateTo("/dashboard");
+            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
         }
     }
 
