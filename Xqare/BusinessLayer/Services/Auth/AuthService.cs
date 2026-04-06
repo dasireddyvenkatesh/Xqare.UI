@@ -61,7 +61,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
             var response = await _api.PostAsync<LoginRequest, LoginResponse>("api/auth/login", request);
 
-            if (!response.IsSuccess || response.Data == null)
+            if (!response.IsSuccess || response.Data == null || !response.Data.IsSuccess)
                 return response.Data!;
 
             await _tokenService.SetTokenAsync(response.Data.AccessToken);
