@@ -39,31 +39,18 @@ async function onActivate(event) {
         .map(key => caches.delete(key)));
 }
 
+// inside service-worker.js
 async function onFetch(event) {
-    if (event.request.method !== 'GET') {
-        return fetch(event.request);
-    }
+    if (event.request.method !== 'GET') return fetch(event.request);
 
-    const url = event.request.url;
+    const url = new URL(event.request.url);
 
-    if (
-        url.includes('.dll') ||
-        url.includes('.wasm') ||
-        url.includes('blazor.boot.json') ||
-        url.endsWith('/') ||               
-        url.endsWith('index.html')        
-    ) {
-        return fetch(event.request, { cache: 'no-store' });
+    if (url.pathname.includes('blazor.boot.json') || url.pathname.includes('service-worker-assets.js')) {
+        return fetch(event.request, { cache: 'no-cache' });
     }
 
     const cache = await caches.open(cacheName);
-
-    const shouldServeIndexHtml = event.request.mode === 'navigate'
-        && !manifestUrlList.some(url => url === event.request.url);
-
-    const request = shouldServeIndexHtml ? 'index.html' : event.request;
-
-    const cachedResponse = await cache.match(request);
+    const cachedResponse = await cache.match(event.request);
 
     return cachedResponse || fetch(event.request);
 }
