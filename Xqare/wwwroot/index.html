@@ -38,20 +38,7 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
-    <script>
-        navigator.serviceWorker.register('service-worker.published.js?v=' + Date.now(), {
-            updateViaCache: 'none'
-        }).then(reg => {
-            reg.update();
-        });
-
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (refreshing) return;
-            refreshing = true;
-            window.location.reload();
-        });
-    </script>
+    <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
 </body>
 
 </html>

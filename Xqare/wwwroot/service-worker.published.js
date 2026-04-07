@@ -8,8 +8,8 @@ self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
 
 const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
-const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/, /\.webmanifest$/ ];
-const offlineAssetsExclude = [ /^service-worker\.js$/ ];
+const offlineAssetsInclude = [/\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/, /\.webmanifest$/];
+const offlineAssetsExclude = [/^service-worker\.js$/];
 
 // Replace with your base path if you are hosting on a subfolder. Ensure there is a trailing '/'.
 const base = "/";
@@ -18,7 +18,6 @@ const manifestUrlList = self.assetsManifest.assets.map(asset => new URL(asset.ur
 
 async function onInstall(event) {
     console.info('Service worker: Install');
-    self.skipWaiting();
 
     // Fetch and cache all matching items from the assets manifest
     const assetsRequests = self.assetsManifest.assets
@@ -30,7 +29,6 @@ async function onInstall(event) {
 
 async function onActivate(event) {
     console.info('Service worker: Activate');
-    await clients.claim();
 
     // Delete unused caches
     const cacheKeys = await caches.keys();
@@ -40,19 +38,18 @@ async function onActivate(event) {
 }
 
 async function onFetch(event) {
-    if (event.request.method !== 'GET') return fetch(event.request);
+    let cachedResponse = null;
+    if (event.request.method === 'GET') {
+        // For all navigation requests, try to serve index.html from cache,
+        // unless that request is for an offline resource.
+        // If you need some URLs to be server-rendered, edit the following check to exclude those URLs
+        const shouldServeIndexHtml = event.request.mode === 'navigate'
+            && !manifestUrlList.some(url => url === event.request.url);
 
-    const url = new URL(event.request.url);
-
-    // SIMPLE RULE: If it's a boot file or the main page, ALWAYS fetch from network
-    if (url.pathname.includes('blazor.boot.json') ||
-        url.pathname.includes('service-worker-assets.js') ||
-        url.pathname.endsWith('/')) {
-        return fetch(event.request, { cache: 'no-store' });
+        const request = shouldServeIndexHtml ? 'index.html' : event.request;
+        const cache = await caches.open(cacheName);
+        cachedResponse = await cache.match(request);
     }
 
-    // For everything else (dlls, images), try cache first
-    const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(event.request);
     return cachedResponse || fetch(event.request);
 }
