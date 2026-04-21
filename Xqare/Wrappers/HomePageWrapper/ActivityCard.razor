@@ -1,0 +1,56 @@
+﻿@inject ISnackbar Snackbar
+
+@code {
+    private List<string> Users = new()
+    {
+        "Rahul from Bangalore",
+        "Priya from Hyderabad",
+        "Arjun from Delhi",
+        "Sneha from Mumbai",
+        "Kiran from Chennai"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        while (true)
+        {
+            await Task.Delay(4000);
+
+            var random = new Random();
+            var user = Users[random.Next(Users.Count)];
+
+            ShowActivity(user);
+
+            await Task.Delay(20000);
+        }
+    }
+
+    void ShowActivity(string user)
+    {
+        var parts = user.Split(' ');
+        var initials = $"{parts[0][0]}{parts[0][1].ToString().ToUpper()}";
+
+        Snackbar.Add(@<div class="activity-snackbar">
+                <MudAvatar Variant="Variant.Outlined">@initials</MudAvatar>
+            <div class="content">
+                <div class="title">@user</div>
+                <div class="subtitle">
+                    just joined XQARE!
+                </div>
+            </div>
+
+        </div>
+    , Severity.Normal, config =>
+        {
+            config.ShowCloseIcon = false;
+            config.RequireInteraction = false;
+            config.VisibleStateDuration = 1000;
+            config.DuplicatesBehavior = SnackbarDuplicatesBehavior.Prevent;
+            config.HideIcon = true;
+            
+        });
+
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
+        Snackbar.Configuration.MaxDisplayedSnackbars = 1;
+    }
+}

@@ -1,0 +1,145 @@
+﻿/* ===== HEADER SECTION ===== */
+.features-header {
+    margin-bottom: 50px;
+}
+
+/* Badge */
+.ecosystem-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(245, 180, 0, 0.1);
+    color: #f5b400;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+/* Title */
+::deep .ecosystem-title {
+    font-weight: 700;
+    color: #1c2e40;
+    margin-bottom: 16px;
+}
+
+/* Highlight */
+.highlight {
+    color: #f5b400;
+}
+
+/* Subtitle */
+::deep .ecosystem-subtitle {
+    color: #6b7b8c;
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Space before grid */
+.features-grid {
+    margin-top: 30px;
+}
+
+/* ===== WRAPPER ===== */
+.features-wrapper {
+    padding: 80px 0;
+    background: #f9fbfd;
+}
+
+/* ===== CARD ===== */
+.feature-card {
+    position: relative;
+    background: white;
+    border-radius: 18px;
+    padding: 28px;
+    border: 1px solid rgba(0,0,0,0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== NUMBER ===== */
+.feature-number {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: rgba(245, 180, 0, 0.25);
+    font-weight: 700;
+    font-size: 20px;
+    transition: color 0.3s ease;
+}
+
+/* ===== ICON ===== */
+.feature-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245, 180, 0, 0.1);
+    color: #f5b400;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+/* ===== TITLE ===== */
+.feature-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1c2e40;
+    margin-bottom: 10px;
+}
+
+/* ===== DESC ===== */
+.feature-desc {
+    color: #6b7b8c;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* ===== LINE ===== */
+.feature-line {
+    width: 28px;
+    height: 1.5px;
+    background: #f5b400;
+    border-radius: 2px;
+    margin-top: auto;
+    opacity:0.7;
+    transition: all 0.3s ease;
+}
+
+/* ======================= */
+/* 🔥 HOVER EFFECT (KEY)   */
+/* ======================= */
+
+.feature-card:hover {
+    transform: translateY(-10px) scale(1.01);
+    border-color: rgba(245, 180, 0, 0.25);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(245, 180, 0, 0.15), 0 0 25px rgba(245, 180, 0, 0.15);
+}
+    .feature-card:hover .feature-number {
+        color: rgba(245, 180, 0, 0.6);
+    }
+
+    /* icon glow on hover */
+    .feature-card:hover .feature-icon {
+        background: rgba(245, 180, 0, 0.2);
+        box-shadow: 0 0 0 6px rgba(245, 180, 0, 0.05), 0 10px 25px rgba(245, 180, 0, 0.25);
+    }
+
+    /* line expands */
+    .feature-card:hover .feature-line {
+        width: 52px;
+        height: 2px;
+        opacity: 1;
+    }

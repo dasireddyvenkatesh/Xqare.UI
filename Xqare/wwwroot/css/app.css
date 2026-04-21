@@ -113,3 +113,21 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+
+/*SnackBar*/
+.mud-snackbar {
+    background: linear-gradient(135deg, #243f5a, #1b334b) !important;
+    border-radius: 15px;
+    pointer-events: none;
+    min-width: 190px;
+    border: 1px solid rgba(245, 180, 0, 0.5);
+    max-height: 60px;
+}
+
+.mud-avatar.mud-avatar-medium {
+    color: #f5b400;
+    border: 1px solid rgba(245, 180, 0, 0.5);
+    font-size: 0.75rem;
+
+}

@@ -1,0 +1,78 @@
+﻿<section class="features-wrapper">
+
+    <MudContainer MaxWidth="MaxWidth.Medium">
+
+        <!-- 🔥 ECOSYSTEM HEADER -->
+        <div class="features-header text-center">
+
+            <div class="ecosystem-badge">
+                ✨ Platform Ecosystem
+            </div>
+
+            <MudText Typo="Typo.h3" Class="ecosystem-title">
+                Everything you need to build your career —
+                <span class="highlight">in one platform.</span>
+            </MudText>
+
+            <MudText Typo="Typo.subtitle1" Class="ecosystem-subtitle">
+                From mentorship to real job opportunities, XQARE connects every stage of your professional journey.
+            </MudText>
+
+        </div>
+
+        <!-- 🔽 FEATURES GRID -->
+        <MudGrid Spacing="4" Class="features-grid">
+
+            @foreach (var item in Features.Select((value, index) => new { value, index }))
+            {
+                <MudItem xs="12" sm="6" md="4" Class="d-flex">
+
+                    <div class="feature-card">
+
+                        <!-- Number -->
+                        <div class="feature-number">
+                            @($"{item.index + 1:00}")
+                        </div>
+
+                        <!-- Icon -->
+                        <div class="feature-icon">
+                            <MudIcon Icon="@item.value.Icon" />
+                        </div>
+
+                        <!-- Title -->
+                        <div class="feature-title">
+                            @item.value.Title
+                        </div>
+
+                        <!-- Description -->
+                        <div class="feature-desc">
+                            @item.value.Description
+                        </div>
+
+                        <!-- Bottom line -->
+                        <div class="feature-line"></div>
+
+                    </div>
+
+                </MudItem>
+            }
+
+        </MudGrid>
+
+    </MudContainer>
+
+</section>
+
+@code {
+    private List<FeatureItem> Features = new()
+    {
+        new("Mentorship Network", "Connect with experienced professionals from top tech companies for guidance and career growth.", Icons.Material.Filled.Group),
+        new("Career Community", "Collaborate with ambitious peers, share knowledge, and grow together in a focused professional network.", Icons.Material.Filled.Chat),
+        new("Curated Learning Paths", "Structured learning roadmaps designed by industry experts to accelerate your career.", Icons.Material.Filled.MenuBook),
+        new("Real Job Opportunities", "Discover verified job openings from trusted MNC companies matched to your profile.", Icons.Material.Filled.Work),
+        new("Application Tracking", "Apply for roles directly from XQARE and track the entire hiring process in one place.", Icons.Material.Filled.Assignment),
+        new("Career Growth Insights", "Understand your career progress and identify next opportunities with intelligent analytics.", Icons.Material.Filled.TrendingUp)
+    };
+
+    public record FeatureItem(string Title, string Description, string Icon);
+}

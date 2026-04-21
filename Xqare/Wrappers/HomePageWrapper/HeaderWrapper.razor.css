@@ -1,0 +1,161 @@
+﻿/* ===== AppBar ===== */
+::deep .mud-appbar.header {
+    background: linear-gradient(135deg, #0f2a44, #1b3a57) !important;
+    box-shadow: none !important;
+    padding: 6px 0;
+}
+
+::deep .header.scrolled {
+    background: #1a3856 !important;
+}
+
+/* ===== Container ===== */
+::deep .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ===== Logo ===== */
+::deep .logo {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+/* ===== Desktop Nav ===== */
+::deep .nav-desktop {
+    align-items: center;
+    gap: 20px;
+}
+
+/* ===== Nav Links ===== */
+::deep .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+    ::deep .nav-links a,
+    ::deep .nav-links .mud-typography {
+        color: #dbe6f1 !important;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+        ::deep .nav-links a:hover {
+            color: #f4b400 !important;
+        }
+
+/* ===== Sign Up Button ===== */
+::deep .signup-btn {
+    background-color: #f5b400 !important;
+    color: #000000 !important;
+    border-radius: 24px;
+    padding: 6px 20px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+/* ===== Mobile Login ===== */
+::deep .mobile-login {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+    ::deep .mobile-login:hover {
+        color: #f4b400 !important;
+    }
+    /* ===== Backdrop ===== */
+    .drawer-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1200;
+    }
+
+/* ===== Custom Drawer Panel ===== */
+.custom-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 270px;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f2a44, #1b3a57);
+    z-index: 1300;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex !important;
+    flex-direction: column;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+    .custom-drawer.drawer-open {
+        transform: translateX(0);
+    }
+
+/* ===== Drawer Header ===== */
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.drawer-logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.drawer-close-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+}
+
+    .drawer-close-btn:hover {
+        color: #f5b400;
+    }
+
+/* ===== Drawer Content ===== */
+.drawer-content {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 16px;
+}
+
+    .drawer-content a {
+        color: #dbe6f1;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+        .drawer-content a:hover {
+            color: #f4b400 !important;
+        }
+::deep .drawer-signup {
+    margin-top: 8px !important;
+    width: fit-content !important;
+}
+
+::deep .drawer-content .mud-typography.mud-link {
+    color: #dbe6f1 !important;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+    ::deep .drawer-content .mud-typography.mud-link:hover {
+        color: #f4b400 !important;
+    }
+

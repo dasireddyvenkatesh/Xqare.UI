@@ -1,0 +1,88 @@
+﻿@inject IJSRuntime JS
+
+<section class="header-wrapper">
+    <MudAppBar Elevation="0" Class="@HeaderClass">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="header-container">
+
+            <div class="logo">XQARE</div>
+
+            <!-- DESKTOP NAV: visible on md and above -->
+            <div class="nav-desktop d-none d-md-flex">
+                <div class="nav-links">
+                    <MudLink Href="/">Home</MudLink>
+                    <MudLink Disabled="true" Href="/mentors">Mentors</MudLink>
+                    <MudLink Disabled="true" Href="/community">Community</MudLink>
+                    <MudLink Disabled="true" Href="/jobs">Jobs</MudLink>
+                    <MudLink Href="/contact">Contact</MudLink>
+                    <MudLink Href="/login">Login</MudLink>
+                </div>
+                <MudButton Href="/register" Class="signup-btn">SIGN UP</MudButton>
+            </div>
+
+            <!-- MOBILE NAV: visible below md only -->
+            <div class="nav-mobile d-flex d-md-none align-items-center gap-2">
+                <MudLink Href="/login" Class="mobile-login">Login</MudLink>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                               Color="Color.Inherit"
+                               OnClick="ToggleDrawer" />
+            </div>
+
+        </MudContainer>
+    </MudAppBar>
+</section>
+
+<!-- BACKDROP: only in DOM when drawer is open -->
+@if (_drawerOpen)
+{
+    <div class="drawer-backdrop" @onclick="CloseDrawer"></div>
+}
+
+<!-- DRAWER PANEL -->
+<div class="custom-drawer d-md-none @(_drawerOpen ? "drawer-open" : "")">
+    <div class="drawer-header">
+        <div class="logo drawer-logo">XQARE</div>
+        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                       Color="Color.Inherit"
+                       OnClick="CloseDrawer" />
+    </div>
+
+    <nav class="drawer-content">
+        <MudLink Href="/" OnClick="CloseDrawer">Home</MudLink>
+        <MudLink Disabled="true" Href="/mentors" OnClick="CloseDrawer">Mentors</MudLink>
+        <MudLink Disabled="true" Href="/community" OnClick="CloseDrawer">Community</MudLink>
+        <MudLink Disabled="true" Href="/jobs" OnClick="CloseDrawer">Jobs</MudLink>
+        <MudLink Href="/contact" OnClick="CloseDrawer">Contact</MudLink>
+        <MudButton Href="/register" Class="signup-btn drawer-signup" OnClick="CloseDrawer">SIGN UP</MudButton>
+    </nav>
+</div>
+
+@code {
+    private string HeaderClass = "header";
+    private bool _drawerOpen = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("headerScrollHandler",
+                DotNetObjectReference.Create(this));
+        }
+    }
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private void CloseDrawer()
+    {
+        _drawerOpen = false;
+    }
+
+    [JSInvokable]
+    public void OnScroll(bool isScrolled)
+    {
+        HeaderClass = isScrolled ? "header scrolled" : "header";
+        StateHasChanged();
+    }
+}

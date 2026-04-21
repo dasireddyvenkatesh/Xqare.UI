@@ -8,24 +8,27 @@
     DateTime offerEnd = DateTime.UtcNow.AddHours(6);
 }
 
-<AuthWrapper />
+
+<HeaderWrapper/>
+<HeroContentUpdated/>
+<FeaturesWrapper/>
+<ActivityCard />
+<HowItWorksWrapper/>
+<FAQWrapper/>
+<Footer/>
+
+
+
+@* <AuthWrapper /> 
 <PromoBarWrapper IsExpired="true" OfferEndsAt="@offerEnd"
                  SlotsLeft="50"
                  RegisterUrl="/register" />
 <HeroContentWrapper ShowPromoChip="false" />
 <WhySection />
 <CareerGrowthPlatformWrapper />
-
-
-<JobOpportunitiesWrapper />
-
-<HowItWorksWrapper />
-
+<JobOpportunitiesWrapper /> 
 <LimitedOfferWrapper isShow="false" TargetDate="@DateTime.Now.AddDays(7)" />
-
 <CareerGrowthProofWrapper isShow="false" />
-
-
 <AnimateOnVisible>
 
     <CommunityStatsWrapper isShow="false" Mentors="500"
@@ -34,11 +37,9 @@
                            SuccessStories="250" />
 
 </AnimateOnVisible>
+<MentorsWrapper isShow="false" /> *@
 
-<MentorsWrapper isShow="false" />
 
-<FAQWrapper />
-<Footer/>
 
 
 
