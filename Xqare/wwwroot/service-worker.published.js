@@ -1,6 +1,3 @@
-// Caution! Be sure you understand the caveats before publishing an application with
-// offline support. See https://aka.ms/blazor-offline-considerations
-
 self.importScripts('./service-worker-assets.js');
 self.addEventListener('install', event => event.waitUntil(onInstall(event)));
 self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
@@ -17,9 +14,7 @@ const manifestUrlList = self.assetsManifest.assets.map(asset => new URL(asset.ur
 
 async function onInstall(event) {
     console.info('Service worker: Install');
-    // Force the new service worker to activate immediately without waiting
     self.skipWaiting();
-
     const assetsRequests = self.assetsManifest.assets
         .filter(asset => offlineAssetsInclude.some(pattern => pattern.test(asset.url)))
         .filter(asset => !offlineAssetsExclude.some(pattern => pattern.test(asset.url)))
@@ -29,10 +24,7 @@ async function onInstall(event) {
 
 async function onActivate(event) {
     console.info('Service worker: Activate');
-    // Claim all clients immediately so new SW takes effect without reload
     await clients.claim();
-
-    // Delete ALL old caches with our prefix (original only deleted non-matching)
     const cacheKeys = await caches.keys();
     await Promise.all(cacheKeys
         .filter(key => key.startsWith(cacheNamePrefix) && key !== cacheName)
@@ -49,6 +41,5 @@ async function onFetch(event) {
         const cache = await caches.open(cacheName);
         cachedResponse = await cache.match(request);
     }
-
     return cachedResponse || fetch(event.request);
 }

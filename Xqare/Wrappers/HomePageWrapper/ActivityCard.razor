@@ -11,12 +11,16 @@
         "Kiran from Chennai"
     };
 
+    private bool _isActive;
+
     protected override async Task OnInitializedAsync()
     {
-        if (!IsHomePage())
+        _isActive = IsHomePage();
+        
+        if (!_isActive)
             return;
 
-        while (true)
+        while (_isActive)
         {
             await Task.Delay(4000);
 
