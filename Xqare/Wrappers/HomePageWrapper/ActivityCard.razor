@@ -11,12 +11,13 @@
         "Kiran from Chennai"
     };
 
+    private readonly Random _random = new();
     private bool _isActive;
 
     protected override async Task OnInitializedAsync()
     {
         _isActive = IsHomePage();
-        
+
         if (!_isActive)
             return;
 
@@ -24,13 +25,27 @@
         {
             await Task.Delay(4000);
 
-            var random = new Random();
-            var user = Users[random.Next(Users.Count)];
+            var user = Users[_random.Next(Users.Count)];
 
             ShowActivity(user);
 
             await Task.Delay(20000);
         }
+    }
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += HandleLocationChanged;
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        _isActive = IsHomePage();
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= HandleLocationChanged;
     }
 
     void ShowActivity(string user)
