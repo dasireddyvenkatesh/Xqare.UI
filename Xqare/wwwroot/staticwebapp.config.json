@@ -1,33 +1,43 @@
 {
   "routes": [
     {
-      "route": "/service-worker.js",
+      "route": "/index.html",
       "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate"
-      }
-    },
-    {
-      "route": "/service-worker-assets.js",
-      "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate"
+        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0"
       }
     },
     {
       "route": "/blazor.boot.json",
       "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate"
+        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0"
       }
     },
     {
-      "route": "/index.html",
+      "route": "/service-worker.js",
       "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate"
+        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0"
+      }
+    },
+    {
+      "route": "/service-worker-assets.js",
+      "headers": {
+        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0"
       }
     },
     {
       "route": "/manifest.webmanifest",
       "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate"
+        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0"
       }
     },
     {
@@ -43,13 +53,7 @@
       }
     },
     {
-      "route": "/*.js",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      }
-    },
-    {
-      "route": "/*.css",
+      "route": "/_framework/*",
       "headers": {
         "Cache-Control": "public, max-age=31536000, immutable"
       }
@@ -68,6 +72,9 @@
       "/js/*",
       "*.{wasm,dll,js,css,png,jpg,ico,webmanifest}"
     ]
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff"
   },
   "mimeTypes": {
     ".wasm": "application/wasm",
