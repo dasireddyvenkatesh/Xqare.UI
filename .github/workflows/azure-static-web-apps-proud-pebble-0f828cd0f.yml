@@ -1,4 +1,5 @@
 name: Azure Static Web Apps CI/CD
+
 on:
   push:
     branches:
@@ -18,47 +19,19 @@ jobs:
         with:
           submodules: true
           lfs: false
-
-      # Install .NET 10
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      # Build and publish the Blazor WASM app
-      - name: Publish Blazor WASM
-        run: dotnet publish ./Xqare/Xqare.csproj -c Release -o ./release
-
-      # Inject unique deploy timestamp into index.html
-      # This busts the browser HTTP cache for the shell page on every deploy
-      - name: Inject deploy version into index.html
-        run: |
-          TIMESTAMP=$(date +%s)
-          echo "Deploy version: $TIMESTAMP"
-          sed -i "s|</head>|<meta name=\"deploy-version\" content=\"$TIMESTAMP\" /></head>|" ./release/wwwroot/index.html
-
-      # Verify staticwebapp.config.json made it into publish output
-      - name: Verify staticwebapp.config.json exists
-        run: |
-          if [ ! -f "./release/wwwroot/staticwebapp.config.json" ]; then
-            echo "ERROR: staticwebapp.config.json not found in publish output!"
-            exit 1
-          fi
-          echo "staticwebapp.config.json found OK"
-          cat ./release/wwwroot/staticwebapp.config.json
-
-      # Deploy to Azure Static Web Apps from the published output
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROUD_PEBBLE_0F828CD0F }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
-          app_location: "./release/wwwroot"   # ← point to published output directly
-          api_location: ""                     # ← empty since no API build needed now
-          output_location: ""                  # ← empty since app is already built
-          skip_app_build: true                 # ← CRITICAL: tells SWA not to rebuild
+          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
+          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
+          app_location: "./Xqare" # App source code path
+          api_location: "Api" # Api source code path - optional
+          output_location: "wwwroot" # Built app content directory - optional
+          ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
