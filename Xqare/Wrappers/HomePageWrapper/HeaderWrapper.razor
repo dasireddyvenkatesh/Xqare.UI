@@ -7,7 +7,7 @@
             <div class="logo">XQARE</div>
 
             <!-- DESKTOP NAV: visible on md and above -->
-            <div class="nav-desktop d-none d-md-flex">
+            <div class="nav-desktop d-none d-lg-flex">
                 <div class="nav-links">
                     <MudLink Href="/">Home</MudLink>
                     <MudLink Disabled="true" Href="/mentors">Mentors</MudLink>
@@ -20,7 +20,7 @@
             </div>
 
             <!-- MOBILE NAV: visible below md only -->
-            <div class="nav-mobile d-flex d-md-none align-items-center gap-2">
+            <div class="nav-mobile d-flex d-lg-none align-items-center gap-2">
                 <MudLink Href="/login" Class="mobile-login">Login</MudLink>
                 <MudIconButton Icon="@Icons.Material.Filled.Menu"
                                Color="Color.Inherit"
@@ -34,11 +34,11 @@
 <!-- BACKDROP: only in DOM when drawer is open -->
 @if (_drawerOpen)
 {
-    <div class="drawer-backdrop d-md-none" @onclick="CloseDrawer"></div>
+    <div class="drawer-backdrop d-lg-none" @onclick="CloseDrawer"></div>
 }
 
 <!-- DRAWER PANEL -->
-<div class="custom-drawer d-md-none @(_drawerOpen ? "drawer-open" : "")">
+<div class="custom-drawer d-lg-none @(_drawerOpen ? "drawer-open" : "")">
     <div class="drawer-header">
         <div class="logo drawer-logo">XQARE</div>
         <MudIconButton Icon="@Icons.Material.Filled.Close"
