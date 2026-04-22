@@ -71,7 +71,7 @@
 
 /* Title */
 ::deep .hero-title {
-    font-size: 64px;
+    font-size: 75px;
     font-weight: 800;
     margin-bottom: 20px;
 }
@@ -98,8 +98,8 @@
 
 /* Primary */
 ::deep .primary-btn {
-    background: #f5b400 !important;
-    color: black !important;
+    background: #ff9800 !important;
+    color: #ffffff !important;
     border-radius: 28px;
     padding: 10px 26px;
     font-weight: 600;

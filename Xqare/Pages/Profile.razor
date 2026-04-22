@@ -1,0 +1,159 @@
+﻿@* @page "/profile"
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.Profile
+@inject IProfileService ProfileService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
+
+    @if (IsLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else
+    {
+        <MudGrid>
+
+            <!-- Profile Info -->
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-5 profile-card">
+
+                    <MudText Typo="Typo.h6">Profile Information</MudText>
+
+                    @ProfileRow("Full Name", Profile.FullName, () => EditField("Full Name", Profile.FullName, "FullName"))
+                    @ProfileRow("Email", Profile.Email, null)
+                    @ProfileRow("Phone", Profile.Phone, () => EditField("Phone", Profile.Phone, "Phone"))
+                    @ProfileRow("Bio", Profile.Bio, () => EditField("Bio", Profile.Bio, "Bio"))
+
+                </MudPaper>
+            </MudItem>
+
+            <!-- Security -->
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-5 profile-card">
+
+                    <MudText Typo="Typo.h6">Security</MudText>
+
+                    <div class="setting-row">
+                        <div>
+                            <div class="title">Password</div>
+                            <div class="subtitle">
+                                @(Profile.HasPassword ? "Change your password" : "Set password for your account")
+                            </div>
+                        </div>
+
+                        <MudButton Color="Color.Warning" OnClick="OpenPasswordDialog">
+                            @(Profile.HasPassword ? "Update" : "Set Password")
+                        </MudButton>
+                    </div>
+
+                </MudPaper>
+            </MudItem>
+
+        </MudGrid>
+    }
+
+</MudContainer>
+
+@code {
+    private UserProfileDto Profile = new();
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProfile();
+    }
+
+    private async Task LoadProfile()
+    {
+        try
+        {
+            Profile = await ProfileService.GetProfileAsync();
+        }
+        catch
+        {
+            Snackbar.Add("Failed to load profile", Severity.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private RenderFragment ProfileRow(string label, string value, Func<Task> onEdit) => builder =>
+    {
+        builder.AddMarkupContent(0, $@"
+        <div class='setting-row'>
+            <div>
+                <div class='title'>{label}</div>
+                <div class='subtitle'>{value}</div>
+            </div>
+        </div>
+        ");
+
+        if (onEdit != null)
+        {
+            builder.OpenComponent<MudButton>(1);
+            builder.AddAttribute(2, "OnClick", EventCallback.Factory.Create(this, onEdit));
+            builder.AddAttribute(3, "ChildContent", (RenderFragment)(b => b.AddContent(0, "Edit")));
+            builder.CloseComponent();
+        }
+    };
+
+    private async Task EditField(string label, string value, string field)
+    {
+        var parameters = new DialogParameters
+        {
+            ["Label"] = label,
+            ["Value"] = value
+        };
+
+        var dialog = DialogService.Show<EditFieldDialog>("Edit " + label, parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var newValue = result.Data.ToString();
+
+            var request = new UpdateProfileRequest();
+
+            switch (field)
+            {
+                case "FullName": request.FullName = newValue; break;
+                case "Phone": request.Phone = newValue; break;
+                case "Bio": request.Bio = newValue; break;
+            }
+
+            await ProfileService.UpdateProfileAsync(request);
+            await LoadProfile();
+
+            Snackbar.Add($"{label} updated", Severity.Success);
+        }
+    }
+
+    private async Task OpenPasswordDialog()
+    {
+        var dialog = DialogService.Show<PasswordDialog>("Password");
+
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                if (!Profile.HasPassword)
+                    await ProfileService.SetPasswordAsync((SetPasswordRequest)result.Data);
+                else
+                    await ProfileService.ChangePasswordAsync((ChangePasswordRequest)result.Data);
+
+                Snackbar.Add("Password updated", Severity.Success);
+                Profile.HasPassword = true;
+            }
+            catch
+            {
+                Snackbar.Add("Failed to update password", Severity.Error);
+            }
+        }
+    }
+} *@
