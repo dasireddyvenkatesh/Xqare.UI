@@ -12,7 +12,7 @@
             <a href="@GetSectionHref(section.Id)"
                class="@GetLinkClass(section.Id)"
                data-section-id="@section.Id"
-               @onclick="@(() => OnSectionSelected.InvokeAsync(section.Id))"
+               @onclick="() => OnSectionSelected.InvokeAsync(section.Id)"
                @onclick:preventDefault="true">
                 @section.Title
             </a>
