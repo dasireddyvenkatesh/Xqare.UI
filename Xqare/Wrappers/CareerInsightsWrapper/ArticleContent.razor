@@ -1,12 +1,14 @@
 ﻿@using Xqare.Models.Carrer_Insights_Detail
 
 <main class="article-body">
-    @foreach (var section in Sections)
+    @foreach (var sectionItem in Sections)
     {
-        <section id="@section.Id" data-section-id="@section.Id" class="article-section">
-            <MudText Typo="Typo.h2" Class="article-section__title">@section.Title</MudText>
+        <section id="@sectionItem.Id" data-section-id="@sectionItem.Id" class="article-section">
+            <MudText Typo="Typo.h2" Class="article-section__title">
+                @sectionItem.Title
+            </MudText>
 
-            @foreach (var block in section.Blocks)
+            @foreach (var block in sectionItem.Blocks)
             {
                 <ArticleContentBlock Block="block" />
             }
