@@ -1,0 +1,64 @@
+﻿@using Xqare.Models.Carrer_Insights
+
+<section class="featured-shell">
+    <div class="featured-shell__topline">
+        <div class="featured-shell__label">
+            <span></span>
+            Editor's Pick
+        </div>
+        <div class="featured-shell__note">
+            <MudIcon Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" />
+            Featured this week
+        </div>
+    </div>
+
+    <MudPaper Elevation="0" Class="featured-card" @onclick="@(() => OnOpen.InvokeAsync(Article))">
+        <div class="featured-card__media">
+            <img src="@Article.ImageUrl" alt="@Article.Title" />
+            <div class="featured-card__badges">
+                @if (Article.IsTrending)
+                {
+                    <span class="status-badge status-badge--hot">
+                        <MudIcon Icon="@Icons.Material.Outlined.TrendingUp" Size="Size.Small" />
+                        Trending
+                    </span>
+                }
+                <span class="status-badge">
+                    <MudIcon Icon="@Icons.Material.Outlined.AutoAwesome" Size="Size.Small" />
+                    @Article.CategoryName
+                </span>
+            </div>
+        </div>
+
+        <div class="featured-card__body">
+            <div class="featured-card__accent"></div>
+            <div class="featured-card__eyebrow">
+                <MudIcon Icon="@Icons.Material.Outlined.Article" Size="Size.Small" />
+                Featured Article
+            </div>
+            <MudText Typo="Typo.h2" Class="featured-card__title">@Article.Title</MudText>
+            <MudText Typo="Typo.body1" Class="featured-card__summary">@Article.Summary</MudText>
+
+            <ArticleMeta Article="Article" Featured="true" />
+
+            <div class="featured-card__footer">
+                <MudButton Variant="Variant.Filled"
+                           EndIcon="@Icons.Material.Outlined.ArrowForward"
+                           Class="featured-card__action"
+                           OnClick="@(() => OnOpen.InvokeAsync(Article))">
+                    Read Article
+                </MudButton>
+
+                @if (Article.IsNew)
+                {
+                    <span class="new-dot">New insight</span>
+                }
+            </div>
+        </div>
+    </MudPaper>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public CareerInsightArticle Article { get; set; } = new();
+    [Parameter] public EventCallback<CareerInsightArticle> OnOpen { get; set; }
+}

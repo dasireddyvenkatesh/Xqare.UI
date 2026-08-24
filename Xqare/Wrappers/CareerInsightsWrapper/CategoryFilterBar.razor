@@ -1,0 +1,25 @@
+﻿@using Xqare.Models.Carrer_Insights
+<nav class="career-filters" aria-label="Career insights filters">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="career-filters__inner">
+        @foreach (var category in Categories)
+        {
+            <MudButton Variant="Variant.Filled"
+                       Size="Size.Small"
+                       Class="@GetButtonClass(category.Id)"
+                       OnClick="@(() => SelectedCategoryIdChanged.InvokeAsync(category.Id))">
+                @category.Name
+            </MudButton>
+        }
+    </MudContainer>
+</nav>
+
+@code {
+    [Parameter] public IReadOnlyList<CareerInsightCategory> Categories { get; set; } = [];
+    [Parameter] public string? SelectedCategoryId { get; set; } = "all";
+    [Parameter] public EventCallback<string> SelectedCategoryIdChanged { get; set; }
+
+    private string GetButtonClass(string categoryId) =>
+        categoryId == (string.IsNullOrWhiteSpace(SelectedCategoryId) ? "all" : SelectedCategoryId)
+            ? "career-filter-pill career-filter-pill--active"
+            : "career-filter-pill";
+}

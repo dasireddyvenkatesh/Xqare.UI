@@ -1,0 +1,36 @@
+﻿@using Xqare.Models.Carrer_Insights_Detail
+@inject NavigationManager Navigation
+
+<MudPaper Elevation="0" Class="side-card side-card--toc">
+    <div class="side-card__title side-card__title--toc">
+        <MudIcon Icon="@Icons.Material.Outlined.MenuBook" Size="Size.Small" />
+        In This Article
+    </div>
+    <nav>
+        @foreach (var section in Sections)
+        {
+            <a href="@GetSectionHref(section.Id)"
+               class="@GetLinkClass(section.Id)"
+               data-section-id="@section.Id"
+               @onclick="@(() => OnSectionSelected.InvokeAsync(section.Id))"
+               @onclick:preventDefault="true">
+                @section.Title
+            </a>
+        }
+    </nav>
+</MudPaper>
+
+@code {
+    [Parameter] public IReadOnlyList<CareerInsightSection> Sections { get; set; } = [];
+    [Parameter] public string ActiveSectionId { get; set; } = "";
+    [Parameter] public EventCallback<string> OnSectionSelected { get; set; }
+
+    private string GetLinkClass(string sectionId) =>
+        sectionId == ActiveSectionId ? "toc-link toc-link--active" : "toc-link";
+
+    private string GetSectionHref(string sectionId)
+    {
+        var path = new Uri(Navigation.Uri).PathAndQuery.Split('#')[0];
+        return $"{path}#{sectionId}";
+    }
+}

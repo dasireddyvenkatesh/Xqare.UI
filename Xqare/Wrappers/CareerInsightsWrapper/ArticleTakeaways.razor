@@ -1,0 +1,19 @@
+﻿<MudPaper Elevation="0" Class="side-card side-card--takeaways">
+    <div class="side-card__title">
+        <MudIcon Icon="@Icons.Material.Outlined.Lightbulb" Size="Size.Small" />
+        Key Takeaways
+    </div>
+    <ul>
+        @foreach (var item in Items)
+        {
+            <li>
+                <MudIcon Icon="@Icons.Material.Outlined.RadioButtonUnchecked" Size="Size.Small" />
+                <span>@item</span>
+            </li>
+        }
+    </ul>
+</MudPaper>
+
+@code {
+    [Parameter] public IReadOnlyList<string> Items { get; set; } = [];
+}

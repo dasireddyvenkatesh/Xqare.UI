@@ -1,0 +1,24 @@
+﻿@using Xqare.Models.Carrer_Insights
+
+<header class="career-hero">
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="career-hero__inner">
+        <MudText Typo="Typo.h1" Class="career-hero__title">@Model.BrandName</MudText>
+        <MudText Typo="Typo.body1" Class="career-hero__subtitle">@Model.Subtitle</MudText>
+        <MudTextField T="string"
+                      Value="SearchText"
+                      ValueChanged="SearchTextChanged"
+                      Placeholder="@Model.SearchPlaceholder"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.None"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Outlined.Search"
+                      Immediate="true"
+                      Class="career-hero__search" />
+    </MudContainer>
+</header>
+
+@code {
+    [Parameter, EditorRequired] public CareerInsightPageModel Model { get; set; } = new();
+    [Parameter] public string SearchText { get; set; } = "";
+    [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
+}

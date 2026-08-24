@@ -1,0 +1,21 @@
+﻿@using Xqare.Models.Carrer_Insights
+<div class="article-meta @(Featured ? "article-meta--featured" : null)">
+    @if (Featured)
+    {
+        <span class="article-avatar">@Article.Author.AvatarText</span>
+        <span class="article-meta__author">@Article.Author.Name</span>
+    }
+    else
+    {
+        <MudIcon Icon="@Icons.Material.Outlined.Person" Size="Size.Small" />
+        <span>@Article.Author.Name</span>
+    }
+    <span>@Article.PublishedOn.ToString("MMMM d, yyyy")</span>
+    <MudIcon Icon="@Icons.Material.Outlined.Schedule" Size="Size.Small" />
+    <span>@Article.ReadMinutes min read</span>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public CareerInsightArticle Article { get; set; } = new();
+    [Parameter] public bool Featured { get; set; }
+}

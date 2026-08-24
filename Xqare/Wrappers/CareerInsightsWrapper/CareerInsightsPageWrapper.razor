@@ -1,0 +1,101 @@
+﻿@using Xqare.Models.Carrer_Insights
+
+<section class="career-page">
+    <CareerInsightsHero Model="Model"
+                        SearchText="@EffectiveSearchText"
+                        SearchTextChanged="HandleSearchChanged" />
+
+    <CategoryFilterBar Categories="Model.Categories"
+                       SelectedCategoryId="@EffectiveCategoryId"
+                       SelectedCategoryIdChanged="HandleCategoryChanged" />
+
+    <MudContainer MaxWidth="MaxWidth.Large" Class="career-content">
+        @if (Model.FeaturedArticle is not null && ShouldShow(Model.FeaturedArticle))
+        {
+            <FeaturedInsightCard Article="Model.FeaturedArticle" OnOpen="OnArticleSelected" />
+        }
+
+        <InsightGrid Articles="FilteredArticles" OnOpen="OnArticleSelected" />
+    </MudContainer>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public CareerInsightPageModel Model { get; set; } = new();
+    [Parameter] public string? SelectedCategoryId { get; set; } = "all";
+    [Parameter] public EventCallback<string> SelectedCategoryIdChanged { get; set; }
+    [Parameter] public string? SearchText { get; set; } = "";
+    [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
+    [Parameter] public EventCallback<CareerInsightArticle> OnArticleSelected { get; set; }
+
+    private string _localCategoryId = "all";
+    private string _localSearchText = "";
+
+    private string EffectiveCategoryId
+    {
+        get
+        {
+            var requestedCategoryId = string.IsNullOrWhiteSpace(SelectedCategoryId)
+                ? _localCategoryId
+                : SelectedCategoryId;
+
+            if (string.Equals(requestedCategoryId, "all", StringComparison.OrdinalIgnoreCase))
+            {
+                return "all";
+            }
+
+            return Model.Categories.Any(category => category.Id == requestedCategoryId)
+                ? requestedCategoryId!
+                : "all";
+        }
+    }
+
+    private string EffectiveSearchText => SearchText ?? _localSearchText;
+
+    private IEnumerable<CareerInsightArticle> FilteredArticles =>
+        Model.Articles
+            .Where(ShouldShow)
+            .Where(article => Model.FeaturedArticle?.Id != article.Id);
+
+    private async Task HandleCategoryChanged(string categoryId)
+    {
+        _localCategoryId = string.IsNullOrWhiteSpace(categoryId) ? "all" : categoryId;
+
+        if (SelectedCategoryIdChanged.HasDelegate)
+        {
+            await SelectedCategoryIdChanged.InvokeAsync(_localCategoryId);
+        }
+    }
+
+    private async Task HandleSearchChanged(string searchText)
+    {
+        _localSearchText = searchText ?? "";
+
+        if (SearchTextChanged.HasDelegate)
+        {
+            await SearchTextChanged.InvokeAsync(_localSearchText);
+        }
+    }
+
+    private bool ShouldShow(CareerInsightArticle article)
+    {
+        var categoryId = EffectiveCategoryId;
+        var categoryMatches = categoryId == "all" || article.CategoryId == categoryId;
+        var query = EffectiveSearchText.Trim();
+
+        if (!categoryMatches)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return true;
+        }
+
+        return article.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || article.Summary.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || article.CategoryName.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || article.Author.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || article.Tags.Any(tag => tag.Contains(query, StringComparison.OrdinalIgnoreCase));
+    }
+}

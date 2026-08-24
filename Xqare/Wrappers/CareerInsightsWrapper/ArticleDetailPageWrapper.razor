@@ -1,0 +1,92 @@
+﻿@using Xqare.Models.Carrer_Insights
+@using Xqare.Models.Carrer_Insights_Detail
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+
+<article class="article-detail">
+    <ArticleDetailHero Model="Model" />
+
+    <MudContainer MaxWidth="MaxWidth.Large" Class="article-detail__shell">
+        <aside class="article-sidebar">
+            <ArticleTakeaways Items="Model.KeyTakeaways" />
+            <ArticleTableOfContents Sections="Model.Sections"
+                                    ActiveSectionId="_activeSectionId"
+                                    OnSectionSelected="ScrollToSection" />
+        </aside>
+
+        <ArticleContent Sections="Model.Sections" CallToAction="Model.CallToAction" />
+    </MudContainer>
+
+    <ContinueReading Articles="Model.ContinueReading" OnOpen="OnArticleSelected" />
+</article>
+
+@code {
+    [Parameter, EditorRequired] public CareerInsightDetailModel Model { get; set; } = new();
+    [Parameter] public EventCallback<CareerInsightArticle> OnArticleSelected { get; set; }
+
+    private DotNetObjectReference<ArticleDetailPageWrapper>? _dotNetReference;
+    private string _articleId = "";
+    private string _activeSectionId = "";
+    private bool _needsSpyRegistration = true;
+
+    protected override void OnParametersSet()
+    {
+        if (_articleId == Model.Article.Id)
+        {
+            return;
+        }
+
+        _articleId = Model.Article.Id;
+        _activeSectionId = Model.Sections.FirstOrDefault()?.Id ?? "";
+        _needsSpyRegistration = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if ((!firstRender && !_needsSpyRegistration) || Model.Sections.Count == 0)
+        {
+            return;
+        }
+
+        _dotNetReference ??= DotNetObjectReference.Create(this);
+        await Js.InvokeVoidAsync("careerInsightsScrollSpy.register", _dotNetReference, ".article-section", "data-section-id");
+        _needsSpyRegistration = false;
+    }
+
+    [JSInvokable]
+    public Task SetActiveSection(string sectionId)
+    {
+        if (!string.IsNullOrWhiteSpace(sectionId) && sectionId != _activeSectionId)
+        {
+            _activeSectionId = sectionId;
+            StateHasChanged();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task ScrollToSection(string sectionId)
+    {
+        if (string.IsNullOrWhiteSpace(sectionId))
+        {
+            return;
+        }
+
+        _activeSectionId = sectionId;
+        await Js.InvokeVoidAsync("careerInsightsScrollSpy.scrollToSection", sectionId);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await Js.InvokeVoidAsync("careerInsightsScrollSpy.dispose");
+        }
+        catch
+        {
+            // The JS runtime may already be gone during app shutdown.
+        }
+
+        _dotNetReference?.Dispose();
+    }
+}

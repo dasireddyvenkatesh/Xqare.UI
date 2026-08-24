@@ -1,0 +1,31 @@
+﻿@using Xqare.Models.Carrer_Insights_Detail
+<header class="article-hero" style="background-image: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.94) 72%, #fff 100%), url('@Model.HeroImageUrl');">
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="article-hero__inner">
+        <div class="article-hero__chips">
+            <MudButton Href="/career-insights"
+                       Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Outlined.ArrowBack"
+                       Class="article-back-button">
+                @Model.BackText
+            </MudButton>
+            <span class="article-hero__category">@Model.Article.CategoryName</span>
+        </div>
+
+        <MudText Typo="Typo.h1" Class="article-hero__title">@Model.Article.Title</MudText>
+    </MudContainer>
+</header>
+
+<section class="article-meta-bar">
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="article-meta-bar__inner">
+        <ArticleMeta Article="Model.Article" />
+        <div class="article-share-icons">
+            <MudIconButton Icon="@Icons.Material.Outlined.Share" Size="Size.Small" Class="article-icon-button" />
+            <MudIconButton Icon="@Icons.Custom.Brands.LinkedIn" Size="Size.Small" Class="article-icon-button" />
+            <MudIconButton Icon="@Icons.Custom.Brands.Twitter" Size="Size.Small" Class="article-icon-button" />
+        </div>
+    </MudContainer>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public CareerInsightDetailModel Model { get; set; } = new();
+}

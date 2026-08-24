@@ -1,0 +1,28 @@
+﻿@page "/blog/{ArticleId}"
+@using Xqare.Models.Carrer_Insights
+@using Xqare.Models.Carrer_Insights_Detail
+@using Xqare.Wrappers.CareerInsightsWrapper
+
+<PageTitle>@_model.Article.Title</PageTitle>
+
+<div class="career-insight-detail-page">
+    <ArticleDetailPageWrapper Model="_model" OnArticleSelected="OpenArticle" />
+</div>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Parameter] public string ArticleId { get; set; } = "";
+
+    private CareerInsightDetailModel _model = new();
+
+    protected override void OnParametersSet()
+    {
+        _model = CareerInsightDetailSeed.Build(ArticleId);
+    }
+
+    private Task OpenArticle(CareerInsightArticle article)
+    {
+        Navigation.NavigateTo($"/blog/{article.Id}");
+        return Task.CompletedTask;
+    }
+}

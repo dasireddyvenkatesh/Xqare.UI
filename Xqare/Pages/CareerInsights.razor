@@ -1,0 +1,42 @@
+﻿@page "/career-insights"
+@using Xqare.Models.Carrer_Insights
+@using Xqare.Wrappers.CareerInsightsWrapper
+
+<PageTitle>XQARE Career Insights</PageTitle>
+
+<div class="career-insights-page">
+    <CareerInsightsPageWrapper Model="_model"
+                               SelectedCategoryId="@_selectedCategoryId"
+                               SelectedCategoryIdChanged="SetCategory"
+                               SearchText="@_searchText"
+                               SearchTextChanged="SetSearchText"
+                               OnArticleSelected="OpenArticle" />
+</div>
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private string _selectedCategoryId = "all";
+    private string _searchText = "";
+    private CareerInsightArticle? _selectedArticle;
+
+    private readonly CareerInsightPageModel _model = CareerInsightSeed.Build();
+
+    private Task SetCategory(string categoryId)
+    {
+        _selectedCategoryId = categoryId;
+        return Task.CompletedTask;
+    }
+
+    private Task SetSearchText(string? searchText)
+    {
+        _searchText = searchText ?? "";
+        return Task.CompletedTask;
+    }
+
+    private Task OpenArticle(CareerInsightArticle article)
+    {
+        _selectedArticle = article;
+        Navigation.NavigateTo($"/blog/{article.Id}");
+        return Task.CompletedTask;
+    }
+}

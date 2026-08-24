@@ -1,0 +1,18 @@
+﻿@using Xqare.Models.Carrer_Insights
+<MudCard Elevation="0" Class="insight-card" @onclick="@(() => OnOpen.InvokeAsync(Article))">
+    <div class="insight-card__image">
+        <img src="@Article.ImageUrl" alt="@Article.Title" />
+    </div>
+
+    <MudCardContent Class="insight-card__content">
+        <span class="category-pill">@Article.CategoryName</span>
+        <MudText Typo="Typo.h6" Class="insight-card__title">@Article.Title</MudText>
+        <MudText Typo="Typo.body2" Class="insight-card__summary">@Article.Summary</MudText>
+        <ArticleMeta Article="Article" />
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired] public CareerInsightArticle Article { get; set; } = new();
+    [Parameter] public EventCallback<CareerInsightArticle> OnOpen { get; set; }
+}

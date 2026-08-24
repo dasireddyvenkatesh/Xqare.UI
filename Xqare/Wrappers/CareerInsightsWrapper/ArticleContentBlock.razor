@@ -1,0 +1,49 @@
+﻿@using Xqare.Models.Carrer_Insights_Detail
+@switch (Block.Type)
+{
+    case CareerInsightBlockType.Paragraph:
+        <MudText Typo="Typo.body1" Class="article-paragraph">@Block.Text</MudText>
+        break;
+    case CareerInsightBlockType.BulletList:
+        <div class="article-block">
+            @if (!string.IsNullOrWhiteSpace(Block.Heading))
+            {
+                <h3>@Block.Heading</h3>
+            }
+            <ul class="article-list article-list--chevron">
+                @foreach (var item in Block.Items)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        </div>
+        break;
+    case CareerInsightBlockType.CheckList:
+        <ul class="article-list article-list--check">
+            @foreach (var item in Block.Items)
+            {
+                <li>@item</li>
+            }
+        </ul>
+        break;
+    case CareerInsightBlockType.NumberedSignals:
+        <ol class="article-signals">
+            @for (var index = 0; index < Block.Signals.Count; index++)
+            {
+                var signal = Block.Signals[index];
+                <li>
+                    <span>@(index + 1)</span>
+                    <strong>@signal.Label</strong>
+                    <em>@signal.Description</em>
+                </li>
+            }
+        </ol>
+        break;
+    case CareerInsightBlockType.Quote:
+        <blockquote class="article-quote">@Block.Text</blockquote>
+        break;
+}
+
+@code {
+    [Parameter, EditorRequired] public CareerInsightContentBlock Block { get; set; } = new();
+}

@@ -1,0 +1,25 @@
+﻿@using Xqare.Models.Carrer_Insights
+@if (Articles.Any())
+{
+    <MudGrid Class="insight-grid" Spacing="4">
+        @foreach (var article in Articles)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <InsightCard Article="article" OnOpen="OnOpen" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+else
+{
+    <MudPaper Elevation="0" Class="empty-state">
+        <MudIcon Icon="@Icons.Material.Outlined.SearchOff" />
+        <MudText Typo="Typo.h6">No insights found</MudText>
+        <MudText Typo="Typo.body2">Try another search term or category.</MudText>
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public IEnumerable<CareerInsightArticle> Articles { get; set; } = [];
+    [Parameter] public EventCallback<CareerInsightArticle> OnOpen { get; set; }
+}

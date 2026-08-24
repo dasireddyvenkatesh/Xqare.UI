@@ -1,0 +1,28 @@
+﻿@using Xqare.Models.Carrer_Insights
+<section class="continue-reading">
+    <MudContainer MaxWidth="MaxWidth.Medium">
+        <MudText Typo="Typo.h2" Class="continue-reading__title">Continue Reading</MudText>
+        <MudGrid Spacing="4">
+            @foreach (var article in Articles)
+            {
+                <MudItem xs="12" sm="4">
+                    <MudCard Elevation="0" Class="continue-card" @onclick="@(() => OnOpen.InvokeAsync(article))">
+                        <div class="continue-card__image">
+                            <img src="@article.ImageUrl" alt="@article.Title" />
+                        </div>
+                        <MudCardContent>
+                            <span class="category-pill">@article.CategoryName</span>
+                            <MudText Typo="Typo.h6">@article.Title</MudText>
+                            <div>@article.Author.Name <span>@article.ReadMinutes min read</span></div>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudContainer>
+</section>
+
+@code {
+    [Parameter] public IReadOnlyList<CareerInsightArticle> Articles { get; set; } = [];
+    [Parameter] public EventCallback<CareerInsightArticle> OnOpen { get; set; }
+}

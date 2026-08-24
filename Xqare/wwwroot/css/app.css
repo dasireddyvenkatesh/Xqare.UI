@@ -131,3 +131,7 @@ code {
     font-size: 0.75rem;
 
 }
+
+.mud-input-root {
+    padding-left: 10px !important;
+}
