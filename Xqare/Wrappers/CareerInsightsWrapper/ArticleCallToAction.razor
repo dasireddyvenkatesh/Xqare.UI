@@ -1,0 +1,15 @@
+﻿@using Xqare.Models.Carrer_Insights_Detail
+
+<MudPaper Elevation="0" Class="article-cta">
+    <MudIcon Icon="@Icons.Material.Outlined.BookmarkBorder" />
+    <MudText Typo="Typo.h5">@Model.Title</MudText>
+    <MudText Typo="Typo.body2">@Model.Text</MudText>
+    <div>
+        <MudButton Variant="Variant.Filled" Class="article-cta__primary">@Model.PrimaryLabel</MudButton>
+        <MudButton Variant="Variant.Outlined" Class="article-cta__secondary">@Model.SecondaryLabel</MudButton>
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter] public CareerInsightCallToAction Model { get; set; } = new();
+}
