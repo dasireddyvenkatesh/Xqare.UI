@@ -1,17 +1,36 @@
 ﻿<MudPaper Elevation="0" Class="side-card side-card--takeaways">
-    <div class="side-card__title">
-        <MudIcon Icon="@Icons.Material.Outlined.Lightbulb" Size="Size.Small" />
-        Key Takeaways
-    </div>
-    <ul>
-        @foreach (var item in Items)
-        {
-            <li>
-                <MudIcon Icon="@Icons.Material.Outlined.RadioButtonUnchecked" Size="Size.Small" />
-                <span>@item</span>
-            </li>
-        }
-    </ul>
+    <MudHidden Breakpoint="Breakpoint.MdAndUp">
+        <MudStack AlignItems="AlignItems.Center" Spacing="2">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Outlined.Lightbulb" Size="Size.Small" />
+                <MudText Typo="Typo.subtitle2">Key Takeaways</MudText>
+            </MudStack>
+
+            @foreach (var item in Items)
+            {
+                <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.Center" Spacing="1">
+                    <MudIcon Icon="@Icons.Material.Outlined.RadioButtonUnchecked" Size="Size.Small" />
+                    <MudText Typo="Typo.caption" Align="Align.Center">@item</MudText>
+                </MudStack>
+            }
+        </MudStack>
+    </MudHidden>
+
+    <MudHidden Breakpoint="Breakpoint.SmAndDown">
+        <div class="side-card__title">
+            <MudIcon Icon="@Icons.Material.Outlined.Lightbulb" Size="Size.Small" />
+            Key Takeaways
+        </div>
+        <ul>
+            @foreach (var item in Items)
+            {
+                <li>
+                    <MudIcon Icon="@Icons.Material.Outlined.RadioButtonUnchecked" Size="Size.Small" />
+                    <span>@item</span>
+                </li>
+            }
+        </ul>
+    </MudHidden>
 </MudPaper>
 
 @code {
