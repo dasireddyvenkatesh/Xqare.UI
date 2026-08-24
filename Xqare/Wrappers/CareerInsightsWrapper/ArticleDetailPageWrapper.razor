@@ -7,20 +7,39 @@
     <ArticleDetailHero Model="Model" />
 
     <MudContainer MaxWidth="MaxWidth.Large">
-        <MudGrid Class="article-detail__shell" Spacing="6" Justify="Justify.Center">
-            <MudItem xs="12" md="3">
-                <aside class="article-sidebar">
-                    <ArticleTakeaways Items="Model.KeyTakeaways" />
-                    <ArticleTableOfContents Sections="Model.Sections"
-                                            ActiveSectionId="_activeSectionId"
-                                            OnSectionSelected="ScrollToSection" />
-                </aside>
-            </MudItem>
+        <MudHidden Breakpoint="Breakpoint.MdAndUp">
+            <MudGrid Class="article-detail__shell" Spacing="0">
+                <MudItem xs="12">
+                    <aside class="article-sidebar">
+                        <ArticleTakeaways Items="Model.KeyTakeaways" />
+                        <ArticleTableOfContents Sections="Model.Sections"
+                                                ActiveSectionId="_activeSectionId"
+                                                OnSectionSelected="ScrollToSection" />
+                    </aside>
+                </MudItem>
 
-            <MudItem xs="12" md="9">
-                <ArticleContent Sections="Model.Sections" CallToAction="Model.CallToAction" />
-            </MudItem>
-        </MudGrid>
+                <MudItem xs="12">
+                    <ArticleContent Sections="Model.Sections" CallToAction="Model.CallToAction" />
+                </MudItem>
+            </MudGrid>
+        </MudHidden>
+
+        <MudHidden Breakpoint="Breakpoint.SmAndDown">
+            <MudGrid Class="article-detail__shell" Spacing="6" Justify="Justify.Center">
+                <MudItem md="3">
+                    <aside class="article-sidebar">
+                        <ArticleTakeaways Items="Model.KeyTakeaways" />
+                        <ArticleTableOfContents Sections="Model.Sections"
+                                                ActiveSectionId="_activeSectionId"
+                                                OnSectionSelected="ScrollToSection" />
+                    </aside>
+                </MudItem>
+
+                <MudItem md="9">
+                    <ArticleContent Sections="Model.Sections" CallToAction="Model.CallToAction" />
+                </MudItem>
+            </MudGrid>
+        </MudHidden>
     </MudContainer>
 
     <ContinueReading Articles="Model.ContinueReading" OnOpen="OnArticleSelected" />
