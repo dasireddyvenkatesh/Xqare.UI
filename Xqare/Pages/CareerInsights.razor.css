@@ -38,29 +38,19 @@
 
 .career-insights-page ::deep .career-hero__search {
     width: min(620px,100%);
+    background: #f8b20e;
+    border-radius: 50px;
 }
 
     .career-insights-page ::deep .career-hero__search .mud-input-root {
         background: #fff;
         border-radius: 999px;
-        min-height: 54px;
+        min-height: 20px;
         padding-inline: 12px;
-        box-shadow: 0 14px 34px rgba(2,20,38,.18);
-        transition: box-shadow 160ms ease,transform 160ms ease;
     }
 
     .career-insights-page ::deep .career-hero__search .mud-input-outlined-border {
-        border-color: #f8b20e !important;
-        border-width: 2px !important;
-    }
-
-    .career-insights-page ::deep .career-hero__search .mud-input-root:hover .mud-input-outlined-border, .career-insights-page ::deep .career-hero__search .mud-input-root.mud-input-focused .mud-input-outlined-border, .career-insights-page ::deep .career-hero__search:focus-within .mud-input-outlined-border {
-        border-color: #ffd568 !important;
-    }
-
-    .career-insights-page ::deep .career-hero__search .mud-input-root.mud-input-focused, .career-insights-page ::deep .career-hero__search:focus-within .mud-input-root {
-        box-shadow: 0 18px 38px rgba(248,178,14,.28);
-        transform: translateY(-1px);
+        border-color: transparent !important;
     }
 
     .career-insights-page ::deep .career-hero__search .mud-input-adornment .mud-icon-root {
