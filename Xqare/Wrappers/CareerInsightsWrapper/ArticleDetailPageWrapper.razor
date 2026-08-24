@@ -6,15 +6,21 @@
 <article class="article-detail">
     <ArticleDetailHero Model="Model" />
 
-    <MudContainer MaxWidth="MaxWidth.Large" Class="article-detail__shell">
-        <aside class="article-sidebar">
-            <ArticleTakeaways Items="Model.KeyTakeaways" />
-            <ArticleTableOfContents Sections="Model.Sections"
-                                    ActiveSectionId="_activeSectionId"
-                                    OnSectionSelected="ScrollToSection" />
-        </aside>
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudGrid Class="article-detail__shell" Spacing="6" Justify="Justify.Center">
+            <MudItem xs="12" md="3">
+                <aside class="article-sidebar">
+                    <ArticleTakeaways Items="Model.KeyTakeaways" />
+                    <ArticleTableOfContents Sections="Model.Sections"
+                                            ActiveSectionId="_activeSectionId"
+                                            OnSectionSelected="ScrollToSection" />
+                </aside>
+            </MudItem>
 
-        <ArticleContent Sections="Model.Sections" CallToAction="Model.CallToAction" />
+            <MudItem xs="12" md="9">
+                <ArticleContent Sections="Model.Sections" CallToAction="Model.CallToAction" />
+            </MudItem>
+        </MudGrid>
     </MudContainer>
 
     <ContinueReading Articles="Model.ContinueReading" OnOpen="OnArticleSelected" />

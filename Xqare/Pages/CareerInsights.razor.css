@@ -109,7 +109,7 @@
 
 .career-insights-page ::deep .featured-shell {
     margin-bottom: 34px;
-    padding: 5px;
+    padding:5px;
 }
 
 .career-insights-page ::deep .featured-shell__topline {
@@ -151,15 +151,14 @@
     border: 1px solid #d7e0ea;
     border-radius: 8px;
     cursor: pointer;
-    display: grid;
-    grid-template-columns: minmax(0,1.35fr) minmax(360px,.85fr);
     min-height: 420px;
     overflow: hidden;
     box-shadow: 0 22px 55px rgba(25,60,92,.08);
 }
 
 .career-insights-page ::deep .featured-card__media {
-    min-height: 420px;
+    height: 100%;
+    min-height: clamp(280px,35vw,520px);
     position: relative;
 }
 

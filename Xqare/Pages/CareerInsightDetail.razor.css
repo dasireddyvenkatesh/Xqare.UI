@@ -72,16 +72,15 @@
 }
 
 .career-insight-detail-page ::deep .article-detail__shell {
-    display: grid;
-    gap: 44px;
-    grid-template-columns: 260px minmax(0,790px);
-    justify-content: center;
+    width: 100%;
+    margin: 0;
     padding: 44px 0 64px;
 }
 
 .career-insight-detail-page ::deep .article-sidebar {
     align-self: start;
     display: flex;
+    width: 100%;
     flex-direction: column;
     gap: 24px;
     position: sticky;
@@ -89,6 +88,8 @@
 }
 
 .career-insight-detail-page ::deep .side-card {
+    box-sizing: border-box;
+    width: 100%;
     border: 1px solid #d8e2ec;
     border-radius: 8px;
     padding: 20px;
@@ -162,6 +163,7 @@
 }
 
 .career-insight-detail-page ::deep .article-body {
+    width: 100%;
     max-width: 790px;
 }
 
