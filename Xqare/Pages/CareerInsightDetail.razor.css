@@ -77,6 +77,10 @@
     padding: 44px 0 64px;
 }
 
+.career-insight-detail-page ::deep .article-padding{
+    padding-top: 10px;
+}
+
 .career-insight-detail-page ::deep .article-sidebar {
     align-self: start;
     display: flex;
