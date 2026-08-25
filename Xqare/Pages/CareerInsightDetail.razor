@@ -2,12 +2,14 @@
 @using Xqare.Models.Carrer_Insights
 @using Xqare.Models.Carrer_Insights_Detail
 @using Xqare.Wrappers.CareerInsightsWrapper
+@using Xqare.Wrappers.CommonWrapper
 
 <PageTitle>@_model.Article.Title</PageTitle>
 
 <div class="career-insight-detail-page">
     <ArticleDetailPageWrapper Model="_model" OnArticleSelected="OpenArticle" />
 </div>
+<Footer/>
 
 @code {
     [Inject] private NavigationManager Navigation { get; set; } = default!;

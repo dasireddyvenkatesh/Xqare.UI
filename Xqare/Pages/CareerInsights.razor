@@ -1,9 +1,12 @@
 ﻿@page "/career-insights"
 @using Xqare.Models.Carrer_Insights
 @using Xqare.Wrappers.CareerInsightsWrapper
+@using Xqare.Wrappers.CommonWrapper
+@using Xqare.Wrappers.HomePageWrapper
 
 <PageTitle>XQARE Career Insights</PageTitle>
 
+<HeaderWrapper/>
 <div class="career-insights-page">
     <CareerInsightsPageWrapper Model="_model"
                                SelectedCategoryId="@_selectedCategoryId"
@@ -12,6 +15,7 @@
                                SearchTextChanged="SetSearchText"
                                OnArticleSelected="OpenArticle" />
 </div>
+<Footer/>
 @code {
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
