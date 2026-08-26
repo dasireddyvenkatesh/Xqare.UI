@@ -24,7 +24,7 @@
 .career-insights-page ::deep .career-hero__title {
     color: #fff;
     font-size: clamp(2.3rem,5vw,4.2rem);
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.05;
     margin-bottom: 14px;
 }
@@ -233,7 +233,7 @@
 .career-insights-page ::deep .featured-card__title {
     color: #0d3456;
     font-size: clamp(1.8rem,3vw,2.65rem);
-    font-weight: 800;
+    font-weight: 700;
     line-height: .98;
     margin-bottom: 18px;
 }
@@ -256,7 +256,7 @@
     background: #f8b20e !important;
     border-radius: 999px;
     color: #08253f !important;
-    font-weight: 800;
+    font-weight: 700;
     padding: 10px 24px;
     text-transform: none;
 }
@@ -310,7 +310,7 @@
     color: #08253f;
     display: inline-flex;
     font-size: .82rem;
-    font-weight: 800;
+    font-weight: 700;
     height: 40px;
     justify-content: center;
     width: 40px;
@@ -359,7 +359,7 @@
 .career-insights-page ::deep .insight-card__title {
     color: #0d3456;
     font-size: 1.02rem;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.35;
     margin: 14px 0 10px;
 }
@@ -395,7 +395,7 @@
 .career-insights-page ::deep .continue-reading__title {
     color: #0d3456;
     font-size: 1.8rem;
-    font-weight: 800;
+    font-weight: 700;
     margin-bottom: 34px;
     text-align: center;
 }
@@ -415,7 +415,7 @@
 .career-insights-page ::deep .continue-card h6 {
     color: #0d3456;
     font-size: 1.02rem;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.35;
     margin: 14px 0 12px;
 }
