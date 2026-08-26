@@ -1,4 +1,6 @@
 ﻿@using Xqare.Models.Carrer_Insights_Detail
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
 
 <header class="article-hero" style="background-image: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.94) 72%, #fff 100%), url('@Model.HeroImageUrl');">
     <MudContainer MaxWidth="MaxWidth.Medium" Class="article-hero__inner">
@@ -20,13 +22,36 @@
     <MudContainer MaxWidth="MaxWidth.Medium" Class="article-meta-bar__inner">
         <ArticleMeta Article="Model.Article" />
         <div class="article-share-icons">
-            <MudIconButton Icon="@Icons.Material.Outlined.Share" Size="Size.Small" Class="article-icon-button" />
-            <MudIconButton Icon="@Icons.Custom.Brands.LinkedIn" Size="Size.Small" Class="article-icon-button" />
-            <MudIconButton Icon="@Icons.Custom.Brands.Twitter" Size="Size.Small" Class="article-icon-button" />
+            <MudIconButton Icon="@Icons.Material.Outlined.Share" OnClick="ShareArticle" Size="Size.Small" Class="article-icon-button" />
+            <MudIconButton Icon="@Icons.Custom.Brands.LinkedIn" OnClick="ShareLinkedIn" Size="Size.Small" Class="article-icon-button" />
+            <MudIconButton Icon="@Icons.Custom.Brands.Twitter" OnClick="ShareTwitter" Size="Size.Small" Class="article-icon-button" />
         </div>
     </MudContainer>
 </section>
 
 @code {
     [Parameter, EditorRequired] public CareerInsightDetailModel Model { get; set; } = new();
+
+    private string ArticleUrl =>
+        NavigationManager.Uri;
+
+    private async Task ShareLinkedIn()
+    {
+        var url = $"https://www.linkedin.com/sharing/share-offsite/?url={Uri.EscapeDataString(ArticleUrl)}";
+
+        await JS.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    private async Task ShareTwitter()
+    {
+        var url = $"https://x.com/intent/tweet?url={Uri.EscapeDataString(ArticleUrl)}";
+
+        await JS.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    private async Task ShareArticle()
+    {
+        await JS.InvokeVoidAsync("shareArticle", ArticleUrl);
+    }
+}
 }

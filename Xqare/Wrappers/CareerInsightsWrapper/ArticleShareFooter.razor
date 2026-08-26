@@ -1,11 +1,38 @@
-﻿<section class="article-share-footer">
+﻿@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<section class="article-share-footer">
     <div>
         <strong>Found this helpful?</strong>
         <span>Share it with someone who would benefit from reading this.</span>
     </div>
     <div>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Link" Class="article-share-button">Copy Link</MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.LinkedIn" Class="article-share-button">LinkedIn</MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Twitter" Class="article-share-button">Twitter</MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Share" OnClick="ShareArticle" Class="article-share-button">Share Link</MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.LinkedIn" OnClick="ShareLinkedIn" Class="article-share-button">LinkedIn</MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Twitter" OnClick="ShareTwitter" Class="article-share-button">Twitter</MudButton>
     </div>
 </section>
+
+@code{
+    private string ArticleUrl =>
+        NavigationManager.Uri;
+
+    private async Task ShareLinkedIn()
+    {
+        var url = $"https://www.linkedin.com/sharing/share-offsite/?url={Uri.EscapeDataString(ArticleUrl)}";
+
+        await JS.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    private async Task ShareTwitter()
+    {
+        var url = $"https://x.com/intent/tweet?url={Uri.EscapeDataString(ArticleUrl)}";
+
+        await JS.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    private async Task ShareArticle()
+    {
+        await JS.InvokeVoidAsync("shareArticle", ArticleUrl);
+    }
+}
