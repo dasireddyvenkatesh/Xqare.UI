@@ -162,7 +162,7 @@
 .career-insight-detail-page ::deep .toc-link--active {
     background: #fff2c8;
     border-left-color: #f8b20e;
-    color: var(--xqare-gold-hover);
+    color: #f0a800;
     font-weight: 700;
 }
 
@@ -224,11 +224,12 @@
     }
 
 .career-insight-detail-page ::deep .article-list--chevron li::before {
-    color: var(--xqare-gold-hover);
+    color: #f0a800;
     content: "›";
     font-size: 1.25rem;
     left: 2px;
-    position: absolute;
+    position: static;
+    margin: 8px;
 }
 
 .career-insight-detail-page ::deep .article-list--check li::before {
@@ -400,7 +401,10 @@
 }
 
 .career-insight-detail-page ::deep .continue-card__image {
-    aspect-ratio: 16 / 8.5;
+    aspect-ratio: 16 / 9;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden;
 }
 
     .career-insight-detail-page ::deep .continue-card__image img {
