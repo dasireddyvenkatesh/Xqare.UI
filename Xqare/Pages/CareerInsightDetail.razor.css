@@ -427,6 +427,10 @@
         margin-left: 10px;
     }
 
+.career-insight-detail-page ::deep .mud-typography-caption{
+    text-align: left !important;
+}
+
 .career-insight-detail-page ::deep .category-pill {
     background: #eef5fb;
     border-radius: 999px;
