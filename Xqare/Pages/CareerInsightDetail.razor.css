@@ -225,7 +225,7 @@
 
 .career-insight-detail-page ::deep .article-list--chevron li::before {
     color: #f0a800;
-    content: "›";
+    content: "›"; 
     font-size: 1.25rem;
     left: 2px;
     position: static;
