@@ -229,7 +229,7 @@
     font-size: 1.25rem;
     left: 2px;
     position: static;
-    margin: 8px;
+    margin: 8px; 
 }
 
 .career-insight-detail-page ::deep .article-list--check li::before {
