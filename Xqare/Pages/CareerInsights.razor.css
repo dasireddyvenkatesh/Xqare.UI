@@ -411,7 +411,10 @@
 }
 
 .career-insights-page ::deep .continue-card__image {
-    aspect-ratio: 16 / 8.5;
+    aspect-ratio: 16 / 9;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden;
 }
 
 .career-insights-page ::deep .continue-card h6 {
