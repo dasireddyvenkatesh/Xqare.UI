@@ -1,5 +1,11 @@
 ﻿window.careerInsightsScrollSpy = (() => {
-    let observer;
+    let scrollHandler;
+    let resizeHandler;
+    let dotNetReference;
+    let sectionSelector;
+    let sectionAttribute;
+    let activeSectionId;
+    let animationFrame;
 
     const activateLink = (sectionId) => {
         document.querySelectorAll(".toc-link").forEach(link => {
@@ -8,7 +14,8 @@
     };
 
     const scrollToSection = (sectionId) => {
-        const target = document.getElementById(sectionId);
+        const target = getVisibleSections().find(section =>
+            section.getAttribute(sectionAttribute) === sectionId);
 
         if (!target) {
             return;
@@ -21,6 +28,45 @@
 
         activateLink(sectionId);
         history.replaceState(null, "", `${location.pathname}${location.search}#${sectionId}`);
+    };
+
+    const getVisibleSections = () => Array.from(document.querySelectorAll(sectionSelector || ".article-section"))
+        .filter(section => section.getClientRects().length > 0);
+
+    const updateActiveSection = () => {
+        const sections = getVisibleSections();
+        if (!sections.length) {
+            return;
+        }
+
+        // The section whose heading has most recently passed the reader's
+        // viewport position is the current section. This remains reliable
+        // even when several sections are visible at the same time.
+        const readingLine = Math.min(window.innerHeight * 0.28, 220);
+        const currentSection = sections.reduce((current, section) => {
+            const top = section.getBoundingClientRect().top;
+            return top <= readingLine ? section : current;
+        }, null) ?? sections[0];
+        const sectionId = currentSection.getAttribute(sectionAttribute);
+
+        if (!sectionId || sectionId === activeSectionId) {
+            return;
+        }
+
+        activeSectionId = sectionId;
+        activateLink(sectionId);
+        dotNetReference?.invokeMethodAsync("SetActiveSection", sectionId);
+    };
+
+    const scheduleActiveSectionUpdate = () => {
+        if (animationFrame) {
+            return;
+        }
+
+        animationFrame = requestAnimationFrame(() => {
+            animationFrame = null;
+            updateActiveSection();
+        });
     };
 
     document.addEventListener("click", event => {
@@ -42,40 +88,39 @@
 
     return {
         register(dotNetRef, selector, attributeName) {
-            if (observer) {
-                observer.disconnect();
-            }
+            this.dispose();
 
-            const sections = Array.from(document.querySelectorAll(selector));
-            if (!sections.length) {
-                return;
-            }
+            dotNetReference = dotNetRef;
+            sectionSelector = selector;
+            sectionAttribute = attributeName;
+            activeSectionId = null;
+            scrollHandler = scheduleActiveSectionUpdate;
+            resizeHandler = scheduleActiveSectionUpdate;
 
-            observer = new IntersectionObserver((entries) => {
-                const visible = entries
-                    .filter(entry => entry.isIntersecting)
-                    .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-
-                if (visible) {
-                    const sectionId = visible.target.getAttribute(attributeName);
-                    activateLink(sectionId);
-                    dotNetRef.invokeMethodAsync("SetActiveSection", sectionId);
-                }
-            }, {
-                rootMargin: "-12% 0px -70% 0px",
-                threshold: [0, 0.15, 0.35, 0.65]
-            });
-
-            sections.forEach(section => observer.observe(section));
+            window.addEventListener("scroll", scrollHandler, { passive: true });
+            window.addEventListener("resize", resizeHandler);
+            updateActiveSection();
         },
         scrollToSection(sectionId) {
             scrollToSection(sectionId);
         },
         dispose() {
-            if (observer) {
-                observer.disconnect();
-                observer = null;
+            if (scrollHandler) {
+                window.removeEventListener("scroll", scrollHandler);
+                scrollHandler = null;
             }
+
+            if (resizeHandler) {
+                window.removeEventListener("resize", resizeHandler);
+                resizeHandler = null;
+            }
+
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+
+            dotNetReference = null;
         }
     };
 })();
