@@ -34,7 +34,19 @@
         <ul class="article-list article-list--check">
             @foreach (var item in Block.Items)
             {
-                <li>@item</li>
+                <li>
+                    @foreach (var span in item.Spans)
+                    {
+                        if (span.Bold)
+                        {
+                            <strong>@span.Text</strong>
+                        }
+                        else
+                        {
+                            @span.Text
+                        }
+                    }
+                </li>
             }
         </ul>
         break;
