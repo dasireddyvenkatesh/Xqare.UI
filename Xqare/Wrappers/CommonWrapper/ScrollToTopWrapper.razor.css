@@ -1,0 +1,23 @@
+﻿/*.scroll-to-top-container {
+    height: 300px;
+    overflow: auto;
+    position: relative;
+}
+
+.scroll-to-top-content {
+    height: 3500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+.scroll-to-top-button {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+    border-radius: 50%;
+}
+*/
