@@ -1,4 +1,4 @@
-﻿@page "/careerinsight/{ArticleId}"
+﻿@page "/careerinsights/{ArticleId}"
 @using Xqare.Models.Carrer_Insights
 @using Xqare.Models.Carrer_Insights_Detail
 @using Xqare.Wrappers.CareerInsightsWrapper
@@ -24,7 +24,7 @@
 
     private Task OpenArticle(CareerInsightArticle article)
     {
-        Navigation.NavigateTo($"/blog/{article.Id}");
+        Navigation.NavigateTo($"/careerinsights/{article.Id}");
         return Task.CompletedTask;
     }
 }
