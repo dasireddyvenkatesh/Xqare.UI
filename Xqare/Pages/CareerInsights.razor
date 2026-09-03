@@ -40,7 +40,7 @@
     private Task OpenArticle(CareerInsightArticle article)
     {
         _selectedArticle = article;
-        Navigation.NavigateTo($"/blog/{article.Id}");
+        Navigation.NavigateTo($"/careerinsights/{article.Id}");
         return Task.CompletedTask;
     }
 }
