@@ -351,7 +351,7 @@ namespace Xqare.Models.Carrer_Insights
                     "Negotiation coaching that often adds meaningful value to the final offer."
                 ),
                 Quote(
-                    "I did 6 mock interviews with my XQARE mentor before my Google onsite. In three of them, he asked variations of what I got in the real interviews. Offer came back at L5 first try. — XQARE Member"
+                    "I did 6 mock interviews with my XQARE mentor. In three of them, he asked variations of what I got in the real interviews. Offer came back at L5 first try. — XQARE Member"
                 )
             )
         ];
@@ -782,7 +782,7 @@ namespace Xqare.Models.Carrer_Insights
         "Mentor Perspective",
 
         Quote(
-            "\"The best mentors don't give you answers — they help you ask better questions.\" — XQARE Mentor, Senior Staff Engineer at Google"
+            "\"The best mentors don't give you answers — they help you ask better questions.\" — XQARE Mentor, Senior Staff Engineer."
         )
     ),
 
@@ -1051,7 +1051,7 @@ namespace Xqare.Models.Carrer_Insights
         "How XQARE Accelerates Your Journey",
 
         Paragraph(
-            "XQARE cloud engineering mentors — including practitioners from AWS, Microsoft, and Google — help you:"
+            "XQARE cloud engineering mentors"
         ),
 
         Check(
@@ -1602,7 +1602,7 @@ namespace Xqare.Models.Carrer_Insights
         ),
 
         Quote(
-            "\"I did 3 mock system design sessions with my XQARE mentor before my Google onsite. In the real interview, I hit the exact same trade-off discussion we'd rehearsed. Level 5 offer, first try.\" — XQARE Member"
+            "\"I did 3 mock system design sessions with my XQARE mentor. In the real interview, I hit the exact same trade-off discussion we'd rehearsed. Level 5 offer, first try.\" — XQARE Member"
         )
     )
 ];
