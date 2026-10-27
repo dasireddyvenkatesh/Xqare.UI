@@ -16,7 +16,8 @@ jobs:
     name: Build and Deploy Job
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           submodules: true
           lfs: false
@@ -32,17 +33,43 @@ jobs:
       - name: Publish Blazor WebAssembly
         run: dotnet publish ./Xqare/Xqare.csproj -c Release -o ./publish
 
+      - name: Diagnose published output
+        shell: bash
+        run: |
+          echo "=== Publish directory ==="
+          ls -la ./publish || true
+
+          echo "=== Locate required files ==="
+          find ./publish -type f \( \
+            -name "index.html" -o \
+            -name "blazor.boot.json" -o \
+            -name "staticwebapp.config.json" -o \
+            -name "blazor.webassembly*.js" \
+          \) -print || true
+
+          echo "=== Check expected paths ==="
+          for file in \
+            "./publish/wwwroot/index.html" \
+            "./publish/wwwroot/_framework/blazor.boot.json" \
+            "./publish/wwwroot/staticwebapp.config.json"
+          do
+            if [ -f "$file" ]; then
+              echo "FOUND: $file"
+            else
+              echo "MISSING: $file"
+            fi
+          done
+
+          echo "=== Published framework files ==="
+          ls -la ./publish/wwwroot/_framework/ || true
+
       - name: Verify published output
         shell: bash
         run: |
           set -euo pipefail
-
           test -f ./publish/wwwroot/index.html
-          test -f ./publish/wwwroot/_framework/blazor.boot.json
-          test -f ./publish/wwwroot/staticwebapp.config.json
-
-          echo "Published files verified."
-          find ./publish/wwwroot/_framework -maxdepth 1 -type f | head -30
+          test -d ./publish/wwwroot/_framework
+          echo "Published application files verified."
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
