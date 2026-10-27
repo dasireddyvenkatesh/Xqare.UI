@@ -14,32 +14,81 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           submodules: true
           lfs: false
-      - name: Build And Deploy
-        id: builddeploy
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ./Xqare/Xqare.csproj
+
+      - name: Publish Blazor WebAssembly
+        run: dotnet publish ./Xqare/Xqare.csproj -c Release -o ./publish
+
+      - name: Diagnose published output
+        shell: bash
+        run: |
+          echo "=== Publish directory ==="
+          ls -la ./publish || true
+
+          echo "=== Locate required files ==="
+          find ./publish -type f \( \
+            -name "index.html" -o \
+            -name "blazor.boot.json" -o \
+            -name "staticwebapp.config.json" -o \
+            -name "blazor.webassembly*.js" \
+          \) -print || true
+
+          echo "=== Check expected paths ==="
+          for file in \
+            "./publish/wwwroot/index.html" \
+            "./publish/wwwroot/_framework/blazor.boot.json" \
+            "./publish/wwwroot/staticwebapp.config.json"
+          do
+            if [ -f "$file" ]; then
+              echo "FOUND: $file"
+            else
+              echo "MISSING: $file"
+            fi
+          done
+
+          echo "=== Published framework files ==="
+          ls -la ./publish/wwwroot/_framework/ || true
+
+      - name: Verify published output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f ./publish/wwwroot/index.html
+          test -d ./publish/wwwroot/_framework
+          echo "Published application files verified."
+
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ICY_SEA_04C65420F }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "./Xqare" # App source code path
-          api_location: "Api" # Api source code path - optional
-          output_location: "wwwroot" # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
+          app_location: "./publish/wwwroot"
+          api_location: ""
+          output_location: ""
+          skip_app_build: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
+
     steps:
       - name: Close Pull Request
-        id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ICY_SEA_04C65420F }}
