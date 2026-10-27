@@ -1,5 +1,15 @@
 {
   "navigationFallback": {
-    "rewrite": "/index.html"
+    "rewrite": "/index.html",
+    "exclude": [
+      "/_framework/*",
+      "/_content/*",
+      "/css/*",
+      "/js/*",
+      "/lib/*",
+      "/Xqare.styles.css",
+      "/favicon.png",
+      "/manifest.webmanifest"
+    ]
   }
 }
