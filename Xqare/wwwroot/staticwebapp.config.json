@@ -1,0 +1,17 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/_framework/*",
+      "/_content/*",
+      "/css/*",
+      "/js/*",
+      "/lib/*",
+      "/Xqare.styles.css",
+      "/appsettings.json",
+      "/appsettings.*.json",
+      "/favicon.png",
+      "/manifest.webmanifest"
+    ]
+  }
+}

@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+#exclude workflow fies
+.github/workflows/*.yaml
+
 # User-specific files
 *.rsuser
 *.suo
