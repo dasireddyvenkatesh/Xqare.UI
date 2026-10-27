@@ -1074,7 +1074,7 @@ namespace Xqare.Models.Carrer_Insights
         ),
 
         Quote(
-            "\"I followed a random YouTube roadmap for 8 months and got no interviews. My XQARE mentor tore it up in one session, rebuilt it around what employers actually test for, and I had 3 offers within 14 weeks.\" — XQARE Member, Cloud Engineer at Razorpay"
+            "\"I followed a random YouTube roadmap for 8 months and got no interviews. My XQARE mentor tore it up in one session, rebuilt it around what employers actually test for, and I had 3 offers within 14 weeks.\" — XQARE Member, Cloud Engineer"
         )
     )
 ];
