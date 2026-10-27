@@ -3,11 +3,11 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - master
+      - Sandbox
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - master
+      - Sandbox
 
 jobs:
   build_and_deploy_job:
@@ -32,17 +32,22 @@ jobs:
       - name: Publish Blazor WebAssembly
         run: dotnet publish ./Xqare/Xqare.csproj -c Release -o ./publish
 
-      - name: Verify published files
+      - name: Verify published output
+        shell: bash
         run: |
+          set -euo pipefail
+
           test -f ./publish/wwwroot/index.html
           test -f ./publish/wwwroot/_framework/blazor.boot.json
           test -f ./publish/wwwroot/staticwebapp.config.json
-          echo "Published Blazor files verified."
 
-      - name: Build and Deploy to Azure Static Web Apps
+          echo "Published files verified."
+          find ./publish/wwwroot/_framework -maxdepth 1 -type f | head -30
+
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROUD_PEBBLE_0F828CD0F }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ICY_SEA_04C65420F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "./publish/wwwroot"
@@ -59,5 +64,5 @@ jobs:
       - name: Close Pull Request
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROUD_PEBBLE_0F828CD0F }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ICY_SEA_04C65420F }}
           action: "close"
