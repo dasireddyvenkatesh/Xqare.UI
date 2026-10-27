@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,11 +36,29 @@
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div class="xqare-loading-screen" role="status" aria-label="Loading XQARE">
+            <div class="xqare-loader-content">
+                <div class="xqare-brand">XQARE</div>
+                <div class="xqare-brand-subtitle">AI Career Ecosystem</div>
+
+                <div class="xqare-progress-wrap">
+                    <svg class="loading-progress" viewBox="0 0 100 100" aria-hidden="true">
+                        <circle cx="50" cy="50" r="43"></circle>
+                        <circle cx="50" cy="50" r="43"></circle>
+                    </svg>
+
+                    <div class="loading-progress-text" aria-hidden="true"></div>
+                </div>
+
+                <div class="xqare-loader-dots" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
