@@ -61,8 +61,11 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
             var response = await _api.PostAsync<LoginRequest, LoginResponse>("api/auth/login", request);
 
-            if (!response.IsSuccess || response.Data == null || !response.Data.IsSuccess)
-                return response.Data!;
+            if (!response.IsSuccess || response.Data == null)
+                return new LoginResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
+
+            if (!response.Data.IsSuccess)
+                return response.Data;
 
             // Successful credential validation may still require email verification or MFA.
             // Never persist an absent token or treat a verification-pending response as authenticated.
@@ -73,13 +76,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 return response.Data;
             }
 
-            await _tokenService.SetTokenAsync(response.Data.AccessToken);
-
-            if (_authStateProvider is JwtAuthStateProvider jwtAuthStateProvider)
-            {
-                jwtAuthStateProvider.NotifyUserAuthentication();
-            }
-
+            await ApplySessionAsync(response.Data);
             return response.Data;
 
         }
@@ -93,7 +90,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             var response = await _api.PostAsync<RegisterRequest, RegisterResponse>("api/auth/register", request);
 
             if (!response.IsSuccess || response.Data == null)
-                return response.Data!;
+                return response.Data ?? new RegisterResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
 
             return response.Data;
 
@@ -144,13 +141,66 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return null;
         }
 
-        public async Task<VerifyEmailOtpResponse> VerifyOtpAsync(VerifyEmailOtpRequest request)
+        public Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyEmailOtpRequest request)
+            => VerifyEmailOtpCoreAsync("api/auth/verify-register-email-otp", request);
+
+        public Task<LoginResponse> VerifyEmailOtpAsync(VerifyEmailOtpRequest request)
+            => VerifyEmailOtpCoreAsync("api/auth/verify-email-otp", request);
+
+        private async Task<LoginResponse> VerifyEmailOtpCoreAsync(string endpoint, VerifyEmailOtpRequest request)
+        {
+            request.Email = request.Email?.Trim() ?? string.Empty;
+            request.DeviceId = await _device.GetDeviceIdAsync();
+            request.DeviceName = await _device.GetDeviceNameAsync();
+
+            var response = await _api.PostAsync<VerifyEmailOtpRequest, LoginResponse>(endpoint, request);
+            if (!response.IsSuccess || response.Data == null)
+                return response.Data ?? new LoginResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
+
+            await ApplySessionAsync(response.Data);
+            return response.Data;
+        }
+
+        public async Task<LoginResponse> VerifyMfaOtpAsync(VerifyMfaOtpRequest request)
         {
             request.DeviceId = await _device.GetDeviceIdAsync();
             request.DeviceName = await _device.GetDeviceNameAsync();
 
-            var response = await _api.PostAsync<VerifyEmailOtpRequest, VerifyEmailOtpResponse>("api/auth/verify-register-email-otp", request);
+            var response = await _api.PostAsync<VerifyMfaOtpRequest, LoginResponse>("api/auth/verify-mfa-otp", request);
+            if (!response.IsSuccess || response.Data == null)
+                return response.Data ?? new LoginResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
+
+            await ApplySessionAsync(response.Data);
             return response.Data;
+        }
+
+        public async Task<OtpOperationResponse> ResendMfaOtpAsync(Guid userId)
+        {
+            var response = await _api.PostAsync<MfaOtpRequest, OtpOperationResponse>(
+                "api/auth/request-mfa-otp", new MfaOtpRequest { Id = userId });
+
+            if (response.IsSuccess && response.Data != null)
+                return response.Data;
+
+            return new OtpOperationResponse
+            {
+                IsSuccess = false,
+                Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
+                    ?? "The request could not be completed. Please try again."
+            };
+        }
+
+        private async Task ApplySessionAsync(LoginResponse response)
+        {
+            if (!response.IsSuccess || string.IsNullOrWhiteSpace(response.AccessToken) ||
+                response.RequiresEmailVerification || response.RequiresMfa)
+            {
+                return;
+            }
+
+            await _tokenService.SetTokenAsync(response.AccessToken);
+            if (_authStateProvider is JwtAuthStateProvider jwt)
+                jwt.NotifyUserAuthentication();
         }
 
         public async Task Logout()
