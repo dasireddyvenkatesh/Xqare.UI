@@ -450,24 +450,53 @@
     protected override async Task OnInitializedAsync()
     {
         var uri = Nav.ToAbsoluteUri(Nav.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
-        if (!uri.Query.Contains("data"))
-            return;
-
-        var (success, requiresMfa) =
-            await AuthService.HandleExternalLoginCallbackAsync(Nav.Uri);
-
-        if (!success)
-            return;
-
-        if (requiresMfa)
+        // Resume MFA when registration verification or an external provider requires the second factor.
+        if (query.TryGetValue("mfaUserId", out var rawUserId) &&
+            Guid.TryParse(rawUserId.ToString(), out var pendingUserId))
         {
+            mfaOtpRequest.UserId = pendingUserId;
+            otpRequest.Email = query.TryGetValue("email", out var emailValue) ? emailValue.ToString() : string.Empty;
+            loginRequest.Email = otpRequest.Email;
             isMfaStep = true;
-            Snackbar.Add("OTP sent to your email");
+            isEmailVerificationStep = false;
             StartTimer();
+
+            if (query.TryGetValue("message", out var messageValue) && !string.IsNullOrWhiteSpace(messageValue.ToString()))
+                Snackbar.Add(messageValue.ToString(), Severity.Info);
+
+            Nav.NavigateTo("/login", false, true);
             return;
         }
 
-        // Nav.NavigateTo("/dashboard");
+        if (!query.ContainsKey("data"))
+            return;
+
+        var (success, requiresMfa, userId, email, message) =
+            await AuthService.HandleExternalLoginCallbackAsync(Nav.Uri);
+
+        if (!success)
+        {
+            if (!string.IsNullOrWhiteSpace(message))
+                Snackbar.Add(message, Severity.Error);
+            Nav.NavigateTo("/login", false, true);
+            return;
+        }
+
+        if (requiresMfa && userId.HasValue)
+        {
+            mfaOtpRequest.UserId = userId.Value;
+            otpRequest.Email = email ?? string.Empty;
+            loginRequest.Email = otpRequest.Email;
+            isMfaStep = true;
+            isEmailVerificationStep = false;
+            StartTimer();
+
+            if (!string.IsNullOrWhiteSpace(message))
+                Snackbar.Add(message, Severity.Info);
+
+            Nav.NavigateTo("/login", false, true);
+        }
     }
 }
