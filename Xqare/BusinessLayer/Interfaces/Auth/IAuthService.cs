@@ -16,7 +16,7 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
         Task LoginWithGitHub();
         Task LoginWithLinkedIn();
         Task LoginWithTwitter();
-        Task<(bool success, bool requiresMfa)> HandleExternalLoginCallbackAsync(string url);
+        Task<(bool success, bool requiresMfa, Guid? userId, string? email, string? message)> HandleExternalLoginCallbackAsync(string url);
         Task Logout();
     }
 }
