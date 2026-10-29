@@ -126,15 +126,14 @@ namespace Xqare.BusinessLayer.Services.Common
 
                 return result;
             }
-            catch (Exception ex)
+            catch
             {
-                Snackbar.Add($"API call failed: {ex.Message}", Severity.Error);
-
+                // Never expose transport exceptions, stack details, or internal host information in the UI.
                 return new ApiResponse<T>
                 {
                     IsSuccess = false,
                     StatusCode = HttpStatusCode.InternalServerError,
-                    ErrorMessage = ex.Message
+                    ErrorMessage = "The request could not be completed. Please try again."
                 };
             }
         }
