@@ -265,7 +265,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             if (!query.ContainsKey("data"))
                 return (false, false, null, null, null);
 
-            var json = Uri.UnescapeDataString(query["data"]!);
+            var json = query["data"].ToString();
             var response = JsonSerializer.Deserialize<LoginResponse>(json);
 
             if (response == null || !response.IsSuccess)
