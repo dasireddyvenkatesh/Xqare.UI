@@ -36,5 +36,12 @@ builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(p =>
     p.GetRequiredService<JwtAuthStateProvider>());
 builder.Services.AddAuthorizationCore();
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+    config.SnackbarConfiguration.MaxDisplayedSnackbars = 1;
+    config.SnackbarConfiguration.PreventDuplicates = true;
+    config.SnackbarConfiguration.ClearAfterNavigation = true;
+    config.SnackbarConfiguration.VisibleStateDuration = 4000;
+});
 await builder.Build().RunAsync();
