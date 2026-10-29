@@ -1,10 +1,13 @@
-﻿@using Xqare.BusinessLayer.Interfaces.Auth
-@inject IAuthService AuthService
+@inject NavigationManager Nav
 
 @code {
     protected override void OnInitialized()
     {
-        AuthService.Logout();
+        var returnUrl = Nav.ToBaseRelativePath(Nav.Uri);
+        var destination = string.IsNullOrWhiteSpace(returnUrl)
+            ? "/login"
+            : $"/login?returnUrl={Uri.EscapeDataString(returnUrl)}";
 
+        Nav.NavigateTo(destination, replace: true);
     }
 }
