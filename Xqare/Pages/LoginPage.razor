@@ -250,7 +250,7 @@
     bool showPassword;
 
     bool isResendDisabled = true;
-    int secondsRemaining = 30;
+    int secondsRemaining = 60;
     Timer timer = new();
 
     void TogglePassword() => showPassword = !showPassword;
@@ -368,16 +368,10 @@
     async Task ResendOtp()
     {
         var response = await AuthService.ResendOtpAsync(loginRequest.Email);
+        Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
 
-        if (response)
-        {
-            Snackbar.Add("OTP resent", Severity.Success);
+        if (response.IsSuccess)
             StartTimer();
-        }
-        else
-        {
-            Snackbar.Add("Failed to resend OTP", Severity.Error);
-        }
 
 
     }
@@ -385,7 +379,7 @@
     void StartTimer()
     {
         isResendDisabled = true;
-        secondsRemaining = 30;
+        secondsRemaining = 60;
 
         timer?.Dispose();
 
