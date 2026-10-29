@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.WebAssembly.Http;
-using MudBlazor;
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -15,16 +13,12 @@ namespace Xqare.BusinessLayer.Services.Common
     {
         private readonly HttpClient _http;
         private readonly ITokenService _tokenService;
-        private readonly NavigationManager _nav;
-        private readonly ISnackbar Snackbar;
         private bool _isRefreshing;
 
-        public ApiClient(HttpClient http, ITokenService tokenService, NavigationManager nav, ISnackbar snackbar)
+        public ApiClient(HttpClient http, ITokenService tokenService)
         {
             _http = http;
             _tokenService = tokenService;
-            _nav = nav;
-            Snackbar = snackbar;
         }
 
         private async Task AttachTokenAsync()
