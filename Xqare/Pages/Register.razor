@@ -332,19 +332,32 @@
             }
             else
             {
-                // STEP 2: VERIFY OTP
-                var otpResponse = await AuthService.VerifyOtpAsync(otpRequest);
+                // STEP 2: VERIFY OTP and establish an authenticated session on the API.
+                var otpResponse = await AuthService.VerifyRegistrationOtpAsync(otpRequest);
 
                 if (!otpResponse.IsSuccess)
                 {
-                    Snackbar.Add(string.IsNullOrWhiteSpace(otpResponse.Message) ? "OTP verification failed." : otpResponse.Message, Severity.Error);
+                    Snackbar.Add(otpResponse.Message ?? "OTP verification failed.", Severity.Error);
                     return;
                 }
 
-                // Registration verification confirms the email, but does not create a login session.
-                // Send the user to sign in rather than opening a protected dashboard without a JWT.
-                Snackbar.Add(otpResponse.Message, Severity.Success);
-                Nav.NavigateTo("/login");
+                if (otpResponse.RequiresMfa)
+                {
+                    var email = Uri.EscapeDataString(otpResponse.Email ?? otpRequest.Email);
+                    var message = Uri.EscapeDataString(otpResponse.Message ?? string.Empty);
+                    Nav.NavigateTo($"/login?mfaUserId={otpResponse.UserId}&email={email}&message={message}");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(otpResponse.AccessToken))
+                {
+                    Snackbar.Add(otpResponse.Message ?? "Email verified, but a login session was not returned. Please sign in.", Severity.Error);
+                    Nav.NavigateTo("/login");
+                    return;
+                }
+
+                Snackbar.Add(otpResponse.Message ?? "Registration completed successfully.", Severity.Success);
+                Nav.NavigateTo("/dashboard");
             }
         }
         catch
