@@ -31,26 +31,24 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task InitializeAsync()
         {
-            var response = await _api.PostAsync<object, RefreshTokenResponse>(
-                "api/auth/refresh-token", default!);
+            // This request sends the HttpOnly refresh cookie and deliberately does not
+            // recursively retry when the refresh endpoint rejects an expired session.
+            var response = await _api.CookieCredential<RefreshTokenResponse>("api/auth/refresh-token");
 
-            if (response.IsSuccess && response.Data != null)
+            if (response.IsSuccess &&
+                response.Data?.IsSuccess == true &&
+                !string.IsNullOrWhiteSpace(response.Data.AccessToken))
             {
                 await _tokenService.SetTokenAsync(response.Data.AccessToken);
-
                 if (_authStateProvider is JwtAuthStateProvider jwt)
                     jwt.NotifyUserAuthentication();
+                return;
             }
-            else
-            {
-                // Refresh token expired or invalid — clear everything
-                await _tokenService.ClearAsync();
-                if (_authStateProvider is JwtAuthStateProvider jwt)
-                    jwt.NotifyUserLogout();
 
-                var returnUrl = Uri.EscapeDataString(_nav.Uri);
-                _nav.NavigateTo($"/login?returnUrl={returnUrl}", false);
-            }
+            // An absent/expired cookie means anonymous, not an immediate forced redirect.
+            await _tokenService.ClearAsync();
+            if (_authStateProvider is JwtAuthStateProvider provider)
+                provider.NotifyUserLogout();
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -205,14 +203,18 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task Logout()
         {
-            await _api.CookieCredential<string>("api/auth/logout");
-            await _tokenService.ClearAsync();       
-            if (_authStateProvider is JwtAuthStateProvider jwtAuthStateProvider)
+            try
             {
-                jwtAuthStateProvider.NotifyUserLogout();
+                await _api.CookieCredential<string>("api/auth/logout");
             }
+            finally
+            {
+                await _tokenService.ClearAsync();
+                if (_authStateProvider is JwtAuthStateProvider jwtAuthStateProvider)
+                    jwtAuthStateProvider.NotifyUserLogout();
 
-            _nav.NavigateTo("/", false);
+                _nav.NavigateTo("/", false);
+            }
         }
 
         public async Task LoginWithGoogle()
