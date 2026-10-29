@@ -257,32 +257,31 @@ namespace Xqare.BusinessLayer.Classes.Auth
             _nav.NavigateTo(url, true);
         }
 
-        public async Task<(bool success, bool requiresMfa)> HandleExternalLoginCallbackAsync(string url)
+        public async Task<(bool success, bool requiresMfa, Guid? userId, string? email, string? message)> HandleExternalLoginCallbackAsync(string url)
         {
             var uri = _nav.ToAbsoluteUri(url);
             var query = QueryHelpers.ParseQuery(uri.Query);
 
             if (!query.ContainsKey("data"))
-                return (false, false);
+                return (false, false, null, null, null);
 
             var json = Uri.UnescapeDataString(query["data"]!);
-
             var response = JsonSerializer.Deserialize<LoginResponse>(json);
 
             if (response == null || !response.IsSuccess)
-                return (false, false);
+                return (false, false, null, null, response?.Message);
 
-            if (!string.IsNullOrEmpty(response.AccessToken))
+            if (!string.IsNullOrWhiteSpace(response.AccessToken) && !response.RequiresMfa)
             {
-                await _tokenService.SetTokenAsync(response.AccessToken);
-
-                if (_authStateProvider is JwtAuthStateProvider jwt)
-                    jwt.NotifyUserAuthentication();
-
+                await ApplySessionAsync(response);
                 _nav.NavigateTo("/dashboard", true);
+                return (true, false, response.UserId, response.Email, response.Message);
             }
 
-            return (true, response.RequiresMfa);
+            if (response.RequiresMfa && response.UserId.HasValue)
+                return (true, true, response.UserId, response.Email, response.Message);
+
+            return (false, false, response.UserId, response.Email, response.Message ?? "The login response did not contain a valid session.");
         }
     }
 }
