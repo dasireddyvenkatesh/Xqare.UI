@@ -212,9 +212,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 jwtAuthStateProvider.NotifyUserLogout();
             }
 
-            var returnUrl = Uri.EscapeDataString(_nav.Uri);
-
-            _nav.NavigateTo($"/login?returnUrl={returnUrl}", false);
+            _nav.NavigateTo("/", false);
         }
 
         public async Task LoginWithGoogle()
