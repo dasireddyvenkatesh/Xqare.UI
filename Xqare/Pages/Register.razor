@@ -1,4 +1,5 @@
 ﻿@page "/register"
+@implements IDisposable
 @using System.Timers
 @using MudBlazor
 @using Xqare.BusinessLayer.DTO
@@ -94,21 +95,24 @@
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
-                                       StartIcon="@Icons.Custom.Brands.GitHub">
+                                       StartIcon="@Icons.Custom.Brands.GitHub"
+                                       OnClick="RegisterWithGitHub">
                                 GitHub
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
-                                       StartIcon="@Icons.Custom.Brands.LinkedIn">
+                                       StartIcon="@Icons.Custom.Brands.LinkedIn"
+                                       OnClick="RegisterWithLinkedIn">
                                 LinkedIn
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
-                                       StartIcon="@Icons.Custom.Brands.Twitter">
+                                       StartIcon="@Icons.Custom.Brands.Twitter"
+                                       OnClick="RegisterWithTwitter">
                                 Twitter
                             </MudButton>
                         </MudItem>
@@ -432,5 +436,15 @@
     async Task RegisterWithTwitter()
     {
         await AuthService.LoginWithTwitter();
+    }
+
+    public void Dispose()
+    {
+        if (timer is null)
+            return;
+
+        timer.Elapsed -= OnTimerTick;
+        timer.Stop();
+        timer.Dispose();
     }
 }
