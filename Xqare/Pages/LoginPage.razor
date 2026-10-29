@@ -292,7 +292,7 @@
                     isEmailVerificationStep = false;
                     isMfaStep = true;
                     StartTimer();
-                    Snackbar.Add(response.Message, Severity.Information);
+                    Snackbar.Add(response.Message, Severity.Info);
                     return;
                 }
 
@@ -339,7 +339,7 @@
                     {
                         isMfaStep = true;
                         StartTimer();
-                        Snackbar.Add(loginResponse.Message, Severity.Information);
+                        Snackbar.Add(loginResponse.Message, Severity.Info);
                         return;
                     }
 
