@@ -108,6 +108,12 @@ namespace Xqare.BusinessLayer.Services.Common
                     await AttachTokenAsync(retryRequest);
                     retryResponse = await _http.SendAsync(retryRequest);
                     responseToRead = retryResponse;
+
+                    if (retryResponse.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await _tokenService.ClearAsync();
+                        _authStateProvider.NotifyUserLogout();
+                    }
                 }
 
                 using (retryResponse)
