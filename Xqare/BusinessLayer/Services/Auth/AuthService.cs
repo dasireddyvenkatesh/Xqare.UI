@@ -99,11 +99,19 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         }
 
-        public async Task<bool> ResendOtpAsync(string email)
+        public async Task<OtpOperationResponse> ResendOtpAsync(string email)
         {
-            var response = await _api.PostAsync<string, bool>("api/auth/resend-email-otp", email);
+            var response = await _api.PostAsync<EmailOtpRequest, OtpOperationResponse>(
+                "api/auth/resend-email-otp", new EmailOtpRequest { Email = email });
 
-            return true;
+            if (response.IsSuccess && response.Data != null)
+                return response.Data;
+
+            return new OtpOperationResponse
+            {
+                IsSuccess = false,
+                Message = response.Data?.Message ?? "The OTP request could not be completed."
+            };
         }
 
         public async Task<VerifyEmailOtpResponse> VerifyOtpAsync(VerifyEmailOtpRequest request)
