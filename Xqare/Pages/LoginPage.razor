@@ -246,6 +246,7 @@
 
     private bool _processing = false;
     bool isMfaStep = false;
+    bool isEmailVerificationStep = false;
     bool showPassword;
 
     bool isResendDisabled = true;
@@ -275,12 +276,29 @@
                     return;
                 }
 
+                if (response.RequiresEmailVerification)
+                {
+                    otpRequest.Email = loginRequest.Email;
+                    isEmailVerificationStep = true;
+                    isMfaStep = true;
+                    StartTimer();
+                    Snackbar.Add("Please verify your email using the OTP we sent.", Severity.Warning);
+                    return;
+                }
+
                 if (response.RequiresMfa)
                 {
                     otpRequest.Email = loginRequest.Email;
+                    isEmailVerificationStep = false;
                     isMfaStep = true;
                     StartTimer();
                     Snackbar.Add("OTP sent to your email");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(response.AccessToken))
+                {
+                    Snackbar.Add("Login did not return a valid session. Please try again.", Severity.Error);
                     return;
                 }
 
@@ -294,6 +312,43 @@
                 {
                     Snackbar.Add("Invalid OTP", Severity.Error);
                     return;
+                }
+
+                if (isEmailVerificationStep)
+                {
+                    // Email verification itself does not create a session. Retry login to obtain
+                    // a real access token after the API confirms the email address.
+                    isEmailVerificationStep = false;
+                    var loginResponse = await AuthService.LoginAsync(loginRequest);
+
+                    if (!loginResponse.IsSuccess)
+                    {
+                        isMfaStep = false;
+                        Snackbar.Add(loginResponse.Message ?? "Email verified. Please sign in again.", Severity.Error);
+                        return;
+                    }
+
+                    if (loginResponse.RequiresEmailVerification)
+                    {
+                        isMfaStep = false;
+                        Snackbar.Add("Email verification is still pending. Please request a new OTP.", Severity.Warning);
+                        return;
+                    }
+
+                    if (loginResponse.RequiresMfa)
+                    {
+                        isMfaStep = true;
+                        StartTimer();
+                        Snackbar.Add("OTP sent to your email");
+                        return;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(loginResponse.AccessToken))
+                    {
+                        isMfaStep = false;
+                        Snackbar.Add("Email verified, but login did not return a valid session. Please sign in again.", Severity.Error);
+                        return;
+                    }
                 }
 
                 Snackbar.Add("Login successful", Severity.Success);
@@ -363,6 +418,7 @@
     void BackToLogin()
     {
         isMfaStep = false;
+        isEmailVerificationStep = false;
         otpRequest = new();
     }
     async Task LoginWithGoogle()
