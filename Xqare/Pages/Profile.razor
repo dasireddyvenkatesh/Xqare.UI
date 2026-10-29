@@ -1,159 +1,65 @@
-﻿@* @page "/profile"
-@using Xqare.BusinessLayer.DTO
-@using Xqare.BusinessLayer.Interfaces.Profile
-@inject IProfileService ProfileService
-@inject ISnackbar Snackbar
-@inject IDialogService DialogService
+@page "/profile"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
+<PageTitle>Profile | XQARE</PageTitle>
 
-    @if (IsLoading)
-    {
-        <MudProgressCircular Indeterminate="true" />
-    }
-    else
-    {
-        <MudGrid>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
+    <MudPaper Elevation="1" Class="pa-6">
+        <MudText Typo="Typo.h4" Class="mb-2">My Profile</MudText>
+        <MudText Color="Color.Secondary" Class="mb-6">
+            Your account profile. Profile editing and mentorship preferences can be added later.
+        </MudText>
 
-            <!-- Profile Info -->
-            <MudItem xs="12" md="6">
-                <MudPaper Class="pa-5 profile-card">
-
-                    <MudText Typo="Typo.h6">Profile Information</MudText>
-
-                    @ProfileRow("Full Name", Profile.FullName, () => EditField("Full Name", Profile.FullName, "FullName"))
-                    @ProfileRow("Email", Profile.Email, null)
-                    @ProfileRow("Phone", Profile.Phone, () => EditField("Phone", Profile.Phone, "Phone"))
-                    @ProfileRow("Bio", Profile.Bio, () => EditField("Bio", Profile.Bio, "Bio"))
-
-                </MudPaper>
-            </MudItem>
-
-            <!-- Security -->
-            <MudItem xs="12" md="6">
-                <MudPaper Class="pa-5 profile-card">
-
-                    <MudText Typo="Typo.h6">Security</MudText>
-
-                    <div class="setting-row">
-                        <div>
-                            <div class="title">Password</div>
-                            <div class="subtitle">
-                                @(Profile.HasPassword ? "Change your password" : "Set password for your account")
-                            </div>
-                        </div>
-
-                        <MudButton Color="Color.Warning" OnClick="OpenPasswordDialog">
-                            @(Profile.HasPassword ? "Update" : "Set Password")
-                        </MudButton>
-                    </div>
-
-                </MudPaper>
-            </MudItem>
-
-        </MudGrid>
-    }
-
+        @if (_isLoading)
+        {
+            <MudProgressLinear Indeterminate="true" />
+        }
+        else
+        {
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.subtitle2">Email</MudText>
+                <MudText>@(_email ?? "Email not available")</MudText>
+                <MudDivider />
+                <MudText Typo="Typo.subtitle2">Account roles</MudText>
+                @if (_roles.Count == 0)
+                {
+                    <MudText Color="Color.Warning">
+                        No role claim was found in this session. Please sign out and sign in again after the default role is configured.
+                    </MudText>
+                }
+                else
+                {
+                    <MudStack Direction="Row" Spacing="1" Wrap="Wrap.Wrap">
+                        @foreach (var role in _roles)
+                        {
+                            <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@role</MudChip>
+                        }
+                    </MudStack>
+                }
+            </MudStack>
+        }
+    </MudPaper>
 </MudContainer>
 
 @code {
-    private UserProfileDto Profile = new();
-    private bool IsLoading = true;
+    private bool _isLoading = true;
+    private string? _email;
+    private List<string> _roles = new();
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadProfile();
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+        _email = user.FindFirst(ClaimTypes.Email)?.Value ?? user.FindFirst("email")?.Value;
+        _roles = user.Claims
+            .Where(c => c.Type == ClaimTypes.Role || c.Type == "role" || c.Type.EndsWith("/role", StringComparison.OrdinalIgnoreCase))
+            .Select(c => c.Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        _isLoading = false;
     }
-
-    private async Task LoadProfile()
-    {
-        try
-        {
-            Profile = await ProfileService.GetProfileAsync();
-        }
-        catch
-        {
-            Snackbar.Add("Failed to load profile", Severity.Error);
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
-
-    private RenderFragment ProfileRow(string label, string value, Func<Task> onEdit) => builder =>
-    {
-        builder.AddMarkupContent(0, $@"
-        <div class='setting-row'>
-            <div>
-                <div class='title'>{label}</div>
-                <div class='subtitle'>{value}</div>
-            </div>
-        </div>
-        ");
-
-        if (onEdit != null)
-        {
-            builder.OpenComponent<MudButton>(1);
-            builder.AddAttribute(2, "OnClick", EventCallback.Factory.Create(this, onEdit));
-            builder.AddAttribute(3, "ChildContent", (RenderFragment)(b => b.AddContent(0, "Edit")));
-            builder.CloseComponent();
-        }
-    };
-
-    private async Task EditField(string label, string value, string field)
-    {
-        var parameters = new DialogParameters
-        {
-            ["Label"] = label,
-            ["Value"] = value
-        };
-
-        var dialog = DialogService.Show<EditFieldDialog>("Edit " + label, parameters);
-        var result = await dialog.Result;
-
-        if (!result.Cancelled)
-        {
-            var newValue = result.Data.ToString();
-
-            var request = new UpdateProfileRequest();
-
-            switch (field)
-            {
-                case "FullName": request.FullName = newValue; break;
-                case "Phone": request.Phone = newValue; break;
-                case "Bio": request.Bio = newValue; break;
-            }
-
-            await ProfileService.UpdateProfileAsync(request);
-            await LoadProfile();
-
-            Snackbar.Add($"{label} updated", Severity.Success);
-        }
-    }
-
-    private async Task OpenPasswordDialog()
-    {
-        var dialog = DialogService.Show<PasswordDialog>("Password");
-
-        var result = await dialog.Result;
-
-        if (!result.Cancelled)
-        {
-            try
-            {
-                if (!Profile.HasPassword)
-                    await ProfileService.SetPasswordAsync((SetPasswordRequest)result.Data);
-                else
-                    await ProfileService.ChangePasswordAsync((ChangePasswordRequest)result.Data);
-
-                Snackbar.Add("Password updated", Severity.Success);
-                Profile.HasPassword = true;
-            }
-            catch
-            {
-                Snackbar.Add("Failed to update password", Severity.Error);
-            }
-        }
-    }
-} *@
+}
