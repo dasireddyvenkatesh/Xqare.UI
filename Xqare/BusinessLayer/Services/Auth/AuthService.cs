@@ -30,8 +30,11 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task InitializeAsync()
         {
-            // This request sends the HttpOnly refresh cookie and deliberately does not
-            // recursively retry when the refresh endpoint rejects an expired session.
+            // Remember whether this tab already has a still-valid access token. This lets
+            // a temporary API/network failure avoid logging out an otherwise valid session.
+            var wasAuthenticated = (await _authStateProvider.GetAuthenticationStateAsync())
+                .User.Identity?.IsAuthenticated == true;
+
             var response = await _api.CookieCredential<RefreshTokenResponse>("api/auth/refresh-token");
 
             if (response.IsSuccess &&
@@ -44,10 +47,17 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 return;
             }
 
-            // An absent/expired cookie means anonymous, not an immediate forced redirect.
+            if (wasAuthenticated && response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+            {
+                if (_authStateProvider is JwtAuthStateProvider provider)
+                    provider.NotifyUserAuthentication();
+                return;
+            }
+
+            // Missing/invalid/expired refresh cookies should fail closed.
             await _tokenService.ClearAsync();
-            if (_authStateProvider is JwtAuthStateProvider provider)
-                provider.NotifyUserLogout();
+            if (_authStateProvider is JwtAuthStateProvider logoutProvider)
+                logoutProvider.NotifyUserLogout();
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
