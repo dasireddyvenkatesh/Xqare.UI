@@ -240,6 +240,7 @@
     MudForm form = new();
     LoginRequest loginRequest = new();
     VerifyEmailOtpRequest otpRequest = new();
+    VerifyMfaOtpRequest mfaOtpRequest = new();
 
     LoginRequestValidator loginValidator = new();
     OtpRequestValidator otpValidator = new();
@@ -289,6 +290,7 @@
                 if (response.RequiresMfa)
                 {
                     otpRequest.Email = loginRequest.Email;
+                    mfaOtpRequest.UserId = response.UserId ?? Guid.Empty;
                     isEmailVerificationStep = false;
                     isMfaStep = true;
                     StartTimer();
@@ -304,54 +306,54 @@
 
                 Nav.NavigateTo("/dashboard");
             }
-            else
+            else if (isEmailVerificationStep)
             {
-                var otpResponse = await AuthService.VerifyOtpAsync(otpRequest);
+                var otpResponse = await AuthService.VerifyEmailOtpAsync(otpRequest);
 
                 if (!otpResponse.IsSuccess)
                 {
-                    Snackbar.Add(string.IsNullOrWhiteSpace(otpResponse.Message) ? "OTP verification failed." : otpResponse.Message, Severity.Error);
+                    Snackbar.Add(otpResponse.Message ?? "OTP verification failed.", Severity.Error);
                     return;
                 }
 
-                if (isEmailVerificationStep)
+                if (otpResponse.RequiresMfa)
                 {
-                    // Email verification itself does not create a session. Retry login to obtain
-                    // a real access token after the API confirms the email address.
+                    mfaOtpRequest.UserId = otpResponse.UserId ?? Guid.Empty;
+                    otpRequest.OtpCode = string.Empty;
                     isEmailVerificationStep = false;
-                    var loginResponse = await AuthService.LoginAsync(loginRequest);
-
-                    if (!loginResponse.IsSuccess)
-                    {
-                        isMfaStep = false;
-                        Snackbar.Add(loginResponse.Message ?? "Email verified. Please sign in again.", Severity.Error);
-                        return;
-                    }
-
-                    if (loginResponse.RequiresEmailVerification)
-                    {
-                        isMfaStep = false;
-                        Snackbar.Add(loginResponse.Message ?? "Email verification is still pending.", Severity.Warning);
-                        return;
-                    }
-
-                    if (loginResponse.RequiresMfa)
-                    {
-                        isMfaStep = true;
-                        StartTimer();
-                        Snackbar.Add(loginResponse.Message, Severity.Info);
-                        return;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(loginResponse.AccessToken))
-                    {
-                        isMfaStep = false;
-                        Snackbar.Add("Email verified, but login did not return a valid session. Please sign in again.", Severity.Error);
-                        return;
-                    }
+                    StartTimer();
+                    Snackbar.Add(otpResponse.Message, Severity.Info);
+                    return;
                 }
 
-                Snackbar.Add("Login successful", Severity.Success);
+                if (string.IsNullOrWhiteSpace(otpResponse.AccessToken))
+                {
+                    Snackbar.Add(otpResponse.Message ?? "Email verified, but no login session was returned. Please sign in again.", Severity.Error);
+                    isMfaStep = false;
+                    return;
+                }
+
+                Snackbar.Add(otpResponse.Message ?? "Login successful.", Severity.Success);
+                Nav.NavigateTo("/dashboard");
+            }
+            else
+            {
+                mfaOtpRequest.Code = otpRequest.OtpCode;
+                var otpResponse = await AuthService.VerifyMfaOtpAsync(mfaOtpRequest);
+
+                if (!otpResponse.IsSuccess)
+                {
+                    Snackbar.Add(otpResponse.Message ?? "OTP verification failed.", Severity.Error);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(otpResponse.AccessToken))
+                {
+                    Snackbar.Add(otpResponse.Message ?? "MFA verification did not return a valid session.", Severity.Error);
+                    return;
+                }
+
+                Snackbar.Add(otpResponse.Message ?? "Login successful.", Severity.Success);
                 Nav.NavigateTo("/dashboard");
             }
         }
@@ -367,13 +369,21 @@
 
     async Task ResendOtp()
     {
-        var response = await AuthService.ResendOtpAsync(loginRequest.Email);
-        Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+        OtpOperationResponse response;
+        if (isEmailVerificationStep)
+        {
+            response = await AuthService.ResendOtpAsync(loginRequest.Email);
+        }
+        else
+        {
+            response = mfaOtpRequest.UserId == Guid.Empty
+                ? new OtpOperationResponse { IsSuccess = false, Message = "The MFA session has expired. Please sign in again." }
+                : await AuthService.ResendMfaOtpAsync(mfaOtpRequest.UserId);
+        }
 
+        Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
         if (response.IsSuccess)
             StartTimer();
-
-
     }
 
     void StartTimer()
@@ -414,6 +424,7 @@
         isMfaStep = false;
         isEmailVerificationStep = false;
         otpRequest = new();
+        mfaOtpRequest = new();
     }
     async Task LoginWithGoogle()
     {
