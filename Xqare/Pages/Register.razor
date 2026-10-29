@@ -341,8 +341,10 @@
                     return;
                 }
 
-                Snackbar.Add("Registration successful", Severity.Success);
-                Nav.NavigateTo("/dashboard");
+                // Registration verification confirms the email, but does not create a login session.
+                // Send the user to sign in rather than opening a protected dashboard without a JWT.
+                Snackbar.Add("Email verified successfully. Please sign in.", Severity.Success);
+                Nav.NavigateTo("/login");
             }
         }
         catch
