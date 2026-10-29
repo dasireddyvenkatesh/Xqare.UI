@@ -1,15 +1,46 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Xqare.Pages
+@using Xqare.BusinessLayer.Interfaces.Auth
+@inject IAuthService AuthService
 
-<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
-                <NotAuthorized>
-                    <RedirectToLogin />
-                </NotAuthorized>
-            </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-        </Found>
-    </Router>
-</CascadingAuthenticationState>
+@if (_authInitialized)
+{
+    <CascadingAuthenticationState>
+        <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
+                    <NotAuthorized>
+                        <RedirectToLogin />
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+        </Router>
+    </CascadingAuthenticationState>
+}
+else
+{
+    <div class="d-flex justify-center align-center" style="min-height: 100vh;">
+        <p>Restoring your session...</p>
+    </div>
+}
+
+@code {
+    private bool _authInitialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            await AuthService.InitializeAsync();
+        }
+        finally
+        {
+            _authInitialized = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
