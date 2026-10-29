@@ -78,12 +78,14 @@ namespace Xqare.BusinessLayer.Services.Common
 
         private async Task<ApiResponse<T>> SendAsync<T>(
             Func<HttpRequestMessage> requestFactory,
-            bool retryAfterRefresh = true)
+            bool retryAfterRefresh = true,
+            bool attachAccessToken = true)
         {
             try
             {
                 using var request = requestFactory();
-                await AttachTokenAsync(request);
+                if (attachAccessToken)
+                    await AttachTokenAsync(request);
                 using var response = await _http.SendAsync(request);
 
                 HttpResponseMessage responseToRead = response;
@@ -105,7 +107,8 @@ namespace Xqare.BusinessLayer.Services.Common
                     }
 
                     using var retryRequest = requestFactory();
-                    await AttachTokenAsync(retryRequest);
+                    if (attachAccessToken)
+                        await AttachTokenAsync(retryRequest);
                     retryResponse = await _http.SendAsync(retryRequest);
                     responseToRead = retryResponse;
 
@@ -169,6 +172,7 @@ namespace Xqare.BusinessLayer.Services.Common
         public Task<ApiResponse<TResponse>> CookieCredential<TResponse>(string url)
             => SendAsync<TResponse>(
                 () => CreateRequest(HttpMethod.Post, url, new StringContent(string.Empty)),
-                retryAfterRefresh: false);
+                retryAfterRefresh: false,
+                attachAccessToken: false);
     }
 }
