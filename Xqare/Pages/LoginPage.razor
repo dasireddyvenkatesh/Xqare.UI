@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@implements IDisposable
 @using System.Timers
 @using MudBlazor
 @using Xqare.BusinessLayer.DTO
@@ -447,56 +448,53 @@
         await AuthService.LoginWithTwitter();
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         var uri = Nav.ToAbsoluteUri(Nav.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
-        // Resume MFA when registration verification or an external provider requires the second factor.
+        // Registration verification may continue in the MFA flow.
         if (query.TryGetValue("mfaUserId", out var rawUserId) &&
             Guid.TryParse(rawUserId.ToString(), out var pendingUserId))
         {
             mfaOtpRequest.UserId = pendingUserId;
-            otpRequest.Email = query.TryGetValue("email", out var emailValue) ? emailValue.ToString() : string.Empty;
+            otpRequest.Email = query.TryGetValue("email", out var emailValue)
+                ? emailValue.ToString()
+                : string.Empty;
             loginRequest.Email = otpRequest.Email;
             isMfaStep = true;
             isEmailVerificationStep = false;
             StartTimer();
 
-            if (query.TryGetValue("message", out var messageValue) && !string.IsNullOrWhiteSpace(messageValue.ToString()))
+            if (query.TryGetValue("message", out var messageValue) &&
+                !string.IsNullOrWhiteSpace(messageValue.ToString()))
                 Snackbar.Add(messageValue.ToString(), Severity.Info);
 
-            Nav.NavigateTo("/login", false, true);
-            return;
+            Nav.NavigateTo("/login", forceLoad: false, replace: true);
+            return Task.CompletedTask;
         }
 
-        if (!query.ContainsKey("data"))
-            return;
-
-        var (success, requiresMfa, userId, email, message) =
-            await AuthService.HandleExternalLoginCallbackAsync(Nav.Uri);
-
-        if (!success)
+        if (query.TryGetValue("externalLogin", out var externalValue))
         {
-            if (!string.IsNullOrWhiteSpace(message))
-                Snackbar.Add(message, Severity.Error);
-            Nav.NavigateTo("/login", false, true);
-            return;
+            var externalStatus = externalValue.ToString();
+            if (string.Equals(externalStatus, "success", StringComparison.OrdinalIgnoreCase))
+            {
+                // App startup restores the access token from the HttpOnly refresh cookie
+                // before the router renders this page.
+                Nav.NavigateTo("/dashboard", forceLoad: false, replace: true);
+                return Task.CompletedTask;
+            }
+
+            if (string.Equals(externalStatus, "failed", StringComparison.OrdinalIgnoreCase))
+            {
+                var error = query.TryGetValue("message", out var errorValue)
+                    ? errorValue.ToString()
+                    : "External sign-in failed. Please try again.";
+                Snackbar.Add(error, Severity.Error);
+                Nav.NavigateTo("/login", forceLoad: false, replace: true);
+            }
         }
 
-        if (requiresMfa && userId.HasValue)
-        {
-            mfaOtpRequest.UserId = userId.Value;
-            otpRequest.Email = email ?? string.Empty;
-            loginRequest.Email = otpRequest.Email;
-            isMfaStep = true;
-            isEmailVerificationStep = false;
-            StartTimer();
-
-            if (!string.IsNullOrWhiteSpace(message))
-                Snackbar.Add(message, Severity.Info);
-
-            Nav.NavigateTo("/login", false, true);
-        }
+        return Task.CompletedTask;
     }
 }
