@@ -110,8 +110,38 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return new OtpOperationResponse
             {
                 IsSuccess = false,
-                Message = response.Data?.Message ?? "The OTP request could not be completed."
+                Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
+                    ?? "The request could not be completed. Please try again."
             };
+        }
+
+        private static string? ExtractBackendMessage(string? payload)
+        {
+            if (string.IsNullOrWhiteSpace(payload))
+                return null;
+
+            try
+            {
+                using var document = JsonDocument.Parse(payload);
+                var root = document.RootElement;
+
+                foreach (var name in new[] { "message", "Message", "title", "Title" })
+                {
+                    if (root.ValueKind == JsonValueKind.Object &&
+                        root.TryGetProperty(name, out var value) &&
+                        value.ValueKind == JsonValueKind.String &&
+                        !string.IsNullOrWhiteSpace(value.GetString()))
+                    {
+                        return value.GetString();
+                    }
+                }
+            }
+            catch (JsonException)
+            {
+                // The response was not a structured API error; do not surface raw payloads.
+            }
+
+            return null;
         }
 
         public async Task<VerifyEmailOtpResponse> VerifyOtpAsync(VerifyEmailOtpRequest request)
