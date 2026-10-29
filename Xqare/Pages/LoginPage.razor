@@ -282,7 +282,7 @@
                     isEmailVerificationStep = true;
                     isMfaStep = true;
                     StartTimer();
-                    Snackbar.Add("Please verify your email using the OTP we sent.", Severity.Warning);
+                    Snackbar.Add(response.Message, Severity.Warning);
                     return;
                 }
 
@@ -292,7 +292,7 @@
                     isEmailVerificationStep = false;
                     isMfaStep = true;
                     StartTimer();
-                    Snackbar.Add("OTP sent to your email");
+                    Snackbar.Add(response.Message, Severity.Information);
                     return;
                 }
 
@@ -331,7 +331,7 @@
                     if (loginResponse.RequiresEmailVerification)
                     {
                         isMfaStep = false;
-                        Snackbar.Add("Email verification is still pending. Please request a new OTP.", Severity.Warning);
+                        Snackbar.Add(loginResponse.Message ?? "Email verification is still pending.", Severity.Warning);
                         return;
                     }
 
@@ -339,7 +339,7 @@
                     {
                         isMfaStep = true;
                         StartTimer();
-                        Snackbar.Add("OTP sent to your email");
+                        Snackbar.Add(loginResponse.Message, Severity.Information);
                         return;
                     }
 
