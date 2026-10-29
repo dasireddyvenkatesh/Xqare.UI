@@ -64,6 +64,15 @@ namespace Xqare.BusinessLayer.Classes.Auth
             if (!response.IsSuccess || response.Data == null || !response.Data.IsSuccess)
                 return response.Data!;
 
+            // Successful credential validation may still require email verification or MFA.
+            // Never persist an absent token or treat a verification-pending response as authenticated.
+            if (response.Data.RequiresEmailVerification ||
+                response.Data.RequiresMfa ||
+                string.IsNullOrWhiteSpace(response.Data.AccessToken))
+            {
+                return response.Data;
+            }
+
             await _tokenService.SetTokenAsync(response.Data.AccessToken);
 
             if (_authStateProvider is JwtAuthStateProvider jwtAuthStateProvider)
