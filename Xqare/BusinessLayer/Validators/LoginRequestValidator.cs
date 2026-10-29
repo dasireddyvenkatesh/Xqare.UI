@@ -11,12 +11,7 @@ namespace Xqare.BusinessLayer.Validators
                 .NotEmpty().EmailAddress();
 
             RuleFor(x => x.Password)
-                .NotEmpty()
-                .MinimumLength(8)
-                .Matches("[A-Z]").WithMessage("One uppercase required")
-                .Matches("[a-z]").WithMessage("One lowercase required")
-                .Matches("[0-9]").WithMessage("One number required")
-                .Matches(@"[\W_]").WithMessage("One symbol required");
+                .NotEmpty().WithMessage("Password is required.");
         }
     }
 }
