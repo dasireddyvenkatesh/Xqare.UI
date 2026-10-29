@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Components.WebAssembly.Http;
+using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Xqare.BusinessLayer.Classes.Auth;
 using Xqare.BusinessLayer.DTO;
 using Xqare.BusinessLayer.Interfaces.Auth;
 using Xqare.BusinessLayer.Interfaces.Common;
@@ -13,48 +14,56 @@ namespace Xqare.BusinessLayer.Services.Common
     {
         private readonly HttpClient _http;
         private readonly ITokenService _tokenService;
-        private bool _isRefreshing;
+        private readonly JwtAuthStateProvider _authStateProvider;
+        private readonly SemaphoreSlim _refreshLock = new(1, 1);
+        private DateTimeOffset _lastSuccessfulRefresh = DateTimeOffset.MinValue;
 
-        public ApiClient(HttpClient http, ITokenService tokenService)
+        public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider)
         {
             _http = http;
             _tokenService = tokenService;
+            _authStateProvider = authStateProvider;
         }
 
-        private async Task AttachTokenAsync()
+        private async Task AttachTokenAsync(HttpRequestMessage request)
         {
-            _http.DefaultRequestHeaders.Authorization = null;
-
             var token = await _tokenService.GetAccessTokenAsync();
-
             if (!string.IsNullOrWhiteSpace(token))
-            {
-                _http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token);
-            }
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
+        private HttpRequestMessage CreateRequest(HttpMethod method, string url, HttpContent? content = null)
+        {
+            var request = new HttpRequestMessage(method, url);
+            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+            if (content != null)
+                request.Content = content;
+            return request;
         }
 
         private async Task<bool> TryRefreshTokenAsync()
         {
-            if (_isRefreshing) return false;
-            _isRefreshing = true;
-
+            await _refreshLock.WaitAsync();
             try
             {
+                // Another request may already have rotated the cookie while this call waited.
+                if (DateTimeOffset.UtcNow - _lastSuccessfulRefresh < TimeSpan.FromSeconds(30))
+                    return true;
 
-                var response = await _http.SendAsync(CreateRequest(HttpMethod.Post, "api/auth/refresh-token", new StringContent("")));
-
+                using var request = CreateRequest(HttpMethod.Post, "api/auth/refresh-token", new StringContent(string.Empty));
+                using var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                     return false;
 
-                var result = await response.Content
-                    .ReadFromJsonAsync<LoginResponse>(
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>(
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (result?.AccessToken == null) return false;
+                if (result == null || !result.IsSuccess || string.IsNullOrWhiteSpace(result.AccessToken))
+                    return false;
 
                 await _tokenService.SetTokenAsync(result.AccessToken);
-
+                _lastSuccessfulRefresh = DateTimeOffset.UtcNow;
+                _authStateProvider.NotifyUserAuthentication();
                 return true;
             }
             catch
@@ -63,66 +72,72 @@ namespace Xqare.BusinessLayer.Services.Common
             }
             finally
             {
-                _isRefreshing = false;
+                _refreshLock.Release();
             }
         }
 
-        private async Task<ApiResponse<T>> SendAsync<T>(Func<Task<HttpResponseMessage>> httpCall)
+        private async Task<ApiResponse<T>> SendAsync<T>(
+            Func<HttpRequestMessage> requestFactory,
+            bool retryAfterRefresh = true)
         {
             try
             {
+                using var request = requestFactory();
+                await AttachTokenAsync(request);
+                using var response = await _http.SendAsync(request);
 
-                await AttachTokenAsync();
+                HttpResponseMessage responseToRead = response;
+                HttpResponseMessage? retryResponse = null;
 
-                var response = await httpCall();
-
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                if (response.StatusCode == HttpStatusCode.Unauthorized && retryAfterRefresh)
                 {
-
                     var refreshed = await TryRefreshTokenAsync();
-
                     if (!refreshed)
                     {
                         await _tokenService.ClearAsync();
+                        _authStateProvider.NotifyUserLogout();
                         return new ApiResponse<T>
                         {
                             IsSuccess = false,
                             StatusCode = HttpStatusCode.Unauthorized,
-                            ErrorMessage = "Session expired"
+                            ErrorMessage = "Session expired. Please sign in again."
                         };
                     }
 
-                    await AttachTokenAsync();
-                    response = await httpCall();
+                    using var retryRequest = requestFactory();
+                    await AttachTokenAsync(retryRequest);
+                    retryResponse = await _http.SendAsync(retryRequest);
+                    responseToRead = retryResponse;
                 }
 
-                string json = await response.Content.ReadAsStringAsync();
-
-                var result = new ApiResponse<T>
+                using (retryResponse)
                 {
-                    StatusCode = response.StatusCode,
-                    RawJson = json,
-                    IsSuccess = response.IsSuccessStatusCode,
-                };
+                    var json = await responseToRead.Content.ReadAsStringAsync();
+                    var result = new ApiResponse<T>
+                    {
+                        StatusCode = responseToRead.StatusCode,
+                        RawJson = json,
+                        IsSuccess = responseToRead.IsSuccessStatusCode
+                    };
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    result.ErrorMessage = json;
+                    if (!responseToRead.IsSuccessStatusCode)
+                    {
+                        result.ErrorMessage = json;
+                        return result;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        result.Data = JsonSerializer.Deserialize<T>(
+                            json,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? default!;
+                    }
+
                     return result;
                 }
-
-                if (!string.IsNullOrWhiteSpace(json))
-                {
-                    result.Data = JsonSerializer.Deserialize<T>(
-                        json,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? default!;
-                }
-
-                return result;
             }
             catch
             {
-                // Never expose transport exceptions, stack details, or internal host information in the UI.
                 return new ApiResponse<T>
                 {
                     IsSuccess = false,
@@ -132,28 +147,22 @@ namespace Xqare.BusinessLayer.Services.Common
             }
         }
 
-        private HttpRequestMessage CreateRequest(HttpMethod method, string url, HttpContent? content = null)
-        {
-            var request = new HttpRequestMessage(method, url);
-            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-            if (content != null) request.Content = content;
-            return request;
-        }
-
         public Task<ApiResponse<TResponse>> GetAsync<TResponse>(string url)
-            => SendAsync<TResponse>(() => _http.GetAsync(url));
+            => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Get, url));
 
         public Task<ApiResponse<TResponse>> PostAsync<TRequest, TResponse>(string url, TRequest data)
-            => SendAsync<TResponse>(() => _http.PostAsJsonAsync(url, data));
+            => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Post, url, JsonContent.Create(data)));
 
         public Task<ApiResponse<TResponse>> PutAsync<TRequest, TResponse>(string url, TRequest data)
-            => SendAsync<TResponse>(() => _http.PutAsJsonAsync(url, data));
+            => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Put, url, JsonContent.Create(data)));
 
         public Task<ApiResponse<bool>> DeleteAsync(string url)
-            => SendAsync<bool>(() => _http.DeleteAsync(url));
+            => SendAsync<bool>(() => CreateRequest(HttpMethod.Delete, url));
 
-        public Task CookieCredential<TResponse>(string url)
-            => SendAsync<TResponse>(() => _http.SendAsync(CreateRequest(HttpMethod.Post, url,
-                new StringContent(""))));
+        // Refresh and logout must not recursively trigger another refresh request.
+        public Task<ApiResponse<TResponse>> CookieCredential<TResponse>(string url)
+            => SendAsync<TResponse>(
+                () => CreateRequest(HttpMethod.Post, url, new StringContent(string.Empty)),
+                retryAfterRefresh: false);
     }
 }
