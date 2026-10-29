@@ -305,7 +305,7 @@
                     return;
                 }
 
-                Nav.NavigateTo("/dashboard");
+                NavigateAfterLogin();
             }
             else if (isEmailVerificationStep)
             {
@@ -427,6 +427,31 @@
         otpRequest = new();
         mfaOtpRequest = new();
     }
+    private void NavigateAfterLogin()
+    {
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(
+            Nav.ToAbsoluteUri(Nav.Uri).Query);
+        var target = "/dashboard";
+
+        if (query.TryGetValue("returnUrl", out var returnUrlValue))
+        {
+            var candidate = returnUrlValue.ToString();
+            // Accept only local paths. Prevent open redirects and login redirect loops.
+            if (!string.IsNullOrWhiteSpace(candidate) &&
+                !Uri.TryCreate(candidate, UriKind.Absolute, out _) &&
+                !candidate.StartsWith("//", StringComparison.Ordinal) &&
+                !candidate.Contains('\\') &&
+                !candidate.StartsWith("/login", StringComparison.OrdinalIgnoreCase))
+            {
+                target = candidate.StartsWith("/", StringComparison.Ordinal)
+                    ? candidate
+                    : "/" + candidate;
+            }
+        }
+
+        Nav.NavigateTo(target);
+    }
+
     async Task LoginWithGoogle()
     {
         await AuthService.LoginWithGoogle();
