@@ -310,7 +310,7 @@
 
                 if (!otpResponse.IsSuccess)
                 {
-                    Snackbar.Add("Invalid OTP", Severity.Error);
+                    Snackbar.Add(string.IsNullOrWhiteSpace(otpResponse.Message) ? "OTP verification failed." : otpResponse.Message, Severity.Error);
                     return;
                 }
 
