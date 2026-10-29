@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Json;
 using Xqare.BusinessLayer.DTO;
 using Xqare.BusinessLayer.Interfaces.Auth;
@@ -257,31 +256,6 @@ namespace Xqare.BusinessLayer.Classes.Auth
             _nav.NavigateTo(url, true);
         }
 
-        public async Task<(bool success, bool requiresMfa, Guid? userId, string? email, string? message)> HandleExternalLoginCallbackAsync(string url)
-        {
-            var uri = _nav.ToAbsoluteUri(url);
-            var query = QueryHelpers.ParseQuery(uri.Query);
 
-            if (!query.ContainsKey("data"))
-                return (false, false, null, null, null);
-
-            var json = query["data"].ToString();
-            var response = JsonSerializer.Deserialize<LoginResponse>(json);
-
-            if (response == null || !response.IsSuccess)
-                return (false, false, null, null, response?.Message);
-
-            if (!string.IsNullOrWhiteSpace(response.AccessToken) && !response.RequiresMfa)
-            {
-                await ApplySessionAsync(response);
-                _nav.NavigateTo("/dashboard", true);
-                return (true, false, response.UserId, response.Email, response.Message);
-            }
-
-            if (response.RequiresMfa && response.UserId.HasValue)
-                return (true, true, response.UserId, response.Email, response.Message);
-
-            return (false, false, response.UserId, response.Email, response.Message ?? "The login response did not contain a valid session.");
-        }
     }
 }
