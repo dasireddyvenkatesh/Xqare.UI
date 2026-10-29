@@ -7,8 +7,11 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
         Task InitializeAsync();
         Task<LoginResponse> LoginAsync(LoginRequest request);
         Task<RegisterResponse> RegisterAsync(RegisterRequest request);
-        Task<VerifyEmailOtpResponse> VerifyOtpAsync(VerifyEmailOtpRequest request);
+        Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyEmailOtpRequest request);
+        Task<LoginResponse> VerifyEmailOtpAsync(VerifyEmailOtpRequest request);
+        Task<LoginResponse> VerifyMfaOtpAsync(VerifyMfaOtpRequest request);
         Task<OtpOperationResponse> ResendOtpAsync(string email);
+        Task<OtpOperationResponse> ResendMfaOtpAsync(Guid userId);
         Task LoginWithGoogle();
         Task LoginWithGitHub();
         Task LoginWithLinkedIn();
