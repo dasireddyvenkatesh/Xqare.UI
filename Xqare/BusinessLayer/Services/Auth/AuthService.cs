@@ -29,11 +29,11 @@ namespace Xqare.BusinessLayer.Classes.Auth
         }
 
         private readonly object _initializeLock = new();
-        private Task? _initializationTask;
+        private Task<SessionRestoreOutcome>? _initializationTask;
 
         // Concurrent callers share one active restore attempt. Once it finishes,
         // a later protected-route visit can try again (for example after token expiry).
-        public Task InitializeAsync()
+        public Task<SessionRestoreOutcome> InitializeAsync()
         {
             lock (_initializeLock)
             {
@@ -44,7 +44,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             }
         }
 
-        private async Task InitializeCoreAsync()
+        private async Task<SessionRestoreOutcome> InitializeCoreAsync()
         {
             try
             {
@@ -56,20 +56,24 @@ namespace Xqare.BusinessLayer.Classes.Auth
                     .User.Identity?.IsAuthenticated == true;
 
                 if (isAuthenticated)
-                    return;
+                    return SessionRestoreOutcome.Restored;
 
                 // Use ApiClient's shared refresh lock. This is the same operation
                 // used when an API request receives 401, so startup and request
                 // recovery cannot rotate the refresh cookie concurrently.
-                var restored = await _api.RestoreSessionAsync();
+                var restoreOutcome = await _api.RestoreSessionAsync();
 
-                if (restored)
-                    return;
+                // Only an explicit 401 from the refresh endpoint proves that the
+                // refresh session is missing, expired or revoked. Network failures,
+                // timeouts and 5xx responses remain retryable and must not erase tokens.
+                if (restoreOutcome == SessionRestoreOutcome.Rejected)
+                {
+                    await _tokenService.ClearAsync();
+                    if (_authStateProvider is JwtAuthStateProvider logoutProvider)
+                        logoutProvider.NotifyUserLogout();
+                }
 
-                // Missing/invalid/expired refresh cookies should fail closed.
-                await _tokenService.ClearAsync();
-                if (_authStateProvider is JwtAuthStateProvider logoutProvider)
-                    logoutProvider.NotifyUserLogout();
+                return restoreOutcome;
             }
             finally
             {

@@ -42,7 +42,7 @@ namespace Xqare.BusinessLayer.Services.Common
             return request;
         }
 
-        private async Task<bool> TryRefreshTokenAsync(string? accessTokenUsed)
+        private async Task<SessionRestoreOutcome> TryRefreshTokenAsync(string? accessTokenUsed)
         {
             await _refreshLock.WaitAsync();
             try
@@ -58,7 +58,7 @@ namespace Xqare.BusinessLayer.Services.Common
                     (string.IsNullOrWhiteSpace(accessTokenUsed) ||
                      !string.Equals(currentToken, accessTokenUsed, StringComparison.Ordinal)))
                 {
-                    return true;
+                    return SessionRestoreOutcome.Restored;
                 }
 
                 using var request = CreateRequest(
@@ -66,27 +66,39 @@ namespace Xqare.BusinessLayer.Services.Common
                     "api/auth/refresh-token",
                     new StringContent(string.Empty));
 
-                // Never leave protected-route restoration waiting indefinitely on a
-                // cross-origin cookie refresh. A timeout returns the user to sign-in.
+                // Bound session restoration so the protected-route UI can offer a
+                // retry. A timeout/network failure is not proof that the session is invalid.
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(12));
                 using var response = await _http.SendAsync(request, timeout.Token);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    return SessionRestoreOutcome.Rejected;
+
                 if (!response.IsSuccessStatusCode)
-                    return false;
+                    return SessionRestoreOutcome.Unavailable;
 
                 var result = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>(
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
                     timeout.Token);
 
                 if (result == null || !result.IsSuccess || string.IsNullOrWhiteSpace(result.AccessToken))
-                    return false;
+                    return SessionRestoreOutcome.Unavailable;
 
                 await _tokenService.SetTokenAsync(result.AccessToken);
                 _authStateProvider.NotifyUserAuthentication();
-                return true;
+                return SessionRestoreOutcome.Restored;
+            }
+            catch (OperationCanceledException)
+            {
+                return SessionRestoreOutcome.Unavailable;
+            }
+            catch (HttpRequestException)
+            {
+                return SessionRestoreOutcome.Unavailable;
             }
             catch
             {
-                return false;
+                return SessionRestoreOutcome.Unavailable;
             }
             finally
             {
@@ -96,8 +108,9 @@ namespace Xqare.BusinessLayer.Services.Common
 
         // Startup session restoration and 401 recovery use this exact same
         // serialized refresh operation.
-        public Task<bool> RestoreSessionAsync()
+        public Task<SessionRestoreOutcome> RestoreSessionAsync()
             => TryRefreshTokenAsync(accessTokenUsed: null);
+
 
         private async Task<ApiResponse<T>> SendAsync<T>(
             Func<HttpRequestMessage> requestFactory,
@@ -117,8 +130,8 @@ namespace Xqare.BusinessLayer.Services.Common
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized && retryAfterRefresh)
                 {
-                    var refreshed = await TryRefreshTokenAsync(accessTokenUsed);
-                    if (!refreshed)
+                    var refreshOutcome = await TryRefreshTokenAsync(accessTokenUsed);
+                    if (refreshOutcome == SessionRestoreOutcome.Rejected)
                     {
                         await _tokenService.ClearAsync();
                         _authStateProvider.NotifyUserLogout();
@@ -127,6 +140,16 @@ namespace Xqare.BusinessLayer.Services.Common
                             IsSuccess = false,
                             StatusCode = HttpStatusCode.Unauthorized,
                             ErrorMessage = "Session expired. Please sign in again."
+                        };
+                    }
+
+                    if (refreshOutcome == SessionRestoreOutcome.Unavailable)
+                    {
+                        return new ApiResponse<T>
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.ServiceUnavailable,
+                            ErrorMessage = "Session validation is temporarily unavailable. Check your connection and retry."
                         };
                     }
 
