@@ -258,6 +258,74 @@ namespace Xqare.BusinessLayer.Classes.Auth
             };
         }
 
+        public async Task<LoginResponse> VerifyMfaChallengeAsync(VerifyMfaChallengeRequest request)
+        {
+            var response = await _api.PostAsync<VerifyMfaChallengeRequest, LoginResponse>(
+                "api/auth/verify-mfa-challenge", request);
+            if (!response.IsSuccess || response.Data == null)
+                return response.Data ?? new LoginResponse
+                {
+                    IsSuccess = false,
+                    Message = response.ErrorMessage ?? "The request could not be completed. Please try again."
+                };
+            await ApplySessionAsync(response.Data);
+            return response.Data;
+        }
+
+        public async Task<TotpStatusResponse> GetTotpStatusAsync()
+        {
+            var response = await _api.GetAsync<TotpStatusResponse>("api/auth/totp/status");
+            return response.Data ?? new TotpStatusResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to retrieve authenticator status."
+            };
+        }
+
+        public async Task<TotpEnrollmentStartResponse> StartTotpEnrollmentAsync(TotpEnrollmentStartRequest request)
+        {
+            var response = await _api.PostAsync<TotpEnrollmentStartRequest, TotpEnrollmentStartResponse>(
+                "api/auth/totp/enrollment/start", request);
+            return response.Data ?? new TotpEnrollmentStartResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to start authenticator setup."
+            };
+        }
+
+        public async Task<TotpEnrollmentConfirmResponse> ConfirmTotpEnrollmentAsync(TotpEnrollmentConfirmRequest request)
+        {
+            var response = await _api.PostAsync<TotpEnrollmentConfirmRequest, TotpEnrollmentConfirmResponse>(
+                "api/auth/totp/enrollment/confirm", request);
+            return response.Data ?? new TotpEnrollmentConfirmResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to verify the authenticator code."
+            };
+        }
+
+        public async Task<TotpEnrollmentConfirmResponse> RegenerateTotpRecoveryCodesAsync(TotpRecoveryCodesRegenerateRequest request)
+        {
+            var response = await _api.PostAsync<TotpRecoveryCodesRegenerateRequest, TotpEnrollmentConfirmResponse>(
+                "api/auth/totp/recovery-codes/regenerate", request);
+            return response.Data ?? new TotpEnrollmentConfirmResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to regenerate recovery codes."
+            };
+        }
+
+        public async Task<OtpOperationResponse> DisableTotpAsync(TotpDisableRequest request)
+        {
+            var response = await _api.PostAsync<TotpDisableRequest, OtpOperationResponse>(
+                "api/auth/totp/disable", request);
+            return response.Data ?? new OtpOperationResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to disable the authenticator."
+            };
+        }
+
         private async Task ApplySessionAsync(LoginResponse response)
         {
             if (!response.IsSuccess || string.IsNullOrWhiteSpace(response.AccessToken) ||

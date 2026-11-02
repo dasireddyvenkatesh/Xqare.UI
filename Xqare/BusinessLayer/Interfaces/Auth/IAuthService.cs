@@ -12,6 +12,12 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
         Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyEmailOtpRequest request);
         Task<LoginResponse> VerifyEmailOtpAsync(VerifyEmailOtpRequest request);
         Task<LoginResponse> VerifyMfaOtpAsync(VerifyMfaOtpRequest request);
+        Task<LoginResponse> VerifyMfaChallengeAsync(VerifyMfaChallengeRequest request);
+        Task<TotpStatusResponse> GetTotpStatusAsync();
+        Task<TotpEnrollmentStartResponse> StartTotpEnrollmentAsync(TotpEnrollmentStartRequest request);
+        Task<TotpEnrollmentConfirmResponse> ConfirmTotpEnrollmentAsync(TotpEnrollmentConfirmRequest request);
+        Task<TotpEnrollmentConfirmResponse> RegenerateTotpRecoveryCodesAsync(TotpRecoveryCodesRegenerateRequest request);
+        Task<OtpOperationResponse> DisableTotpAsync(TotpDisableRequest request);
         Task<OtpOperationResponse> ResendOtpAsync(string email);
         Task<OtpOperationResponse> ResendMfaOtpAsync(Guid userId);
         Task LoginWithGoogle();

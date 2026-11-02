@@ -5,6 +5,7 @@
         public bool IsSuccess { get; set; }
 
         public bool RequiresMfa { get; set; }
+        public string? MfaMethod { get; set; }
 
         public bool RequiresEmailVerification { get; set; }
 
