@@ -6,6 +6,8 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
     {
         Task InitializeAsync();
         Task<LoginResponse> LoginAsync(LoginRequest request);
+        Task<OtpOperationResponse> ForgotPasswordAsync(ForgotPasswordRequest request);
+        Task<OtpOperationResponse> ResetPasswordAsync(ResetPasswordRequest request);
         Task<RegisterResponse> RegisterAsync(RegisterRequest request);
         Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyEmailOtpRequest request);
         Task<LoginResponse> VerifyEmailOtpAsync(VerifyEmailOtpRequest request);
