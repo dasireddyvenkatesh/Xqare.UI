@@ -16,7 +16,6 @@ namespace Xqare.BusinessLayer.Services.Common
         private readonly ITokenService _tokenService;
         private readonly JwtAuthStateProvider _authStateProvider;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
-        private string? _lastRefreshAccessToken;
 
         public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider)
         {
@@ -62,14 +61,6 @@ namespace Xqare.BusinessLayer.Services.Common
                     return true;
                 }
 
-                // Also recognize a token this ApiClient instance has just issued.
-                if (hasValidCurrentToken &&
-                    !string.IsNullOrWhiteSpace(currentToken) &&
-                    string.Equals(currentToken, _lastRefreshAccessToken, StringComparison.Ordinal))
-                {
-                    return true;
-                }
-
                 using var request = CreateRequest(
                     HttpMethod.Post,
                     "api/auth/refresh-token",
@@ -86,7 +77,6 @@ namespace Xqare.BusinessLayer.Services.Common
                     return false;
 
                 await _tokenService.SetTokenAsync(result.AccessToken);
-                _lastRefreshAccessToken = result.AccessToken;
                 _authStateProvider.NotifyUserAuthentication();
                 return true;
             }
