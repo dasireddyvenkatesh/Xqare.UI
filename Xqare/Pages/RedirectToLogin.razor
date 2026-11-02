@@ -1,7 +1,42 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Xqare.BusinessLayer.Interfaces.Auth
 @inject NavigationManager Nav
+@inject IAuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (_checkingSession)
+{
+    <div class="d-flex justify-center align-center" style="min-height: 40vh;">
+        <p>Checking your session...</p>
+    </div>
+}
 
 @code {
-    protected override void OnInitialized()
+    private bool _checkingSession = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Wait for the shared restore attempt. A valid refresh cookie can still
+            // recover this protected route without sending the user through login.
+            await AuthService.InitializeAsync();
+
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity?.IsAuthenticated != true)
+                NavigateToLogin();
+        }
+        catch
+        {
+            NavigateToLogin();
+        }
+        finally
+        {
+            _checkingSession = false;
+        }
+    }
+
+    private void NavigateToLogin()
     {
         var returnUrl = Nav.ToBaseRelativePath(Nav.Uri);
         var destination = string.IsNullOrWhiteSpace(returnUrl)
