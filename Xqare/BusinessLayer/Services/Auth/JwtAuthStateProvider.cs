@@ -25,8 +25,12 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 var handler = new JwtSecurityTokenHandler();
                 var jwt = handler.ReadJwtToken(token);
 
-                // UI-only expiry check. The API remains authoritative for signature and claims validation.
-                if (jwt.ValidTo <= DateTime.UtcNow.AddSeconds(15))
+                // Locally reject stale tokens from the previous authentication contract.
+                // The API still performs signature, expiry and database-session validation.
+                var userId = jwt.Claims.FirstOrDefault(c => c.Type == "uid")?.Value;
+                var sessionId = jwt.Claims.FirstOrDefault(c => c.Type == "sid")?.Value;
+                if (!Guid.TryParse(userId, out _) || !Guid.TryParse(sessionId, out _) ||
+                    jwt.ValidTo <= DateTime.UtcNow.AddSeconds(15))
                 {
                     await _tokenService.ClearAsync();
                     return Anonymous();
