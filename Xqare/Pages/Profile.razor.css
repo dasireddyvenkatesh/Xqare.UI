@@ -1,0 +1,33 @@
+::deep .profile-section-title {
+    color: #0f2a44;
+    font-weight: 700;
+}
+
+::deep .profile-security-panel,
+::deep .profile-recovery-panel {
+    border-radius: 12px;
+}
+
+.totp-qr-image {
+    display: block;
+    width: min(100%, 240px);
+    height: auto;
+    margin: 12px auto 18px;
+    image-rendering: pixelated;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px;
+    background: white;
+}
+
+.recovery-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    padding: 8px 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: rgba(148, 163, 184, .08);
+    user-select: all;
+}

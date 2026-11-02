@@ -2,16 +2,20 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.Auth
 @attribute [Authorize]
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAuthService AuthService
+@inject ISnackbar Snackbar
 
 <PageTitle>Profile | XQARE</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
-    <MudPaper Elevation="1" Class="pa-6">
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8 profile-page">
+    <MudPaper Elevation="1" Class="pa-6 profile-card">
         <MudText Typo="Typo.h4" Class="mb-2">My Profile</MudText>
         <MudText Color="Color.Secondary" Class="mb-6">
-            Your account profile. Profile editing and mentorship preferences can be added later.
+            Manage your account details and security preferences.
         </MudText>
 
         @if (_isLoading)
@@ -21,7 +25,8 @@
         else
         {
             <MudStack Spacing="3">
-                <MudText Typo="Typo.subtitle2">Email</MudText>
+                <MudText Typo="Typo.subtitle1" Class="profile-section-title">Account information</MudText>
+                <MudText Typo="Typo.subtitle2">Email address</MudText>
                 <MudText>@(_email ?? "Email not available")</MudText>
                 <MudDivider />
                 <MudText Typo="Typo.subtitle2">Account roles</MudText>
@@ -40,6 +45,159 @@
                         }
                     </MudStack>
                 }
+
+                <MudDivider Class="my-2" />
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.h5" Class="profile-section-title">Security</MudText>
+                    <MudText Color="Color.Secondary">
+                        Protect your XQARE account with an authenticator app such as Google Authenticator or Microsoft Authenticator.
+                    </MudText>
+
+                    @if (_totpLoading)
+                    {
+                        <MudProgressLinear Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <MudPaper Outlined="true" Class="pa-4 profile-security-panel">
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
+                                <MudStack Spacing="0">
+                                    <MudText Typo="Typo.subtitle1">Authenticator app</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        @(_totpEnabled ? "Two-step verification is enabled." : "Two-step verification is not enabled.")
+                                    </MudText>
+                                </MudStack>
+                                <MudChip T="string" Color="@(_totpEnabled ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
+                                    @(_totpEnabled ? "Enabled" : "Not enabled")
+                                </MudChip>
+                            </MudStack>
+
+                            @if (_totpEnabled)
+                            {
+                                <MudText Typo="Typo.body2" Class="mt-3">
+                                    Recovery codes remaining: <b>@_recoveryCodesRemaining</b>
+                                </MudText>
+                                <MudStack Direction="Row" Spacing="2" Wrap="Wrap.Wrap" Class="mt-3">
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                               OnClick="() => _showRegenerateCodes = !_showRegenerateCodes">
+                                        Regenerate recovery codes
+                                    </MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Error"
+                                               OnClick="() => _showDisableTotp = !_showDisableTotp">
+                                        Disable authenticator
+                                    </MudButton>
+                                    <MudButton Variant="Variant.Outlined"
+                                               OnClick="() => _showEnrollment = !_showEnrollment">
+                                        Replace authenticator
+                                    </MudButton>
+                                </MudStack>
+                            }
+                            else
+                            {
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-3"
+                                           Disabled="_busy" OnClick="() => _showEnrollment = !_showEnrollment">
+                                    Set up authenticator
+                                </MudButton>
+                            }
+                        </MudPaper>
+
+                        @if (_showEnrollment)
+                        {
+                            <MudPaper Outlined="true" Class="pa-4 profile-security-panel">
+                                <MudText Typo="Typo.h6">@(_totpEnabled ? "Replace authenticator" : "Set up authenticator")</MudText>
+                                <MudText Color="Color.Secondary" Typo="Typo.body2" Class="mb-2">
+                                    Confirm your account password. If replacing an authenticator, also enter a current code from the existing app.
+                                </MudText>
+                                <MudTextField Label="Current password" @bind-Value="_enrollmentPassword"
+                                              InputType="InputType.Password" Variant="Variant.Outlined" />
+                                @if (_totpEnabled)
+                                {
+                                    <MudTextField Label="Current authenticator code" @bind-Value="_currentTotpCode"
+                                                  Variant="Variant.Outlined" MaxLength="6" InputMode="InputMode.numeric" />
+                                }
+                                <MudStack Direction="Row" Spacing="2" Class="mt-2">
+                                    <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                                               Disabled="_busy" OnClick="StartEnrollment">
+                                        Continue
+                                    </MudButton>
+                                    <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="CancelEnrollment">Cancel</MudButton>
+                                </MudStack>
+
+                                @if (_enrollment != null && _enrollment.IsSuccess)
+                                {
+                                    <MudDivider Class="my-3" />
+                                    <MudText Typo="Typo.subtitle1">1. Scan this QR code</MudText>
+                                    @if (!string.IsNullOrWhiteSpace(_enrollment.QrCodeDataUri))
+                                    {
+                                        <img class="totp-qr-image" src="@_enrollment.QrCodeDataUri" alt="XQARE authenticator setup QR code" />
+                                    }
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        Or enter this setup key manually in your authenticator app:
+                                    </MudText>
+                                    <MudTextField Value="@_enrollment.Secret" ReadOnly="true" Variant="Variant.Outlined" />
+                                    <MudText Typo="Typo.subtitle1" Class="mt-2">2. Verify your authenticator</MudText>
+                                    <MudTextField Label="Six-digit authenticator code" @bind-Value="_enrollmentCode"
+                                                  Variant="Variant.Outlined" MaxLength="6" InputMode="InputMode.numeric" />
+                                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="_busy"
+                                               OnClick="ConfirmEnrollment">
+                                        Verify and enable
+                                    </MudButton>
+                                }
+                            </MudPaper>
+                        }
+
+                        @if (_showRegenerateCodes && _totpEnabled)
+                        {
+                            <MudPaper Outlined="true" Class="pa-4 profile-security-panel">
+                                <MudText Typo="Typo.subtitle1">Regenerate recovery codes</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Enter a current authenticator code. Your previous unused recovery codes will stop working.
+                                </MudText>
+                                <MudTextField Label="Authenticator code" @bind-Value="_regenerateCode"
+                                              Variant="Variant.Outlined" MaxLength="6" InputMode="InputMode.numeric" />
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="_busy"
+                                           OnClick="RegenerateRecoveryCodes">Generate new codes</MudButton>
+                            </MudPaper>
+                        }
+
+                        @if (_showDisableTotp && _totpEnabled)
+                        {
+                            <MudPaper Outlined="true" Class="pa-4 profile-security-panel">
+                                <MudText Typo="Typo.subtitle1">Disable authenticator</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Confirm your password and enter a current authenticator code to disable two-step verification.
+                                </MudText>
+                                <MudTextField Label="Current password" @bind-Value="_disablePassword"
+                                              InputType="InputType.Password" Variant="Variant.Outlined" />
+                                <MudTextField Label="Authenticator code" @bind-Value="_disableCode"
+                                              Variant="Variant.Outlined" MaxLength="6" InputMode="InputMode.numeric" />
+                                <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_busy"
+                                           OnClick="DisableAuthenticator">Disable authenticator</MudButton>
+                            </MudPaper>
+                        }
+
+                        @if (_recoveryCodes.Count > 0)
+                        {
+                            <MudPaper Outlined="true" Class="pa-4 profile-recovery-panel">
+                                <MudText Typo="Typo.h6">Save your recovery codes</MudText>
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="my-2">
+                                    These codes are displayed only now. Store them somewhere safe. Each code can be used once.
+                                </MudAlert>
+                                <MudGrid Spacing="2">
+                                    @foreach (var code in _recoveryCodes)
+                                    {
+                                        <MudItem xs="6" sm="4">
+                                            <MudText Class="recovery-code">@code</MudText>
+                                        </MudItem>
+                                    }
+                                </MudGrid>
+                                <MudButton Variant="Variant.Outlined" Class="mt-3" OnClick="DismissRecoveryCodes">
+                                    I have saved these codes
+                                </MudButton>
+                            </MudPaper>
+                        }
+                    }
+                </MudStack>
             </MudStack>
         }
     </MudPaper>
@@ -47,8 +205,23 @@
 
 @code {
     private bool _isLoading = true;
+    private bool _totpLoading = true;
+    private bool _busy;
+    private bool _totpEnabled;
+    private bool _showEnrollment;
+    private bool _showRegenerateCodes;
+    private bool _showDisableTotp;
     private string? _email;
     private List<string> _roles = new();
+    private int _recoveryCodesRemaining;
+    private string _enrollmentPassword = string.Empty;
+    private string _currentTotpCode = string.Empty;
+    private string _enrollmentCode = string.Empty;
+    private string _regenerateCode = string.Empty;
+    private string _disablePassword = string.Empty;
+    private string _disableCode = string.Empty;
+    private TotpEnrollmentStartResponse? _enrollment;
+    private List<string> _recoveryCodes = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -61,5 +234,155 @@
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
         _isLoading = false;
+        await RefreshTotpStatus();
     }
+
+    private async Task RefreshTotpStatus()
+    {
+        _totpLoading = true;
+        var response = await AuthService.GetTotpStatusAsync();
+        if (response.IsSuccess)
+        {
+            _totpEnabled = response.IsEnabled;
+            _recoveryCodesRemaining = response.RecoveryCodesRemaining;
+        }
+        else
+        {
+            Snackbar.Add(response.Message, Severity.Error);
+        }
+        _totpLoading = false;
+    }
+
+    private async Task StartEnrollment()
+    {
+        if (string.IsNullOrWhiteSpace(_enrollmentPassword))
+        {
+            Snackbar.Add("Enter your current password.", Severity.Warning);
+            return;
+        }
+        if (_totpEnabled && !IsSixDigitCode(_currentTotpCode))
+        {
+            Snackbar.Add("Enter the current six-digit authenticator code.", Severity.Warning);
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            var response = await AuthService.StartTotpEnrollmentAsync(new TotpEnrollmentStartRequest
+            {
+                CurrentPassword = _enrollmentPassword,
+                CurrentTotpCode = _currentTotpCode
+            });
+            if (!response.IsSuccess)
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
+            }
+            _enrollment = response;
+            _enrollmentCode = string.Empty;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task ConfirmEnrollment()
+    {
+        if (!IsSixDigitCode(_enrollmentCode))
+        {
+            Snackbar.Add("Enter the six-digit code from your authenticator app.", Severity.Warning);
+            return;
+        }
+        _busy = true;
+        try
+        {
+            var response = await AuthService.ConfirmTotpEnrollmentAsync(new TotpEnrollmentConfirmRequest { Code = _enrollmentCode });
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (!response.IsSuccess) return;
+
+            _recoveryCodes = response.RecoveryCodes.ToList();
+            _showEnrollment = false;
+            _enrollment = null;
+            _enrollmentPassword = string.Empty;
+            _currentTotpCode = string.Empty;
+            _enrollmentCode = string.Empty;
+            await RefreshTotpStatus();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task RegenerateRecoveryCodes()
+    {
+        if (!IsSixDigitCode(_regenerateCode))
+        {
+            Snackbar.Add("Enter the current six-digit authenticator code.", Severity.Warning);
+            return;
+        }
+        _busy = true;
+        try
+        {
+            var response = await AuthService.RegenerateTotpRecoveryCodesAsync(
+                new TotpRecoveryCodesRegenerateRequest { Code = _regenerateCode });
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (!response.IsSuccess) return;
+
+            _recoveryCodes = response.RecoveryCodes.ToList();
+            _showRegenerateCodes = false;
+            _regenerateCode = string.Empty;
+            await RefreshTotpStatus();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task DisableAuthenticator()
+    {
+        if (string.IsNullOrWhiteSpace(_disablePassword) || !IsSixDigitCode(_disableCode))
+        {
+            Snackbar.Add("Enter your current password and authenticator code.", Severity.Warning);
+            return;
+        }
+        _busy = true;
+        try
+        {
+            var response = await AuthService.DisableTotpAsync(new TotpDisableRequest
+            {
+                CurrentPassword = _disablePassword,
+                Code = _disableCode
+            });
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (!response.IsSuccess) return;
+
+            _showDisableTotp = false;
+            _disablePassword = string.Empty;
+            _disableCode = string.Empty;
+            _recoveryCodes.Clear();
+            await RefreshTotpStatus();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void CancelEnrollment()
+    {
+        _showEnrollment = false;
+        _enrollment = null;
+        _enrollmentPassword = string.Empty;
+        _currentTotpCode = string.Empty;
+        _enrollmentCode = string.Empty;
+    }
+
+    private void DismissRecoveryCodes() => _recoveryCodes.Clear();
+
+    private static bool IsSixDigitCode(string? value)
+        => value is { Length: 6 } && value.All(c => c is >= '0' and <= '9');
 }
