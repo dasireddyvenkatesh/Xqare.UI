@@ -31,45 +31,58 @@ namespace Xqare.BusinessLayer.Classes.Auth
         private readonly object _initializeLock = new();
         private Task? _initializationTask;
 
-        // All callers share one restore operation. The router can render immediately,
-        // while protected routes await this same task before redirecting to login.
+        // Concurrent callers share one active restore attempt. Once it finishes,
+        // a later protected-route visit can try again (for example after token expiry).
         public Task InitializeAsync()
         {
             lock (_initializeLock)
             {
-                return _initializationTask ??= InitializeCoreAsync();
+                if (_initializationTask is { IsCompleted: false })
+                    return _initializationTask;
+
+                return _initializationTask = InitializeCoreAsync();
             }
         }
 
         private async Task InitializeCoreAsync()
         {
-            // A still-valid access token already exists in this tab's session storage.
-            // Use it immediately; do not make every application startup wait for a
-            // refresh-token API round-trip. The API remains authoritative and the
-            // normal 401 handling path can refresh an expired/revoked token later.
-            var isAuthenticated = (await _authStateProvider.GetAuthenticationStateAsync())
-                .User.Identity?.IsAuthenticated == true;
-
-            if (isAuthenticated)
-                return;
-
-            // No usable local access token: attempt cookie-based session restoration.
-            var response = await _api.CookieCredential<RefreshTokenResponse>("api/auth/refresh-token");
-
-            if (response.IsSuccess &&
-                response.Data?.IsSuccess == true &&
-                !string.IsNullOrWhiteSpace(response.Data.AccessToken))
+            try
             {
-                await _tokenService.SetTokenAsync(response.Data.AccessToken);
-                if (_authStateProvider is JwtAuthStateProvider jwt)
-                    jwt.NotifyUserAuthentication();
-                return;
-            }
+                // A still-valid access token already exists in this tab's session storage.
+                // Use it immediately; do not make every application startup wait for a
+                // refresh-token API round-trip. The API remains authoritative and the
+                // normal 401 handling path can refresh an expired/revoked token later.
+                var isAuthenticated = (await _authStateProvider.GetAuthenticationStateAsync())
+                    .User.Identity?.IsAuthenticated == true;
 
-            // Missing/invalid/expired refresh cookies should fail closed.
-            await _tokenService.ClearAsync();
-            if (_authStateProvider is JwtAuthStateProvider logoutProvider)
-                logoutProvider.NotifyUserLogout();
+                if (isAuthenticated)
+                    return;
+
+                // No usable local access token: attempt cookie-based session restoration.
+                var response = await _api.CookieCredential<RefreshTokenResponse>("api/auth/refresh-token");
+
+                if (response.IsSuccess &&
+                    response.Data?.IsSuccess == true &&
+                    !string.IsNullOrWhiteSpace(response.Data.AccessToken))
+                {
+                    await _tokenService.SetTokenAsync(response.Data.AccessToken);
+                    if (_authStateProvider is JwtAuthStateProvider jwt)
+                        jwt.NotifyUserAuthentication();
+                    return;
+                }
+
+                // Missing/invalid/expired refresh cookies should fail closed.
+                await _tokenService.ClearAsync();
+                if (_authStateProvider is JwtAuthStateProvider logoutProvider)
+                    logoutProvider.NotifyUserLogout();
+            }
+            finally
+            {
+                lock (_initializeLock)
+                {
+                    _initializationTask = null;
+                }
+            }
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
