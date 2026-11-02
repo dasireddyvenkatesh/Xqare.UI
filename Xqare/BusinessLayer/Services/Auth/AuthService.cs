@@ -233,35 +233,6 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data;
         }
 
-        public async Task<LoginResponse> VerifyMfaOtpAsync(VerifyMfaOtpRequest request)
-        {
-            request.DeviceId = await _device.GetDeviceIdAsync();
-            request.DeviceName = await _device.GetDeviceNameAsync();
-
-            var response = await _api.PostAsync<VerifyMfaOtpRequest, LoginResponse>("api/auth/verify-mfa-otp", request);
-            if (!response.IsSuccess || response.Data == null)
-                return response.Data ?? new LoginResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
-
-            await ApplySessionAsync(response.Data);
-            return response.Data;
-        }
-
-        public async Task<OtpOperationResponse> ResendMfaOtpAsync(Guid userId)
-        {
-            var response = await _api.PostAsync<MfaOtpRequest, OtpOperationResponse>(
-                "api/auth/request-mfa-otp", new MfaOtpRequest { Id = userId });
-
-            if (response.IsSuccess && response.Data != null)
-                return response.Data;
-
-            return new OtpOperationResponse
-            {
-                IsSuccess = false,
-                Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
-                    ?? "The request could not be completed. Please try again."
-            };
-        }
-
         public async Task<LoginResponse> VerifyMfaChallengeAsync(VerifyMfaChallengeRequest request)
         {
             var response = await _api.PostAsync<VerifyMfaChallengeRequest, LoginResponse>(

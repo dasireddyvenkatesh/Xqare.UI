@@ -1,0 +1,569 @@
+﻿@page "/login"
+@implements IDisposable
+@using System.Timers
+@using MudBlazor
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.Auth
+@using Xqare.BusinessLayer.Validators
+@using Xqare.BusinessLayer.Validators.FluentValidation
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IAuthService AuthService
+
+<section>
+
+    <MudGrid Class="login-wrapper" GutterSize="0">
+
+        <!-- LEFT PANEL -->
+        <MudItem xs="12" md="6" Class="left-panel d-none d-md-flex">
+            <MudStack Class="left-content">
+
+                <MudText Class="logo-text">
+                    X<span>QARE</span>
+                </MudText>
+
+                <MudText Class="hero-title mt-8">
+                    Welcome back to your <span>career growth</span> journey
+                </MudText>
+
+                <MudText Class="hero-sub mt-4">
+                    Built for every stage of your career — from first step to leadership.
+                </MudText>
+
+                @*                 <MudStack Direction="Row" Spacing="8" Class="stats mt-10">
+                    <MudStack>
+                        <MudText Class="stat-number">5,000+</MudText>
+                        <MudText Class="stat-label">Members</MudText>
+                    </MudStack>
+
+                    <MudStack>
+                        <MudText Class="stat-number">200+</MudText>
+                        <MudText Class="stat-label">Mentors</MudText>
+                    </MudStack>
+
+                    <MudStack>
+                        <MudText Class="stat-number">92%</MudText>
+                        <MudText Class="stat-label">Growth Rate</MudText>
+                    </MudStack>
+                </MudStack> *@
+
+            </MudStack>
+        </MudItem>
+
+        <!-- RIGHT PANEL -->
+        <MudItem xs="12" md="6" Class="right-panel">
+
+            <MudPaper Elevation="0" Class="auth-container">
+                <MudText Class="mobile-logo d-block d-md-none">
+                    X<span>QARE</span>
+                </MudText>
+                <MudText Class="auth-title">
+                    Sign in to your account
+                </MudText>
+
+                <MudText Class="auth-subtitle">
+                    Don’t have an account?
+                    <MudButton Href="/register">Create one free</MudButton>
+                </MudText>
+
+                @if (!isMfaStep)
+                {
+                    <!-- SOCIAL 2x2 -->
+                    <MudGrid Class="social-grid mt-6">
+                        <MudItem xs="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.Google"
+                                       OnClick="LoginWithGoogle">
+                                Google
+                            </MudButton>
+                        </MudItem>
+
+                        <MudItem xs="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.GitHub"
+                                       OnClick="LoginWithGitHub">
+                                GitHub
+                            </MudButton>
+                        </MudItem>
+
+                        <MudItem xs="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.LinkedIn"
+                                       OnClick="LoginWithLinkedIn">
+                                LinkedIn
+                            </MudButton>
+                        </MudItem>
+
+                        <MudItem xs="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.Twitter"
+                                       OnClick="LoginWithTwitter">
+                                Twitter
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudGrid Class="mt-6 mb-6 align-center">
+
+                        <MudItem xs="5">
+                            <MudDivider Class="divider-line-1" />
+                        </MudItem>
+
+                        <MudItem xs="2">
+                            <MudText Class="divider-text d-flex justify-center">
+                                OR CONTINUE WITH EMAIL
+                            </MudText>
+                        </MudItem>
+
+                        <MudItem xs="5">
+                            <MudDivider Class="divider-line-2" />
+                        </MudItem>
+
+                    </MudGrid>
+
+                    <!-- LOGIN FORM -->
+                    <MudForm @ref="form"
+                             Model="loginRequest"
+                             Validation="loginValidator.ToMudValidator()"
+                             OnValidSubmit="Submit">
+
+                        <MudTextField Label="Email Address"
+                                      Variant="Variant.Outlined"
+                                      @bind-Value="loginRequest.Email"
+                                      For="@(() => loginRequest.Email)"
+                                      Immediate="true" />
+
+                        <MudTextField Label="Password"
+                                      Variant="Variant.Outlined"
+                                      @bind-Value="loginRequest.Password"
+                                      For="@(() => loginRequest.Password)"
+                                      InputType="@(showPassword? InputType.Text: InputType.Password)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="TogglePassword" />
+
+                        <div class="forgot-password-row">
+                            <MudButton Href="/forgot-password"
+                                       Variant="Variant.Text"
+                                       Class="forgot-password-link">
+                                Forgot password?
+                            </MudButton>
+                        </div>
+
+                        <MudButton Disabled="@_processing"
+                                   FullWidth
+                                   Variant="Variant.Filled"
+                                   OnClick="Submit"
+                                   Class="login-btn">
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    <MudText>Processing...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Sign In →</MudText>
+                                }
+
+                            </MudStack>
+                        </MudButton>
+                        <MudText Class="security-text">
+                            🔒 Your data is protected with enterprise-grade encryption
+                        </MudText>
+                    </MudForm>
+                }
+                else
+                {
+                    <MudForm @ref="form"
+                             Model="otpRequest"
+                             OnValidSubmit="Submit"
+                             Class="mt-6">
+                        <MudButton Variant="Variant.Text" OnClick="BackToLogin" Class="back-btn">
+                            ← Back to login
+                        </MudButton>
+                        <MudTextField Label="Email" Value="loginRequest.Email"
+                                      Variant="Variant.Outlined" ReadOnly="true" />
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2 mb-2">
+                            @if (isEmailVerificationStep || mfaMethod == "email")
+                            {
+                                <span>Enter the code sent to your registered email address.</span>
+                            }
+                            else if (isRecoveryCodeStep)
+                            {
+                                <span>Enter one of your saved recovery codes.</span>
+                            }
+                            else
+                            {
+                                <span>Open your authenticator app and enter the current six-digit code.</span>
+                            }
+                        </MudText>
+                        <MudTextField Label="@(isRecoveryCodeStep ? "Recovery code" : (mfaMethod == "email" || isEmailVerificationStep ? "Email verification code" : "Authenticator code"))"
+                                      Variant="Variant.Outlined" @bind-Value="otpRequest.OtpCode"
+                                      MaxLength="@(isRecoveryCodeStep ? 36 : 6)" Immediate="true"
+                                      InputMode="@(isRecoveryCodeStep ? InputMode.text : InputMode.numeric)" />
+                        @if (isMfaStep && !isEmailVerificationStep && mfaMethod == "totp")
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Primary"
+                                       OnClick="ToggleRecoveryCode" Class="resend-btn">
+                                @(isRecoveryCodeStep ? "Use authenticator code" : "Use a recovery code")
+                            </MudButton>
+                        }
+                        @if (isEmailVerificationStep || (isMfaStep && mfaMethod == "email"))
+                        {
+                            <MudButton Variant="Variant.Text" Disabled="@isResendDisabled"
+                                       OnClick="ResendOtp" Class="resend-btn">
+                                @(isResendDisabled ? $"Resend in {secondsRemaining} s" : "Resend code")
+                            </MudButton>
+                        }
+                        <MudButton Disabled="@_processing" FullWidth Variant="Variant.Filled"
+                                   OnClick="Submit" Class="login-btn">
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    <MudText>Verifying...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Verify and Sign In →</MudText>
+                                }
+                            </MudStack>
+                        </MudButton>
+                    </MudForm>
+                }
+
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</section>
+
+@code {
+
+    MudForm form = new();
+    LoginRequest loginRequest = new();
+    VerifyEmailOtpRequest otpRequest = new();
+    VerifyMfaOtpRequest mfaOtpRequest = new();
+
+    LoginRequestValidator loginValidator = new();
+    OtpRequestValidator otpValidator = new();
+
+    private bool _processing = false;
+    bool isMfaStep = false;
+    bool isEmailVerificationStep = false;
+    bool isRecoveryCodeStep = false;
+    bool showPassword;
+    string mfaMethod = "totp";
+
+    bool isResendDisabled = true;
+    int secondsRemaining = 60;
+    Timer timer = new();
+
+    void TogglePassword() => showPassword = !showPassword;
+
+    async Task Submit()
+    {
+        if (!isMfaStep)
+        {
+            await form.ValidateAsync();
+            if (!form.IsValid)
+                return;
+        }
+        else
+        {
+            var enteredCode = otpRequest.OtpCode?.Trim() ?? string.Empty;
+            var normalizedCode = new string(enteredCode.Where(char.IsLetterOrDigit).ToArray());
+            var invalidCode = isRecoveryCodeStep
+                ? normalizedCode.Length < 20
+                : enteredCode.Length != 6 || !enteredCode.All(char.IsDigit);
+            if (invalidCode)
+            {
+                Snackbar.Add(isRecoveryCodeStep ? "Enter a valid recovery code." : "Enter the six-digit verification code.", Severity.Warning);
+                return;
+            }
+        }
+
+        _processing = true;
+        try
+        {
+            if (!isMfaStep)
+            {
+                // 🔐 CALL LOGIN API
+                var response = await AuthService.LoginAsync(loginRequest);
+
+                if (!response.IsSuccess)
+                {
+                    Snackbar.Add(response.Message!, Severity.Error);
+                    return;
+                }
+
+                if (response.RequiresEmailVerification)
+                {
+                    otpRequest.Email = loginRequest.Email;
+                    isEmailVerificationStep = true;
+                    isMfaStep = true;
+                    StartTimer();
+                    Snackbar.Add(response.Message, Severity.Warning);
+                    return;
+                }
+
+                if (response.RequiresMfa)
+                {
+                    otpRequest.Email = loginRequest.Email;
+                    mfaOtpRequest.UserId = Guid.Empty;
+                    mfaMethod = response.MfaMethod ?? "totp";
+                    isRecoveryCodeStep = false;
+                    isEmailVerificationStep = false;
+                    isMfaStep = true;
+                    if (mfaMethod == "email") StartTimer();
+                    Snackbar.Add(response.Message, Severity.Info);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(response.AccessToken))
+                {
+                    Snackbar.Add("Login did not return a valid session. Please try again.", Severity.Error);
+                    return;
+                }
+
+                NavigateAfterLogin();
+            }
+            else if (isEmailVerificationStep)
+            {
+                var otpResponse = await AuthService.VerifyEmailOtpAsync(otpRequest);
+
+                if (!otpResponse.IsSuccess)
+                {
+                    Snackbar.Add(otpResponse.Message ?? "OTP verification failed.", Severity.Error);
+                    return;
+                }
+
+                if (otpResponse.RequiresMfa)
+                {
+                    mfaOtpRequest.UserId = Guid.Empty;
+                    mfaMethod = otpResponse.MfaMethod ?? "email";
+                    otpRequest.OtpCode = string.Empty;
+                    isRecoveryCodeStep = false;
+                    isEmailVerificationStep = false;
+                    if (mfaMethod == "email") StartTimer();
+                    Snackbar.Add(otpResponse.Message, Severity.Info);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(otpResponse.AccessToken))
+                {
+                    Snackbar.Add(otpResponse.Message ?? "Email verified, but no login session was returned. Please sign in again.", Severity.Error);
+                    isMfaStep = false;
+                    return;
+                }
+
+                Snackbar.Add(otpResponse.Message ?? "Login successful.", Severity.Success);
+                Nav.NavigateTo("/dashboard");
+            }
+            else
+            {
+                LoginResponse otpResponse;
+                if (mfaMethod == "email")
+                {
+                    mfaOtpRequest.Code = otpRequest.OtpCode;
+                    otpResponse = await AuthService.VerifyMfaOtpAsync(mfaOtpRequest);
+                }
+                else
+                {
+                    otpResponse = await AuthService.VerifyMfaChallengeAsync(new VerifyMfaChallengeRequest
+                    {
+                        Code = otpRequest.OtpCode.Trim(),
+                        Factor = isRecoveryCodeStep ? "recovery" : "totp"
+                    });
+                }
+
+                if (!otpResponse.IsSuccess)
+                {
+                    Snackbar.Add(otpResponse.Message ?? "Verification failed.", Severity.Error);
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(otpResponse.AccessToken))
+                {
+                    Snackbar.Add(otpResponse.Message ?? "MFA verification did not return a valid session.", Severity.Error);
+                    return;
+                }
+                Snackbar.Add(otpResponse.Message ?? "Login successful.", Severity.Success);
+                Nav.NavigateTo("/dashboard");
+            }
+        }
+        catch
+        {
+            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
+        }
+    }
+
+    async Task ResendOtp()
+    {
+        OtpOperationResponse response;
+        if (isEmailVerificationStep)
+            response = await AuthService.ResendOtpAsync(loginRequest.Email);
+        else if (mfaMethod == "email")
+            response = await AuthService.ResendMfaOtpAsync(Guid.Empty);
+        else
+            response = new OtpOperationResponse { IsSuccess = false, Message = "Authenticator codes are generated by your authenticator app." };
+
+        Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+        if (response.IsSuccess)
+            StartTimer();
+    }
+
+    void StartTimer()
+    {
+        isResendDisabled = true;
+        secondsRemaining = 60;
+
+        timer?.Dispose();
+
+        timer = new Timer(1000);
+        timer.Elapsed += OnTimerTick;
+        timer.Start();
+    }
+
+    void OnTimerTick(object? sender, ElapsedEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            if (secondsRemaining > 0)
+                secondsRemaining--;
+            else
+            {
+                isResendDisabled = false;
+                timer.Stop();
+            }
+
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+
+    void BackToLogin()
+    {
+        isMfaStep = false;
+        isEmailVerificationStep = false;
+        isRecoveryCodeStep = false;
+        mfaMethod = "totp";
+        otpRequest = new();
+        mfaOtpRequest = new();
+        timer?.Stop();
+    }
+
+    void ToggleRecoveryCode()
+    {
+        isRecoveryCodeStep = !isRecoveryCodeStep;
+        otpRequest.OtpCode = string.Empty;
+    }
+    private void NavigateAfterLogin()
+    {
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(
+            Nav.ToAbsoluteUri(Nav.Uri).Query);
+        var target = "/dashboard";
+
+        if (query.TryGetValue("returnUrl", out var returnUrlValue))
+        {
+            var candidate = returnUrlValue.ToString();
+            // Accept only local paths. Prevent open redirects and login redirect loops.
+            if (!string.IsNullOrWhiteSpace(candidate) &&
+                !Uri.TryCreate(candidate, UriKind.Absolute, out _) &&
+                !candidate.StartsWith("//", StringComparison.Ordinal) &&
+                !candidate.Contains('\\') &&
+                !candidate.StartsWith("/login", StringComparison.OrdinalIgnoreCase))
+            {
+                target = candidate.StartsWith("/", StringComparison.Ordinal)
+                    ? candidate
+                    : "/" + candidate;
+            }
+        }
+
+        Nav.NavigateTo(target);
+    }
+
+    async Task LoginWithGoogle()
+    {
+        await AuthService.LoginWithGoogle();
+
+    }
+
+    async Task LoginWithGitHub()
+    {
+        await AuthService.LoginWithGitHub();
+    }
+
+    async Task LoginWithLinkedIn()
+    {
+        await AuthService.LoginWithLinkedIn();
+    }
+
+    async Task LoginWithTwitter()
+    {
+        await AuthService.LoginWithTwitter();
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        // OAuth MFA returns with an API-hosted HttpOnly challenge cookie.
+        // No user identifier or challenge token is carried in the URL.
+        if (query.TryGetValue("mfa", out var mfaValue) &&
+            string.Equals(mfaValue.ToString(), "required", StringComparison.OrdinalIgnoreCase))
+        {
+            otpRequest.Email = query.TryGetValue("email", out var emailValue)
+                ? emailValue.ToString()
+                : string.Empty;
+            loginRequest.Email = otpRequest.Email;
+            mfaMethod = query.TryGetValue("mfaMethod", out var methodValue)
+                ? methodValue.ToString()
+                : "totp";
+            isMfaStep = true;
+            isEmailVerificationStep = false;
+            isRecoveryCodeStep = false;
+            otpRequest.OtpCode = string.Empty;
+            if (mfaMethod == "email") StartTimer();
+
+            if (query.TryGetValue("message", out var messageValue) &&
+                !string.IsNullOrWhiteSpace(messageValue.ToString()))
+                Snackbar.Add(messageValue.ToString(), Severity.Info);
+
+            Nav.NavigateTo("/login", forceLoad: false, replace: true);
+            return Task.CompletedTask;
+        }
+
+        if (query.TryGetValue("externalLogin", out var externalValue))
+        {
+            var externalStatus = externalValue.ToString();
+            if (string.Equals(externalStatus, "success", StringComparison.OrdinalIgnoreCase))
+            {
+                // Session restoration runs in the background. The protected dashboard
+                // route waits for that shared restore attempt before redirecting to login.
+                Nav.NavigateTo("/dashboard", forceLoad: false, replace: true);
+                return Task.CompletedTask;
+            }
+
+            if (string.Equals(externalStatus, "failed", StringComparison.OrdinalIgnoreCase))
+            {
+                var error = query.TryGetValue("message", out var errorValue)
+                    ? errorValue.ToString()
+                    : "External sign-in failed. Please try again.";
+                Snackbar.Add(error, Severity.Error);
+                Nav.NavigateTo("/login", forceLoad: false, replace: true);
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+}
