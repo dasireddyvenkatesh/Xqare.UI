@@ -382,7 +382,7 @@
                 {
                     var email = Uri.EscapeDataString(otpResponse.Email ?? otpRequest.Email);
                     var message = Uri.EscapeDataString(otpResponse.Message ?? string.Empty);
-                    Nav.NavigateTo($"/login?mfaUserId={otpResponse.UserId}&email={email}&message={message}");
+                    Nav.NavigateTo($"/login?mfa=required&email={email}&message={message}");
                     return;
                 }
 
