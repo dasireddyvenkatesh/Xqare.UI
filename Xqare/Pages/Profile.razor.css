@@ -1,43 +1,190 @@
-::deep .profile-section-title {
+.profile-page {
+    padding-top: 36px;
+    padding-bottom: 48px;
+}
+
+.profile-page-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.profile-page-title {
+    color: #0f2a44;
+    font-weight: 750;
+    letter-spacing: -0.4px;
+    margin-bottom: 4px;
+}
+
+.profile-heading-chip {
+    align-self: center;
+}
+
+.profile-surface {
+    height: 100%;
+    border: 1px solid #e8edf3;
+    border-radius: 16px;
+    background: var(--mud-palette-surface);
+}
+
+.profile-identity-panel,
+.profile-security-panel {
+    padding: 24px;
+}
+
+.profile-identity-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.profile-avatar {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.profile-identity-copy {
+    min-width: 0;
+}
+
+.profile-display-name {
+    color: #0f2a44;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.profile-email {
+    overflow-wrap: anywhere;
+}
+
+.profile-overline {
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: .8px;
+}
+
+.profile-fact-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, .20);
+}
+
+.profile-fact-row:last-of-type {
+    border-bottom: 0;
+}
+
+.profile-fact-value {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.profile-role-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.profile-security-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.profile-security-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    border-radius: 14px;
+    background: rgba(81, 67, 223, .08);
+}
+
+.profile-security-heading-copy {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.profile-section-title {
     color: #0f2a44;
     font-weight: 700;
 }
 
-::deep .profile-security-panel,
-::deep .profile-recovery-panel {
-    border-radius: 12px;
-}
-
-.profile-security-header {
+.profile-authenticator-summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    width: 100%;
-    flex-wrap: wrap;
+    padding: 4px 0 12px;
 }
 
-.profile-security-summary {
+.profile-summary-title {
+    font-weight: 700;
+}
+
+.profile-security-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 12px 0 18px;
+}
+
+.profile-metric {
     min-width: 0;
-    text-align: left;
+    padding: 12px;
+    border: 1px solid #e8edf3;
+    border-radius: 12px;
+    background: rgba(148, 163, 184, .06);
 }
 
-.profile-security-actions {
+.profile-metric-value {
+    overflow-wrap: anywhere;
+}
+
+.profile-security-actions,
+.profile-form-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
+}
+
+.profile-action-panel,
+.profile-recovery-panel {
+    padding: 20px;
+    border-radius: 14px;
+}
+
+.profile-action-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
 }
 
 .totp-qr-image {
     display: block;
     width: min(100%, 240px);
     height: auto;
-    margin: 12px auto 18px;
+    margin: 16px auto;
     image-rendering: pixelated;
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 8px;
+    border-radius: 12px;
+    padding: 10px;
     background: white;
 }
 
@@ -46,9 +193,20 @@
     font-size: 14px;
     font-weight: 700;
     text-align: center;
-    padding: 8px 6px;
+    padding: 10px 6px;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 9px;
     background: rgba(148, 163, 184, .08);
     user-select: all;
+    overflow-wrap: anywhere;
+}
+
+::deep .profile-action-panel .mud-input-control,
+::deep .profile-security-panel .mud-input-control {
+    width: 100%;
+}
+
+::deep .session-restore-panel {
+    border: 1px solid #e8edf3;
+    border-radius: 16px;
 }

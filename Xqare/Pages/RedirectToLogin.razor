@@ -1,4 +1,5 @@
 @using Microsoft.AspNetCore.Components.Authorization
+@using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.Auth
 @inject NavigationManager Nav
 @inject IAuthService AuthService
@@ -7,34 +8,78 @@
 @if (_checkingSession)
 {
     <div class="d-flex justify-center align-center" style="min-height: 40vh;">
-        <p>Checking your session...</p>
+        <MudStack AlignItems="AlignItems.Center" Spacing="2">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Restoring your session...</MudText>
+        </MudStack>
     </div>
+}
+else if (_restoreUnavailable)
+{
+    <MudContainer MaxWidth="MaxWidth.Small" Class="py-10">
+        <MudPaper Class="pa-6 session-restore-panel" Elevation="1">
+            <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Warning" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Class="mt-3">We couldn't verify your session</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">
+                The authentication service did not respond. Your saved session has not been cleared.
+                Check your connection and try again.
+            </MudText>
+            <MudStack Direction="Row" Spacing="2" Class="mt-5" Wrap="Wrap.Wrap">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           Disabled="_checkingSession" OnClick="RetrySessionRestore">
+                    Try again
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
+                           OnClick="NavigateToLogin">
+                    Go to sign in
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    </MudContainer>
 }
 
 @code {
     private bool _checkingSession = true;
+    private bool _restoreUnavailable;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
+        => RestoreSessionAsync();
+
+    private async Task RestoreSessionAsync()
     {
+        _checkingSession = true;
+        _restoreUnavailable = false;
+
         try
         {
-            // Wait for the shared restore attempt. A valid refresh cookie can still
-            // recover this protected route without sending the user through login.
-            await AuthService.InitializeAsync();
-
+            var outcome = await AuthService.InitializeAsync();
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            if (authState.User.Identity?.IsAuthenticated != true)
-                NavigateToLogin();
+
+            if (authState.User.Identity?.IsAuthenticated == true)
+                return;
+
+            if (outcome == SessionRestoreOutcome.Unavailable)
+            {
+                _restoreUnavailable = true;
+                return;
+            }
+
+            NavigateToLogin();
         }
         catch
         {
-            NavigateToLogin();
+            // An unexpected client-side failure is retryable too. Do not clear
+            // the stored access token here because the failure isn't proof of expiry.
+            _restoreUnavailable = true;
         }
         finally
         {
             _checkingSession = false;
         }
     }
+
+    private Task RetrySessionRestore()
+        => RestoreSessionAsync();
 
     private void NavigateToLogin()
     {
