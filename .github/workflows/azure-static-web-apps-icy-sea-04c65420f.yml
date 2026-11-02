@@ -77,6 +77,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ICY_SEA_04C65420F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
+          # GitHub repository production branch. Pushes from Sandbox are routed
+          # to a branch preview environment instead of the production environment.
+          production_branch: "master"
           app_location: "./publish/wwwroot"
           api_location: ""
           output_location: ""
