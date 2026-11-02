@@ -102,7 +102,16 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 "api/auth/reset-password", request);
 
             if (response.IsSuccess && response.Data != null)
+            {
+                if (response.Data.IsSuccess)
+                {
+                    await _tokenService.ClearAsync();
+                    if (_authStateProvider is JwtAuthStateProvider jwt)
+                        jwt.NotifyUserLogout();
+                }
+
                 return response.Data;
+            }
 
             return new OtpOperationResponse
             {
