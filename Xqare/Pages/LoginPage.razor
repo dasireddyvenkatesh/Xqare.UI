@@ -142,6 +142,14 @@
                                       AdornmentIcon="@(showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                                       OnAdornmentClick="TogglePassword" />
 
+                        <div class="forgot-password-row">
+                            <MudButton Href="/forgot-password"
+                                       Variant="Variant.Text"
+                                       Class="forgot-password-link">
+                                Forgot password?
+                            </MudButton>
+                        </div>
+
                         <MudButton Disabled="@_processing"
                                    FullWidth
                                    Variant="Variant.Filled"
