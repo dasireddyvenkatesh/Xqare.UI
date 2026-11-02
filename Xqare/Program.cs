@@ -1,4 +1,3 @@
-using FluentValidation;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -15,7 +14,6 @@ using Xqare.BusinessLayer.Interfaces.Common;
 using Xqare.BusinessLayer.Interfaces.ContactUs;
 using Xqare.BusinessLayer.Interfaces.PartnerShip;
 using Xqare.BusinessLayer.Services.Common;
-using Xqare.BusinessLayer.Validators;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -27,7 +25,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseU
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
-builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 builder.Services.AddSingleton<VisitCounterService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IContactUsService, ContactUsService>();
