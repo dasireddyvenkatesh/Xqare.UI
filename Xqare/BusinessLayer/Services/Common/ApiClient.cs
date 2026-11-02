@@ -16,7 +16,7 @@ namespace Xqare.BusinessLayer.Services.Common
         private readonly ITokenService _tokenService;
         private readonly JwtAuthStateProvider _authStateProvider;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
-        private DateTimeOffset _lastSuccessfulRefresh = DateTimeOffset.MinValue;
+        private string? _lastRefreshAccessToken;
 
         public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider)
         {
@@ -25,11 +25,13 @@ namespace Xqare.BusinessLayer.Services.Common
             _authStateProvider = authStateProvider;
         }
 
-        private async Task AttachTokenAsync(HttpRequestMessage request)
+        private async Task<string?> AttachTokenAsync(HttpRequestMessage request)
         {
             var token = await _tokenService.GetAccessTokenAsync();
             if (!string.IsNullOrWhiteSpace(token))
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            return token;
         }
 
         private HttpRequestMessage CreateRequest(HttpMethod method, string url, HttpContent? content = null)
@@ -41,16 +43,38 @@ namespace Xqare.BusinessLayer.Services.Common
             return request;
         }
 
-        private async Task<bool> TryRefreshTokenAsync()
+        private async Task<bool> TryRefreshTokenAsync(string? accessTokenUsed)
         {
             await _refreshLock.WaitAsync();
             try
             {
-                // Another request may already have rotated the cookie while this call waited.
-                if (DateTimeOffset.UtcNow - _lastSuccessfulRefresh < TimeSpan.FromSeconds(30))
-                    return true;
+                // A different request may have refreshed the session while this
+                // request was waiting. Reuse that token instead of rotating the
+                // refresh cookie again.
+                var currentToken = await _tokenService.GetAccessTokenAsync();
+                var currentState = await _authStateProvider.GetAuthenticationStateAsync();
+                var hasValidCurrentToken = currentState.User.Identity?.IsAuthenticated == true;
 
-                using var request = CreateRequest(HttpMethod.Post, "api/auth/refresh-token", new StringContent(string.Empty));
+                if (hasValidCurrentToken &&
+                    (string.IsNullOrWhiteSpace(accessTokenUsed) ||
+                     !string.Equals(currentToken, accessTokenUsed, StringComparison.Ordinal)))
+                {
+                    return true;
+                }
+
+                // Also recognize a token this ApiClient instance has just issued.
+                if (hasValidCurrentToken &&
+                    !string.IsNullOrWhiteSpace(currentToken) &&
+                    string.Equals(currentToken, _lastRefreshAccessToken, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+
+                using var request = CreateRequest(
+                    HttpMethod.Post,
+                    "api/auth/refresh-token",
+                    new StringContent(string.Empty));
+
                 using var response = await _http.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                     return false;
@@ -62,7 +86,7 @@ namespace Xqare.BusinessLayer.Services.Common
                     return false;
 
                 await _tokenService.SetTokenAsync(result.AccessToken);
-                _lastSuccessfulRefresh = DateTimeOffset.UtcNow;
+                _lastRefreshAccessToken = result.AccessToken;
                 _authStateProvider.NotifyUserAuthentication();
                 return true;
             }
@@ -76,6 +100,11 @@ namespace Xqare.BusinessLayer.Services.Common
             }
         }
 
+        // Startup session restoration and 401 recovery use this exact same
+        // serialized refresh operation.
+        public Task<bool> RestoreSessionAsync()
+            => TryRefreshTokenAsync(accessTokenUsed: null);
+
         private async Task<ApiResponse<T>> SendAsync<T>(
             Func<HttpRequestMessage> requestFactory,
             bool retryAfterRefresh = true,
@@ -84,8 +113,9 @@ namespace Xqare.BusinessLayer.Services.Common
             try
             {
                 using var request = requestFactory();
+                string? accessTokenUsed = null;
                 if (attachAccessToken)
-                    await AttachTokenAsync(request);
+                    accessTokenUsed = await AttachTokenAsync(request);
                 using var response = await _http.SendAsync(request);
 
                 HttpResponseMessage responseToRead = response;
@@ -93,7 +123,7 @@ namespace Xqare.BusinessLayer.Services.Common
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized && retryAfterRefresh)
                 {
-                    var refreshed = await TryRefreshTokenAsync();
+                    var refreshed = await TryRefreshTokenAsync(accessTokenUsed);
                     if (!refreshed)
                     {
                         await _tokenService.ClearAsync();
