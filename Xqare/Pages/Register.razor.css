@@ -53,6 +53,8 @@
     background: #f9fafb;
     display: flex;
     justify-content: center;
+    min-width: 0;
+    box-sizing: border-box;
     padding: 80px 20px;
 }
 
@@ -61,7 +63,10 @@
 }
 
 ::deep .auth-container {
-    width: 420px;
+    width: 100%;
+    max-width: 420px;
+    min-width: 0;
+    box-sizing: border-box;
     background-color: transparent;
 }
 
