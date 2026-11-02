@@ -80,6 +80,38 @@ namespace Xqare.BusinessLayer.Classes.Auth
             }
         }
 
+        public async Task<OtpOperationResponse> ForgotPasswordAsync(ForgotPasswordRequest request)
+        {
+            var response = await _api.PostAsync<ForgotPasswordRequest, OtpOperationResponse>(
+                "api/auth/forgot-password", request);
+
+            if (response.IsSuccess && response.Data != null)
+                return response.Data;
+
+            return new OtpOperationResponse
+            {
+                IsSuccess = false,
+                Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
+                    ?? "The request could not be completed. Please try again."
+            };
+        }
+
+        public async Task<OtpOperationResponse> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            var response = await _api.PostAsync<ResetPasswordRequest, OtpOperationResponse>(
+                "api/auth/reset-password", request);
+
+            if (response.IsSuccess && response.Data != null)
+                return response.Data;
+
+            return new OtpOperationResponse
+            {
+                IsSuccess = false,
+                Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
+                    ?? "The request could not be completed. Please try again."
+            };
+        }
+
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
 
