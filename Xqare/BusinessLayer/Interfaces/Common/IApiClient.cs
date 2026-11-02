@@ -13,5 +13,8 @@ namespace Xqare.BusinessLayer.Interfaces.Common
         Task<ApiResponse<bool>> DeleteAsync(string url);
 
         Task<ApiResponse<TResponse>> CookieCredential<TResponse>(string url);
+
+        // Shares the same serialized refresh flow used by requests that receive 401.
+        Task<bool> RestoreSessionAsync();
     }
 }
