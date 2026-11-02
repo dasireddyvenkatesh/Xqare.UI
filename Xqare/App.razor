@@ -1,10 +1,15 @@
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.WebAssembly.Services
 @using Xqare.Pages
 @using Xqare.BusinessLayer.Interfaces.Auth
 @inject IAuthService AuthService
+@inject LazyAssemblyLoader AssemblyLoader
 
 <CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+    <Router AppAssembly="@typeof(App).Assembly"
+        NotFoundPage="typeof(Pages.NotFound)"
+        OnNavigateAsync="OnNavigateAsync">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
                 <NotAuthorized>
@@ -39,6 +44,39 @@
         {
             // Keep the application shell available. Protected routes handle an
             // unsuccessful restore by sending the user to the login page.
+        }
+    }
+
+    private readonly SemaphoreSlim _fluentValidationLoadLock = new(1, 1);
+    private bool _fluentValidationLoaded;
+
+    private async Task OnNavigateAsync(NavigationContext context)
+    {
+        var route = context.Path.Split('?', '#')[0].Trim('/');
+
+        // These forms construct FluentValidation validators directly. Keep the
+        // package out of the initial homepage/authentication download and load it
+        // only when a route that needs validation is opened.
+        var requiresValidation = route.Equals("login", StringComparison.OrdinalIgnoreCase)
+            || route.Equals("register", StringComparison.OrdinalIgnoreCase)
+            || route.Equals("contact", StringComparison.OrdinalIgnoreCase)
+            || route.Equals("hiringpartner", StringComparison.OrdinalIgnoreCase);
+
+        if (!requiresValidation || _fluentValidationLoaded)
+            return;
+
+        await _fluentValidationLoadLock.WaitAsync();
+        try
+        {
+            if (_fluentValidationLoaded)
+                return;
+
+            await AssemblyLoader.LoadAssembliesAsync(new[] { "FluentValidation.dll" });
+            _fluentValidationLoaded = true;
+        }
+        finally
+        {
+            _fluentValidationLoadLock.Release();
         }
     }
 }
