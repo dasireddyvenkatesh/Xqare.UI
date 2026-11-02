@@ -6,7 +6,7 @@ namespace Xqare.BusinessLayer.Classes.Auth;
 public class TokenService : ITokenService
 {
     private readonly IJSRuntime _js;
-    private const string Key = "xq_access_token";
+    private const string Key = "xq_access_token_v2";
 
     // In-memory cache so we don't call JS every single time
     private string? _cachedToken;
