@@ -218,7 +218,7 @@
                         <MudButton Variant="Variant.Text"
                                    OnClick="BackToRegister"
                                    Class="back-btn">
-                            ← Back to login
+                            ← Back to registration
                         </MudButton>
 
                         <MudTextField Label="Email"
@@ -233,6 +233,23 @@
                                       MaxLength="6"
                                       Immediate="true"
                                       InputMode="InputMode.numeric" />
+
+                        <MudTextField Label="Set Password"
+                                      Variant="Variant.Outlined"
+                                      InputType="@(showPassword ? InputType.Text : InputType.Password)"
+                                      @bind-Value="registerRequest.Password"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="TogglePassword"
+                                      HelperText="Choose the final password for this account." />
+
+                        <MudTextField Label="Confirm Password"
+                                      Variant="Variant.Outlined"
+                                      InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
+                                      @bind-Value="registerRequest.ConfirmPassword"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showConfirmPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="ToggleConfirmPassword" />
 
                         <MudButton Variant="Variant.Text"
                                    Disabled="@isResendDisabled"
@@ -303,34 +320,57 @@
 
     async Task Submit()
     {
-        await form.ValidateAsync();
-
-        if (!form.IsValid)
+        // Guard against double-clicks and duplicate form/button submit events.
+        if (_processing)
             return;
 
         _processing = true;
 
         try
         {
+            await form.ValidateAsync();
+
+            if (!form.IsValid)
+                return;
+
+            if (isOtpStep)
+            {
+                // Validate the password again on the OTP step because it can be edited here.
+                var passwordValidation = validationRules.Validate(registerRequest);
+                if (!passwordValidation.IsValid)
+                {
+                    foreach (var failure in passwordValidation.Errors)
+                        Snackbar.Add(failure.ErrorMessage, Severity.Error);
+
+                    return;
+                }
+            }
 
             if (!isOtpStep)
             {
                 // STEP 1: REGISTER
                 var response = await AuthService.RegisterAsync(registerRequest);
 
-                if (!response.IsSuccess)
+                // A pending account may already have a valid OTP in its 60-second
+                // resend cooldown. Still show the OTP step so the user can use that code.
+                if (response.RequiresEmailVerification)
                 {
-                    Snackbar.Add(response.Message, Severity.Error);
+                    otpRequest.Email = string.IsNullOrWhiteSpace(response.Email)
+                        ? registerRequest.Email
+                        : response.Email;
+                    isOtpStep = true;
+
+                    Snackbar.Add(
+                        response.Message ?? "Enter the verification code sent to your email.",
+                        response.IsSuccess ? Severity.Info : Severity.Warning);
+
+                    StartTimer(GetResendCooldownSeconds(response.Message));
                     return;
                 }
 
-                if (response.RequiresEmailVerification)
+                if (!response.IsSuccess)
                 {
-                    otpRequest.Email = registerRequest.Email;
-                    isOtpStep = true;
-
-                    Snackbar.Add(response.Message);
-                    StartTimer();
+                    Snackbar.Add(response.Message, Severity.Error);
                     return;
                 }
             }
@@ -390,11 +430,32 @@
 
     }
 
-    void StartTimer()
+    private static int GetResendCooldownSeconds(string? message)
+    {
+        const string prefix = "Please wait ";
+        if (string.IsNullOrWhiteSpace(message))
+            return 60;
+
+        var start = message.IndexOf(prefix, StringComparison.OrdinalIgnoreCase);
+        if (start < 0)
+            return 60;
+
+        start += prefix.Length;
+        var remaining = message[start..];
+        var separator = remaining.IndexOf(' ');
+        var number = separator >= 0 ? remaining[..separator] : remaining;
+
+        return int.TryParse(number, out var seconds)
+            ? Math.Clamp(seconds, 1, 3600)
+            : 60;
+    }
+
+    void StartTimer(int durationSeconds = 60)
     {
         isResendDisabled = true;
-        secondsRemaining = 60;
+        secondsRemaining = Math.Clamp(durationSeconds, 1, 3600);
 
+        timer?.Stop();
         timer?.Dispose();
 
         timer = new Timer(1000);
