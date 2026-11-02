@@ -50,7 +50,7 @@
     private readonly SemaphoreSlim _fluentValidationLoadLock = new(1, 1);
     private bool _fluentValidationLoaded;
 
-    private async Task OnNavigateAsync(NavigationContext context)
+    private async Task OnNavigateAsync(Microsoft.AspNetCore.Components.Routing.NavigationContext context)
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 
