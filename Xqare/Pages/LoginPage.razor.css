@@ -167,3 +167,17 @@
 ::deep .mobile-logo span {
     color: #f59e0b;
 }
+::deep .forgot-password-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2px;
+}
+
+::deep .forgot-password-link {
+    color: #d97706;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: none;
+    min-width: 0;
+    padding: 4px 0;
+}
