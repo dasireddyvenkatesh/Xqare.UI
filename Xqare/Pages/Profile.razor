@@ -1,354 +1,457 @@
 @page "/profile"
-@using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.JSInterop
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.Auth
+@using Xqare.BusinessLayer.Interfaces.Profile
 @attribute [Authorize]
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IProfileService ProfileService
 @inject IAuthService AuthService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JS
 
-<PageTitle>Profile | XQARE</PageTitle>
+<PageTitle>My Profile | XQARE</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="profile-page">
-    <div class="profile-page-heading">
-        <div>
-            <MudText Typo="Typo.h4" Class="profile-page-title">Account &amp; Profile</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary">
-                View your account information and manage how you protect your XQARE sign-in.
-            </MudText>
+<section class="profile-page">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="profile-container">
+        <div class="profile-hero">
+            <div class="profile-hero-copy">
+                <MudText Typo="Typo.overline" Class="profile-eyebrow">YOUR XQARE ACCOUNT</MudText>
+                <MudText Typo="Typo.h3" Class="profile-hero-title">My profile</MudText>
+                <MudText Typo="Typo.body1" Class="profile-hero-subtitle">
+                    Keep your personal details current and manage your account security in one place.
+                </MudText>
+            </div>
+            <div class="profile-hero-meta">
+                <MudChip T="string" Color="@(_profile?.IsActive == true ? Color.Success : Color.Warning)"
+                         Variant="Variant.Filled" Class="profile-hero-chip">
+                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Class="mr-1" />
+                    @(_profile?.IsActive == true ? "Account active" : "Account status unavailable")
+                </MudChip>
+                <MudText Typo="Typo.caption" Class="profile-hero-meta-text">
+                    Member since @_profile?.CreatedAt.ToLocalTime().ToString("MMM yyyy")
+                </MudText>
+            </div>
+            <div class="profile-hero-orbit profile-hero-orbit-one"></div>
+            <div class="profile-hero-orbit profile-hero-orbit-two"></div>
         </div>
-        <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary" Class="profile-heading-chip">
-            Account settings
-        </MudChip>
-    </div>
 
-    @if (_isLoading)
-    {
-        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-    }
-    else
-    {
-        <MudGrid Spacing="4">
-            <MudItem xs="12" md="4">
-                <MudPaper Elevation="1" Class="profile-surface profile-identity-panel">
-                    <div class="profile-identity-header">
-                        <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Class="profile-avatar">
-                            @_initials
-                        </MudAvatar>
-                        <div class="profile-identity-copy">
-                            <MudText Typo="Typo.h6" Class="profile-display-name">@_displayName</MudText>
-                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="profile-email">
-                                @(_email ?? "Email not available")
-                            </MudText>
-                        </div>
-                    </div>
-
-                    <MudDivider Class="my-4" />
-
-                    <MudText Typo="Typo.overline" Class="profile-overline">ACCOUNT DETAILS</MudText>
-                    <div class="profile-fact-row">
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">Email address</MudText>
-                        <MudText Typo="Typo.body2" Class="profile-fact-value">@(_email ?? "Not available")</MudText>
-                    </div>
-                    <div class="profile-fact-row">
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">Account name</MudText>
-                        <MudText Typo="Typo.body2" Class="profile-fact-value">@_displayName</MudText>
-                    </div>
-
-                    <MudDivider Class="my-4" />
-
-                    <MudText Typo="Typo.overline" Class="profile-overline">ACCESS ROLES</MudText>
-                    @if (_roles.Count == 0)
-                    {
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">
-                            No role information is available in this session.
-                        </MudText>
-                    }
-                    else
-                    {
-                        <div class="profile-role-list">
-                            @foreach (var role in _roles)
-                            {
-                                <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">
-                                    @role
-                                </MudChip>
-                            }
-                        </div>
-                    }
-
-                    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mt-4">
-                        Account details are read-only here. Profile editing can be added when the API supports account updates.
-                    </MudAlert>
-                </MudPaper>
-            </MudItem>
-
-            <MudItem xs="12" md="8">
-                <MudPaper Elevation="1" Class="profile-surface profile-security-panel">
-                    <div class="profile-security-heading">
-                        <div class="profile-security-icon">
-                            <MudIcon Icon="@Icons.Material.Filled.Security" Size="Size.Large" Color="Color.Primary" />
-                        </div>
-                        <div class="profile-security-heading-copy">
-                            <MudText Typo="Typo.h5" Class="profile-section-title">Sign-in security</MudText>
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                Add a second verification step with an authenticator app.
-                            </MudText>
-                        </div>
-                        @if (!_totpLoading && !_statusFailed)
-                        {
-                            <MudChip T="string"
-                                     Color="@(_totpEnabled ? Color.Success : Color.Warning)"
-                                     Variant="Variant.Outlined">
-                                @(_totpEnabled ? "Protected" : "Not enabled")
-                            </MudChip>
-                        }
-                    </div>
-
-                    <MudDivider Class="my-4" />
-
-                    @if (_totpLoading)
-                    {
-                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-                    }
-                    else if (_statusFailed)
-                    {
-                        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
-                            @_statusError
-                        </MudAlert>
-                        <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                                   Class="mt-3" OnClick="RefreshTotpStatus">
-                            Retry security status
-                        </MudButton>
-                    }
-                    else
-                    {
-                        <div class="profile-authenticator-summary">
-                            <div>
-                                <MudText Typo="Typo.subtitle1" Class="profile-summary-title">Authenticator app</MudText>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                    Use Google Authenticator, Microsoft Authenticator or another TOTP-compatible app.
-                                </MudText>
-                            </div>
-                            @if (_totpEnabled)
-                            {
-                                <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Color="Color.Success" Size="Size.Large" />
-                            }
-                            else
-                            {
-                                <MudIcon Icon="@Icons.Material.Filled.PhoneAndroid" Color="Color.Secondary" Size="Size.Large" />
-                            }
-                        </div>
-
-                        @if (_totpEnabled)
-                        {
-                            <div class="profile-security-metrics">
-                                <div class="profile-metric">
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Status</MudText>
-                                    <MudText Typo="Typo.subtitle2" Class="profile-metric-value">Enabled</MudText>
-                                </div>
-                                <div class="profile-metric">
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Enabled on</MudText>
-                                    <MudText Typo="Typo.subtitle2" Class="profile-metric-value">
-                                        @(_enabledAt?.ToLocalTime().ToString("dd MMM yyyy") ?? "Available")
+        @if (_profileLoading)
+        {
+            <MudPaper Class="profile-loading-card" Elevation="0">
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Loading your profile…</MudText>
+            </MudPaper>
+        }
+        else if (_profile == null || !_profile.IsSuccess)
+        {
+            <MudPaper Class="profile-empty-card" Elevation="0">
+                <MudIcon Icon="@Icons.Material.Filled.PersonOff" Class="profile-empty-icon" />
+                <MudText Typo="Typo.h6">We couldn't load your profile</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @(_profile?.Message ?? "Check your connection and try again.")
+                </MudText>
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Refresh"
+                           OnClick="LoadProfileAsync" Class="profile-primary-button">
+                    Try again
+                </MudButton>
+            </MudPaper>
+        }
+        else
+        {
+            <MudGrid Spacing="4" Class="profile-layout-grid">
+                <MudItem xs="12" md="4" Class="profile-sidebar-column">
+                    <MudPaper Class="profile-card profile-identity-card" Elevation="0">
+                        <div class="profile-identity-top">
+                            <MudAvatar Image="@_profile.ProfileImageUrl" Color="Color.Primary"
+                                       Variant="Variant.Filled" Size="Size.Large" Class="profile-avatar">
+                                @Initials
+                            </MudAvatar>
+                            <div class="profile-identity-text">
+                                <MudText Typo="Typo.h5" Class="profile-display-name">@DisplayName</MudText>
+                                <MudText Typo="Typo.body2" Class="profile-email-text">@_profile.Email</MudText>
+                                <div class="profile-verification-line">
+                                    <MudIcon Icon="@(_profile.IsEmailConfirmed ? Icons.Material.Filled.Verified : Icons.Material.Filled.Info)"
+                                             Color="@(_profile.IsEmailConfirmed ? Color.Success : Color.Warning)" Size="Size.Small" />
+                                    <MudText Typo="Typo.caption">
+                                        @(_profile.IsEmailConfirmed ? "Email verified" : "Email not verified")
                                     </MudText>
                                 </div>
-                                <div class="profile-metric">
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Recovery codes left</MudText>
-                                    <MudText Typo="Typo.subtitle2" Class="profile-metric-value">@_recoveryCodesRemaining</MudText>
+                            </div>
+                        </div>
+
+                        <MudDivider Class="profile-divider" />
+
+                        <div class="profile-card-section-title">
+                            <MudText Typo="Typo.overline">ACCOUNT OVERVIEW</MudText>
+                        </div>
+                        <div class="profile-overview-list">
+                            <div class="profile-overview-row">
+                                <span class="profile-overview-icon"><MudIcon Icon="@Icons.Material.Filled.AlternateEmail" /></span>
+                                <div class="profile-overview-copy">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Email address</MudText>
+                                    <MudText Typo="Typo.body2" Class="profile-overview-value">@_profile.Email</MudText>
                                 </div>
                             </div>
-
-                            <div class="profile-security-actions">
-                                <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                                           OnClick="ToggleRegenerateCodes">
-                                    Regenerate recovery codes
-                                </MudButton>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Error"
-                                           OnClick="ToggleDisableAuthenticator">
-                                    Disable authenticator
-                                </MudButton>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
-                                           Disabled="@(!_canEnroll || _busy)"
-                                           OnClick="ToggleEnrollment">
-                                    Replace authenticator
-                                </MudButton>
+                            <div class="profile-overview-row">
+                                <span class="profile-overview-icon"><MudIcon Icon="@Icons.Material.Filled.CalendarMonth" /></span>
+                                <div class="profile-overview-copy">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Joined XQARE</MudText>
+                                    <MudText Typo="Typo.body2" Class="profile-overview-value">@_profile.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</MudText>
+                                </div>
                             </div>
+                            <div class="profile-overview-row">
+                                <span class="profile-overview-icon"><MudIcon Icon="@Icons.Material.Filled.Login" /></span>
+                                <div class="profile-overview-copy">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Last sign-in</MudText>
+                                    <MudText Typo="Typo.body2" Class="profile-overview-value">
+                                        @(_profile.LastLoginAt?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") ?? "Not available")
+                                    </MudText>
+                                </div>
+                            </div>
+                        </div>
+
+                        <MudDivider Class="profile-divider" />
+
+                        <div class="profile-card-section-title profile-roles-heading">
+                            <MudText Typo="Typo.overline">ACCOUNT ROLES</MudText>
+                        </div>
+                        @if (_profile.Roles.Count == 0)
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">No roles are assigned to this account.</MudText>
                         }
                         else
                         {
-                            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mt-3">
-                                Your account currently uses its primary sign-in method only. Enabling an authenticator adds a time-based code challenge during sign-in.
-                            </MudAlert>
+                            <div class="profile-role-list">
+                                @foreach (var role in _profile.Roles)
+                                {
+                                    <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small">@role</MudChip>
+                                }
+                            </div>
+                        }
+                        <div class="profile-account-note">
+                            <MudIcon Icon="@Icons.Material.Filled.Lock" />
+                            <MudText Typo="Typo.caption">Your email and account identity are protected and cannot be changed from this page.</MudText>
+                        </div>
+                    </MudPaper>
+                </MudItem>
 
-                            @if (_canEnroll)
+                <MudItem xs="12" md="8" Class="profile-main-column">
+                    <MudPaper Class="profile-card profile-details-card" Elevation="0">
+                        <div class="profile-section-heading">
+                            <div class="profile-section-icon profile-section-icon-gold">
+                                <MudIcon Icon="@Icons.Material.Filled.PersonOutline" />
+                            </div>
+                            <div class="profile-section-heading-copy">
+                                <MudText Typo="Typo.h5" Class="profile-section-title">Personal information</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">The details people use to recognise you on XQARE.</MudText>
+                            </div>
+                            @if (!_isEditing)
                             {
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                                           Disabled="_busy" Class="mt-4"
-                                           OnClick="ToggleEnrollment">
-                                    Set up authenticator
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit"
+                                           Disabled="_saveBusy" OnClick="BeginEdit" Class="profile-edit-button">
+                                    Edit profile
                                 </MudButton>
+                            }
+                        </div>
+
+                        <MudDivider Class="profile-divider" />
+
+                        @if (_isEditing)
+                        {
+                            <MudForm @ref="_profileForm">
+                                <MudGrid Spacing="3">
+                                    <MudItem xs="12" sm="6">
+                                        <MudTextField T="string" Label="First name" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" Required="true"
+                                                      RequiredError="First name is required."
+                                                      MaxLength="80" @bind-Value="_edit.FirstName" />
+                                    </MudItem>
+                                    <MudItem xs="12" sm="6">
+                                        <MudTextField T="string" Label="Last name" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" Required="true"
+                                                      RequiredError="Last name is required."
+                                                      MaxLength="80" @bind-Value="_edit.LastName" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" Label="Phone number (optional)" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" MaxLength="32"
+                                                      InputType="InputType.Telephone" @bind-Value="_edit.PhoneNumber" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" Label="About you" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" Lines="4"
+                                                      MaxLength="600" Counter="600" @bind-Value="_edit.Bio"
+                                                      Placeholder="Share a little about your background, interests or goals." />
+                                    </MudItem>
+                                </MudGrid>
+                                <div class="profile-form-footer">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Your changes are saved to your XQARE account.</MudText>
+                                    <div class="profile-form-buttons">
+                                        <MudButton Variant="Variant.Text" Color="Color.Secondary" Disabled="_saveBusy"
+                                                   OnClick="CancelEdit">Cancel</MudButton>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_saveBusy"
+                                                   StartIcon="@Icons.Material.Filled.Save" OnClick="SaveProfileAsync"
+                                                   Class="profile-primary-button">
+                                            @if (_saveBusy)
+                                            {
+                                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                                                <span>Saving</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Save changes</span>
+                                            }
+                                        </MudButton>
+                                    </div>
+                                </div>
+                            </MudForm>
+                        }
+                        else
+                        {
+                            <div class="profile-details-grid">
+                                <div class="profile-detail-item">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">First name</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-detail-value">@ValueOrFallback(_profile.FirstName)</MudText>
+                                </div>
+                                <div class="profile-detail-item">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Last name</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-detail-value">@ValueOrFallback(_profile.LastName)</MudText>
+                                </div>
+                                <div class="profile-detail-item">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Phone number</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-detail-value">@ValueOrFallback(_profile.PhoneNumber)</MudText>
+                                </div>
+                                <div class="profile-detail-item">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Email address</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-detail-value">@_profile.Email</MudText>
+                                </div>
+                                <div class="profile-detail-item profile-detail-item-wide">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">About you</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-detail-bio">@ValueOrFallback(_profile.Bio, "Add a short introduction about yourself.")</MudText>
+                                </div>
+                            </div>
+                        }
+                    </MudPaper>
+
+                    <MudPaper Class="profile-card profile-security-card" Elevation="0">
+                        <div class="profile-section-heading">
+                            <div class="profile-section-icon profile-section-icon-blue">
+                                <MudIcon Icon="@Icons.Material.Filled.Shield" />
+                            </div>
+                            <div class="profile-section-heading-copy">
+                                <MudText Typo="Typo.h5" Class="profile-section-title">Sign-in &amp; security</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Manage two-step verification and protect access to your account.</MudText>
+                            </div>
+                            @if (!_totpLoading && !_statusFailed)
+                            {
+                                <MudChip T="string" Color="@(_totpEnabled ? Color.Success : Color.Warning)"
+                                         Variant="Variant.Outlined" Class="profile-security-chip">
+                                    @(_totpEnabled ? "Protected" : "Action needed")
+                                </MudChip>
+                            }
+                        </div>
+
+                        <MudDivider Class="profile-divider" />
+
+                        @if (_totpLoading)
+                        {
+                            <div class="profile-security-loading">
+                                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Checking your security settings…</MudText>
+                            </div>
+                        }
+                        else if (_statusFailed)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">@_statusError</MudAlert>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="RefreshTotpStatus"
+                                       StartIcon="@Icons.Material.Filled.Refresh" Class="mt-3">Retry security status</MudButton>
+                        }
+                        else
+                        {
+                            <div class="profile-authenticator-banner">
+                                <div class="profile-authenticator-banner-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.PhoneAndroid" />
+                                </div>
+                                <div class="profile-authenticator-banner-copy">
+                                    <MudText Typo="Typo.subtitle1" Class="profile-summary-title">Authenticator app</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        Use Google Authenticator, Microsoft Authenticator or any TOTP-compatible app.
+                                    </MudText>
+                                </div>
+                                <MudChip T="string" Color="@(_totpEnabled ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
+                                    @(_totpEnabled ? "Enabled" : "Not enabled")
+                                </MudChip>
+                            </div>
+
+                            @if (_totpEnabled)
+                            {
+                                <div class="profile-security-metrics">
+                                    <div class="profile-metric">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Authenticator</MudText>
+                                        <MudText Typo="Typo.subtitle2" Class="profile-metric-value">Active</MudText>
+                                    </div>
+                                    <div class="profile-metric">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Enabled on</MudText>
+                                        <MudText Typo="Typo.subtitle2" Class="profile-metric-value">
+                                            @(_enabledAt?.ToLocalTime().ToString("dd MMM yyyy") ?? "Available")
+                                        </MudText>
+                                    </div>
+                                    <div class="profile-metric">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Recovery codes</MudText>
+                                        <MudText Typo="Typo.subtitle2" Class="profile-metric-value">@_recoveryCodesRemaining remaining</MudText>
+                                    </div>
+                                </div>
+
+                                @if (_recoveryCodesRemaining <= 3)
+                                {
+                                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="profile-security-alert">
+                                        You have only a few recovery codes remaining. Generate a new set and store it somewhere safe.
+                                    </MudAlert>
+                                }
+
+                                <div class="profile-security-actions">
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Key"
+                                               OnClick="ToggleRegenerateCodes">Recovery codes</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Sync"
+                                               Disabled="@(!_canEnroll || _busy)" OnClick="ToggleEnrollment">Replace authenticator</MudButton>
+                                    <MudButton Variant="Variant.Text" Color="Color.Error" StartIcon="@Icons.Material.Filled.RemoveCircleOutline"
+                                               OnClick="ToggleDisableAuthenticator">Disable</MudButton>
+                                </div>
                             }
                             else
                             {
-                                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mt-3">
-                                    Authenticator setup is unavailable because the API has no valid AES-256 encryption key configured. Add the versioned key settings to the API App Service, then retry this status check.
+                                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="profile-security-alert">
+                                    Add an authenticator to require a time-based code after your password whenever you sign in.
                                 </MudAlert>
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                                           Disabled="true" Class="mt-3">
-                                    Set up authenticator
-                                </MudButton>
+                                @if (_canEnroll)
+                                {
+                                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="_busy"
+                                               StartIcon="@Icons.Material.Filled.Add" OnClick="ToggleEnrollment"
+                                               Class="profile-primary-button">Set up authenticator</MudButton>
+                                }
+                                else
+                                {
+                                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">
+                                        Authenticator setup is unavailable because the API AES-256 key is not configured.
+                                    </MudAlert>
+                                }
                             }
                         }
-                    }
 
-                    @if (_showEnrollment)
-                    {
-                        <MudDivider Class="my-4" />
-                        <MudPaper Outlined="true" Class="profile-action-panel">
-                            <div class="profile-action-heading">
-                                <MudText Typo="Typo.h6">@(_totpEnabled ? "Replace authenticator" : "Set up authenticator")</MudText>
-                                <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">Step 1 of 2</MudChip>
-                            </div>
-                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
-                                Confirm your XQARE password. When replacing an authenticator, verify a code from the current app as well.
-                            </MudText>
-                            <MudTextField T="string" Label="Current password" @bind-Value="_enrollmentPassword"
-                                          InputType="InputType.Password" Variant="Variant.Outlined"
-                                          Margin="Margin.Dense" FullWidth="true" />
-                            @if (_totpEnabled)
-                            {
-                                <MudTextField T="string" Label="Current authenticator code" @bind-Value="_currentTotpCode"
-                                              Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6"
-                                              InputMode="InputMode.numeric" />
-                            }
-                            <div class="profile-form-actions">
-                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="_busy"
-                                           OnClick="StartEnrollment">
-                                    Continue
-                                </MudButton>
-                                <MudButton Color="Color.Secondary" Variant="Variant.Text" Disabled="_busy"
-                                           OnClick="CancelEnrollment">
-                                    Cancel
-                                </MudButton>
-                            </div>
-
-                            @if (_enrollment != null && _enrollment.IsSuccess)
-                            {
-                                <MudDivider Class="my-4" />
+                        @if (_showEnrollment)
+                        {
+                            <MudPaper Outlined="true" Class="profile-action-panel">
                                 <div class="profile-action-heading">
-                                    <MudText Typo="Typo.subtitle1">Scan the QR code</MudText>
-                                    <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">Step 2 of 2</MudChip>
+                                    <MudText Typo="Typo.h6">@(_totpEnabled ? "Replace authenticator" : "Set up authenticator")</MudText>
+                                    <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">Enrollment</MudChip>
                                 </div>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                    In your authenticator app, add an account and scan this QR code.
+                                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                                    Confirm your XQARE password. When replacing an authenticator, verify a current code as well.
                                 </MudText>
-                                @if (!string.IsNullOrWhiteSpace(_enrollment.QrCodeDataUri))
+                                <MudTextField T="string" Label="Current password" @bind-Value="_enrollmentPassword"
+                                              InputType="InputType.Password" Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                                @if (_totpEnabled)
                                 {
-                                    <img class="totp-qr-image" src="@_enrollment.QrCodeDataUri"
-                                         alt="QR code for XQARE authenticator setup" />
+                                    <MudTextField T="string" Label="Current authenticator code" @bind-Value="_currentTotpCode"
+                                                  Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" InputMode="InputMode.numeric" />
                                 }
-                                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
-                                    Can't scan? Enter this setup key manually:
+                                <div class="profile-form-buttons">
+                                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="_busy" OnClick="StartEnrollment"
+                                               Class="profile-primary-button">Continue</MudButton>
+                                    <MudButton Color="Color.Secondary" Variant="Variant.Text" Disabled="_busy" OnClick="CancelEnrollment">Cancel</MudButton>
+                                </div>
+
+                                @if (_enrollment != null && _enrollment.IsSuccess)
+                                {
+                                    <MudDivider Class="profile-divider" />
+                                    <MudText Typo="Typo.subtitle1" Class="profile-summary-title">Scan the QR code</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">Add XQARE to your authenticator app, then verify the current six-digit code.</MudText>
+                                    @if (!string.IsNullOrWhiteSpace(_enrollment.QrCodeDataUri))
+                                    {
+                                        <img class="totp-qr-image" src="@_enrollment.QrCodeDataUri" alt="QR code for XQARE authenticator setup" />
+                                    }
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Manual setup key</MudText>
+                                    <MudTextField T="string" Value="@_enrollment.Secret" ReadOnly="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                    <MudTextField T="string" Label="Six-digit authenticator code" @bind-Value="_enrollmentCode"
+                                                  Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" InputMode="InputMode.numeric" />
+                                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="_busy"
+                                               OnClick="ConfirmEnrollment" Class="profile-primary-button">Verify and enable</MudButton>
+                                }
+                            </MudPaper>
+                        }
+
+                        @if (_showRegenerateCodes && _totpEnabled)
+                        {
+                            <MudPaper Outlined="true" Class="profile-action-panel">
+                                <MudText Typo="Typo.h6">Generate new recovery codes</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                                    Confirm with a current authenticator code. Previous unused recovery codes will be invalidated.
                                 </MudText>
-                                <MudTextField T="string" Value="@_enrollment.Secret" ReadOnly="true"
-                                              Variant="Variant.Outlined" Margin="Margin.Dense" />
-                                <MudTextField T="string" Label="Six-digit code from your authenticator"
-                                              @bind-Value="_enrollmentCode" Variant="Variant.Outlined"
-                                              Margin="Margin.Dense" MaxLength="6" InputMode="InputMode.numeric" />
-                                <MudButton Color="Color.Primary" Variant="Variant.Filled"
-                                           Disabled="_busy" OnClick="ConfirmEnrollment">
-                                    Verify and enable
-                                </MudButton>
-                            }
-                        </MudPaper>
-                    }
+                                <MudTextField T="string" Label="Current authenticator code" @bind-Value="_regenerateCode"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" InputMode="InputMode.numeric" />
+                                <div class="profile-form-buttons">
+                                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="_busy" OnClick="RegenerateRecoveryCodes"
+                                               Class="profile-primary-button">Generate codes</MudButton>
+                                    <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ToggleRegenerateCodes">Cancel</MudButton>
+                                </div>
+                            </MudPaper>
+                        }
 
-                    @if (_showRegenerateCodes && _totpEnabled)
-                    {
-                        <MudDivider Class="my-4" />
-                        <MudPaper Outlined="true" Class="profile-action-panel">
-                            <MudText Typo="Typo.h6">Regenerate recovery codes</MudText>
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                Confirm with a current authenticator code. All previous unused recovery codes will be invalidated.
-                            </MudText>
-                            <MudTextField T="string" Label="Current authenticator code" @bind-Value="_regenerateCode"
-                                          Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6"
-                                          InputMode="InputMode.numeric" />
-                            <div class="profile-form-actions">
-                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="_busy"
-                                           OnClick="RegenerateRecoveryCodes">
-                                    Generate new codes
-                                </MudButton>
-                                <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ToggleRegenerateCodes">
-                                    Cancel
-                                </MudButton>
-                            </div>
-                        </MudPaper>
-                    }
+                        @if (_showDisableTotp && _totpEnabled)
+                        {
+                            <MudPaper Outlined="true" Class="profile-action-panel profile-danger-panel">
+                                <MudText Typo="Typo.h6">Disable authenticator</MudText>
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="my-2">
+                                    Two-step verification will stop being required after you disable this authenticator.
+                                </MudAlert>
+                                <MudTextField T="string" Label="Current password" @bind-Value="_disablePassword"
+                                              InputType="InputType.Password" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                <MudTextField T="string" Label="Current authenticator code" @bind-Value="_disableCode"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" InputMode="InputMode.numeric" />
+                                <div class="profile-form-buttons">
+                                    <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_busy" OnClick="DisableAuthenticator">Disable authenticator</MudButton>
+                                    <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ToggleDisableAuthenticator">Cancel</MudButton>
+                                </div>
+                            </MudPaper>
+                        }
 
-                    @if (_showDisableTotp && _totpEnabled)
-                    {
-                        <MudDivider Class="my-4" />
-                        <MudPaper Outlined="true" Class="profile-action-panel">
-                            <MudText Typo="Typo.h6">Disable authenticator</MudText>
-                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="my-2">
-                                Two-step verification will stop being required after you disable this authenticator.
-                            </MudAlert>
-                            <MudTextField T="string" Label="Current password" @bind-Value="_disablePassword"
-                                          InputType="InputType.Password" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                            <MudTextField T="string" Label="Current authenticator code" @bind-Value="_disableCode"
-                                          Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6"
-                                          InputMode="InputMode.numeric" />
-                            <div class="profile-form-actions">
-                                <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_busy"
-                                           OnClick="DisableAuthenticator">
-                                    Disable authenticator
-                                </MudButton>
-                                <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ToggleDisableAuthenticator">
-                                    Cancel
-                                </MudButton>
-                            </div>
-                        </MudPaper>
-                    }
-
-                    @if (_recoveryCodes.Count > 0)
-                    {
-                        <MudDivider Class="my-4" />
-                        <MudPaper Outlined="true" Class="profile-recovery-panel">
-                            <MudText Typo="Typo.h6">Save your recovery codes</MudText>
-                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="my-3">
-                                These ten codes are shown only once. Each code can be used one time if you cannot access your authenticator.
-                            </MudAlert>
-                            <MudGrid Spacing="2">
-                                @foreach (var recoveryCode in _recoveryCodes)
-                                {
-                                    <MudItem xs="6" sm="4">
-                                        <MudText Class="recovery-code">@(recoveryCode)</MudText>
-                                    </MudItem>
-                                }
-                            </MudGrid>
-                            <div class="profile-form-actions mt-3">
-                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="CopyRecoveryCodes">
-                                    Copy all codes
-                                </MudButton>
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="DismissRecoveryCodes">
-                                    I have saved them
-                                </MudButton>
-                            </div>
-                        </MudPaper>
-                    }
-                </MudPaper>
-            </MudItem>
-        </MudGrid>
-    }
-</MudContainer>
+                        @if (_recoveryCodes.Count > 0)
+                        {
+                            <MudPaper Outlined="true" Class="profile-recovery-panel">
+                                <div class="profile-action-heading">
+                                    <MudText Typo="Typo.h6">Save your recovery codes</MudText>
+                                    <MudChip T="string" Color="Color.Warning" Variant="Variant.Outlined">Shown once</MudChip>
+                                </div>
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="my-3">
+                                    These codes are displayed only now. Each code can be used one time if you cannot access your authenticator.
+                                </MudAlert>
+                                <MudGrid Spacing="2">
+                                    @foreach (var recoveryCode in _recoveryCodes)
+                                    {
+                                        <MudItem xs="12" sm="6" lg="4">
+                                            <MudText Class="recovery-code">@recoveryCode</MudText>
+                                        </MudItem>
+                                    }
+                                </MudGrid>
+                                <div class="profile-form-buttons mt-3">
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="CopyRecoveryCodes">Copy all codes</MudButton>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="DismissRecoveryCodes"
+                                               Class="profile-primary-button">I have saved them</MudButton>
+                                </div>
+                            </MudPaper>
+                        }
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudContainer>
+</section>
 
 @code {
-    private bool _isLoading = true;
+    private bool _profileLoading = true;
+    private bool _profileLoadFailed;
+    private bool _isEditing;
+    private bool _saveBusy;
     private bool _totpLoading = true;
     private bool _statusFailed;
     private bool _busy;
@@ -357,11 +460,10 @@
     private bool _showEnrollment;
     private bool _showRegenerateCodes;
     private bool _showDisableTotp;
-    private string? _email;
-    private string _displayName = "XQARE member";
-    private string _initials = "X";
     private string _statusError = "Unable to retrieve authenticator status.";
-    private List<string> _roles = new();
+    private MyProfileResponse? _profile;
+    private UpdateMyProfileRequest _edit = new();
+    private MudForm? _profileForm;
     private int _recoveryCodesRemaining;
     private DateTime? _enabledAt;
     private string _enrollmentPassword = string.Empty;
@@ -373,35 +475,137 @@
     private TotpEnrollmentStartResponse? _enrollment;
     private readonly List<string> _recoveryCodes = new();
 
+    private string DisplayName => _profile == null
+        ? "XQARE member"
+        : string.IsNullOrWhiteSpace(_profile.DisplayName)
+            ? "XQARE member"
+            : _profile.DisplayName;
+
+    private string Initials
+    {
+        get
+        {
+            var parts = DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length > 1)
+                return string.Concat(parts[0][0], parts[^1][0]).ToUpperInvariant();
+            return DisplayName.Length > 0 ? DisplayName[..1].ToUpperInvariant() : "X";
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = state.User;
-        _email = user.FindFirst(ClaimTypes.Email)?.Value
-            ?? user.FindFirst("email")?.Value
-            ?? user.FindFirst("preferred_username")?.Value;
-
-        _displayName = user.FindFirst(ClaimTypes.Name)?.Value
-            ?? user.FindFirst("name")?.Value
-            ?? user.FindFirst("preferred_username")?.Value
-            ?? (_email?.Split('@').FirstOrDefault())
-            ?? "XQARE member";
-
-        var nameParts = _displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        _initials = nameParts.Length > 1
-            ? string.Concat(nameParts[0][0], nameParts[^1][0]).ToUpperInvariant()
-            : (_displayName.Length > 0 ? _displayName[..1].ToUpperInvariant() : "X");
-
-        _roles = user.Claims
-            .Where(c => c.Type == ClaimTypes.Role || c.Type == "role" ||
-                        c.Type.EndsWith("/role", StringComparison.OrdinalIgnoreCase))
-            .Select(c => c.Value)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        _isLoading = false;
+        await LoadProfileAsync();
         await RefreshTotpStatus();
     }
+
+    private async Task LoadProfileAsync()
+    {
+        _profileLoading = true;
+        _profileLoadFailed = false;
+        try
+        {
+            var response = await ProfileService.GetMyProfileAsync();
+            if (!response.IsSuccess)
+            {
+                _profileLoadFailed = true;
+                Snackbar.Add(response.Message, Severity.Error);
+                _profile = null;
+                return;
+            }
+
+            _profile = response;
+            CopyProfileToEdit();
+        }
+        catch
+        {
+            _profileLoadFailed = true;
+            _profile = null;
+            Snackbar.Add("Your profile could not be loaded. Please retry.", Severity.Error);
+        }
+        finally
+        {
+            _profileLoading = false;
+        }
+    }
+
+    private void CopyProfileToEdit()
+    {
+        if (_profile == null)
+            return;
+
+        _edit = new UpdateMyProfileRequest
+        {
+            FirstName = _profile.FirstName,
+            LastName = _profile.LastName,
+            PhoneNumber = _profile.PhoneNumber,
+            Bio = _profile.Bio
+        };
+    }
+
+    private void BeginEdit()
+    {
+        CopyProfileToEdit();
+        _isEditing = true;
+    }
+
+    private void CancelEdit()
+    {
+        CopyProfileToEdit();
+        _isEditing = false;
+    }
+
+    private async Task SaveProfileAsync()
+    {
+        if (_profileForm != null)
+        {
+            await _profileForm.ValidateAsync();
+            if (!_profileForm.IsValid)
+                return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_edit.FirstName) || string.IsNullOrWhiteSpace(_edit.LastName))
+        {
+            Snackbar.Add("First name and last name are required.", Severity.Warning);
+            return;
+        }
+
+        if (_edit.FirstName.Trim().Length > 80 || _edit.LastName.Trim().Length > 80 ||
+            (_edit.PhoneNumber?.Length ?? 0) > 32 || (_edit.Bio?.Length ?? 0) > 600)
+        {
+            Snackbar.Add("One or more profile fields exceed the allowed length.", Severity.Warning);
+            return;
+        }
+
+        _saveBusy = true;
+        try
+        {
+            var response = await ProfileService.UpdateMyProfileAsync(new UpdateMyProfileRequest
+            {
+                FirstName = _edit.FirstName.Trim(),
+                LastName = _edit.LastName.Trim(),
+                PhoneNumber = _edit.PhoneNumber?.Trim(),
+                Bio = _edit.Bio?.Trim()
+            });
+
+            if (!response.IsSuccess)
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
+            }
+
+            _profile = response;
+            CopyProfileToEdit();
+            _isEditing = false;
+            Snackbar.Add(response.Message, Severity.Success);
+        }
+        finally
+        {
+            _saveBusy = false;
+        }
+    }
+
+    private static string ValueOrFallback(string? value, string fallback = "Not added yet")
+        => string.IsNullOrWhiteSpace(value) ? fallback : value;
 
     private async Task RefreshTotpStatus()
     {
