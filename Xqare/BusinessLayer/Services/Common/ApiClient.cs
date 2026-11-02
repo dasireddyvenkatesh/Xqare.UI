@@ -66,12 +66,16 @@ namespace Xqare.BusinessLayer.Services.Common
                     "api/auth/refresh-token",
                     new StringContent(string.Empty));
 
-                using var response = await _http.SendAsync(request);
+                // Never leave protected-route restoration waiting indefinitely on a
+                // cross-origin cookie refresh. A timeout returns the user to sign-in.
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(12));
+                using var response = await _http.SendAsync(request, timeout.Token);
                 if (!response.IsSuccessStatusCode)
                     return false;
 
                 var result = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>(
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
+                    timeout.Token);
 
                 if (result == null || !result.IsSuccess || string.IsNullOrWhiteSpace(result.AccessToken))
                     return false;

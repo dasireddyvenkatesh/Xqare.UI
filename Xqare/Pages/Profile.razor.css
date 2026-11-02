@@ -8,6 +8,27 @@
     border-radius: 12px;
 }
 
+.profile-security-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.profile-security-summary {
+    min-width: 0;
+    text-align: left;
+}
+
+.profile-security-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .totp-qr-image {
     display: block;
     width: min(100%, 240px);

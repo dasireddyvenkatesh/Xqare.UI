@@ -60,24 +60,24 @@
                     else
                     {
                         <MudPaper Outlined="true" Class="pa-4 profile-security-panel">
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
-                                <MudStack Spacing="0">
+                            <div class="profile-security-header">
+                                <div class="profile-security-summary">
                                     <MudText Typo="Typo.subtitle1">Authenticator app</MudText>
                                     <MudText Typo="Typo.body2" Color="Color.Secondary">
                                         @(_totpEnabled ? "Two-step verification is enabled." : "Two-step verification is not enabled.")
                                     </MudText>
-                                </MudStack>
+                                </div>
                                 <MudChip T="string" Color="@(_totpEnabled ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
                                     @(_totpEnabled ? "Enabled" : "Not enabled")
                                 </MudChip>
-                            </MudStack>
+                            </div>
 
                             @if (_totpEnabled)
                             {
                                 <MudText Typo="Typo.body2" Class="mt-3">
                                     Recovery codes remaining: <b>@_recoveryCodesRemaining</b>
                                 </MudText>
-                                <MudStack Direction="Row" Spacing="2" Wrap="Wrap.Wrap" Class="mt-3">
+                                <div class="profile-security-actions mt-3">
                                     <MudButton Variant="Variant.Outlined" Color="Color.Primary"
                                                OnClick="() => _showRegenerateCodes = !_showRegenerateCodes">
                                         Regenerate recovery codes
@@ -90,13 +90,23 @@
                                                OnClick="() => _showEnrollment = !_showEnrollment">
                                         Replace authenticator
                                     </MudButton>
-                                </MudStack>
+                                </div>
                             }
-                            else
+                            else if (_canEnroll)
                             {
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-3"
                                            Disabled="_busy" OnClick="() => _showEnrollment = !_showEnrollment">
                                     Set up authenticator
+                                </MudButton>
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mt-3">
+                                    Authenticator setup is temporarily unavailable. The server administrator must finish configuring the certificate-protected security key ring before enrollment can be enabled.
+                                </MudAlert>
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-3"
+                                           Disabled="true">
+                                    Set up authenticator unavailable
                                 </MudButton>
                             }
                         </MudPaper>
@@ -208,6 +218,7 @@
     private bool _totpLoading = true;
     private bool _busy;
     private bool _totpEnabled;
+    private bool _canEnroll;
     private bool _showEnrollment;
     private bool _showRegenerateCodes;
     private bool _showDisableTotp;
@@ -244,6 +255,7 @@
         if (response.IsSuccess)
         {
             _totpEnabled = response.IsEnabled;
+            _canEnroll = response.CanEnroll;
             _recoveryCodesRemaining = response.RecoveryCodesRemaining;
         }
         else
@@ -255,6 +267,11 @@
 
     private async Task StartEnrollment()
     {
+        if (!_canEnroll)
+        {
+            Snackbar.Add("Authenticator setup is not yet available on this server.", Severity.Warning);
+            return;
+        }
         if (string.IsNullOrWhiteSpace(_enrollmentPassword))
         {
             Snackbar.Add("Enter your current password.", Severity.Warning);
