@@ -504,8 +504,8 @@
             var externalStatus = externalValue.ToString();
             if (string.Equals(externalStatus, "success", StringComparison.OrdinalIgnoreCase))
             {
-                // App startup restores the access token from the HttpOnly refresh cookie
-                // before the router renders this page.
+                // Session restoration runs in the background. The protected dashboard
+                // route waits for that shared restore attempt before redirecting to login.
                 Nav.NavigateTo("/dashboard", forceLoad: false, replace: true);
                 return Task.CompletedTask;
             }
