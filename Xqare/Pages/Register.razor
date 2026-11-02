@@ -336,6 +336,11 @@
             }
             else
             {
+                // The mailbox owner chooses the final password at OTP completion.
+                // This also replaces any password submitted by an unverified registration attempt.
+                otpRequest.Password = registerRequest.Password;
+                otpRequest.ConfirmPassword = registerRequest.ConfirmPassword;
+
                 // STEP 2: VERIFY OTP and establish an authenticated session on the API.
                 var otpResponse = await AuthService.VerifyRegistrationOtpAsync(otpRequest);
 
