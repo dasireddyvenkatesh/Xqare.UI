@@ -28,13 +28,32 @@ namespace Xqare.BusinessLayer.Classes.Auth
             _configuration = configuration;
         }
 
-        public async Task InitializeAsync()
+        private readonly object _initializeLock = new();
+        private Task? _initializationTask;
+
+        // All callers share one restore operation. The router can render immediately,
+        // while protected routes await this same task before redirecting to login.
+        public Task InitializeAsync()
         {
-            // Remember whether this tab already has a still-valid access token. This lets
-            // a temporary API/network failure avoid logging out an otherwise valid session.
-            var wasAuthenticated = (await _authStateProvider.GetAuthenticationStateAsync())
+            lock (_initializeLock)
+            {
+                return _initializationTask ??= InitializeCoreAsync();
+            }
+        }
+
+        private async Task InitializeCoreAsync()
+        {
+            // A still-valid access token already exists in this tab's session storage.
+            // Use it immediately; do not make every application startup wait for a
+            // refresh-token API round-trip. The API remains authoritative and the
+            // normal 401 handling path can refresh an expired/revoked token later.
+            var isAuthenticated = (await _authStateProvider.GetAuthenticationStateAsync())
                 .User.Identity?.IsAuthenticated == true;
 
+            if (isAuthenticated)
+                return;
+
+            // No usable local access token: attempt cookie-based session restoration.
             var response = await _api.CookieCredential<RefreshTokenResponse>("api/auth/refresh-token");
 
             if (response.IsSuccess &&
@@ -44,13 +63,6 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 await _tokenService.SetTokenAsync(response.Data.AccessToken);
                 if (_authStateProvider is JwtAuthStateProvider jwt)
                     jwt.NotifyUserAuthentication();
-                return;
-            }
-
-            if (wasAuthenticated && response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
-            {
-                if (_authStateProvider is JwtAuthStateProvider provider)
-                    provider.NotifyUserAuthentication();
                 return;
             }
 
