@@ -58,18 +58,13 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 if (isAuthenticated)
                     return;
 
-                // No usable local access token: attempt cookie-based session restoration.
-                var response = await _api.CookieCredential<RefreshTokenResponse>("api/auth/refresh-token");
+                // Use ApiClient's shared refresh lock. This is the same operation
+                // used when an API request receives 401, so startup and request
+                // recovery cannot rotate the refresh cookie concurrently.
+                var restored = await _api.RestoreSessionAsync();
 
-                if (response.IsSuccess &&
-                    response.Data?.IsSuccess == true &&
-                    !string.IsNullOrWhiteSpace(response.Data.AccessToken))
-                {
-                    await _tokenService.SetTokenAsync(response.Data.AccessToken);
-                    if (_authStateProvider is JwtAuthStateProvider jwt)
-                        jwt.NotifyUserAuthentication();
+                if (restored)
                     return;
-                }
 
                 // Missing/invalid/expired refresh cookies should fail closed.
                 await _tokenService.ClearAsync();
