@@ -6,6 +6,8 @@
 
         public bool RequiresMfa { get; set; }
 
+        public string? MfaChallengeToken { get; set; }
+
         public bool RequiresEmailVerification { get; set; }
 
         public string AccessToken { get; set; } = default!;

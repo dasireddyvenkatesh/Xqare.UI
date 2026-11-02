@@ -8,6 +8,8 @@ namespace Xqare.BusinessLayer.Interfaces.Common
 
         Task<ApiResponse<TResponse>> PostAsync<TRequest, TResponse>(string url, TRequest data);
 
+        Task<ApiResponse<TResponse>> PostAnonymousAsync<TRequest, TResponse>(string url, TRequest data);
+
         Task<ApiResponse<TResponse>> PutAsync<TRequest, TResponse>(string url, TRequest data);
 
         Task<ApiResponse<bool>> DeleteAsync(string url);

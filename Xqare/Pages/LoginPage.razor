@@ -252,6 +252,7 @@
     bool isMfaStep = false;
     bool isEmailVerificationStep = false;
     bool isRecoveryCodeStep = false;
+    string? mfaChallengeToken;
     bool showPassword;
 
     bool isResendDisabled = true;
@@ -309,6 +310,7 @@
                 if (response.RequiresMfa)
                 {
                     otpRequest.Email = loginRequest.Email;
+                    mfaChallengeToken = response.MfaChallengeToken;
                     isRecoveryCodeStep = false;
                     isEmailVerificationStep = false;
                     isMfaStep = true;
@@ -358,7 +360,8 @@
                 var otpResponse = await AuthService.VerifyMfaChallengeAsync(new VerifyMfaChallengeRequest
                 {
                     Code = otpRequest.OtpCode.Trim(),
-                    Factor = isRecoveryCodeStep ? "recovery" : "totp"
+                    Factor = isRecoveryCodeStep ? "recovery" : "totp",
+                    ChallengeToken = mfaChallengeToken
                 });
 
                 if (!otpResponse.IsSuccess)
@@ -431,6 +434,7 @@
         isMfaStep = false;
         isEmailVerificationStep = false;
         isRecoveryCodeStep = false;
+        mfaChallengeToken = null;
         otpRequest = new();
         timer?.Stop();
     }

@@ -209,6 +209,14 @@ namespace Xqare.BusinessLayer.Services.Common
         public Task<ApiResponse<TResponse>> PostAsync<TRequest, TResponse>(string url, TRequest data)
             => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Post, url, JsonContent.Create(data)));
 
+        // Anonymous challenge requests must not attach a stale bearer token or
+        // recursively attempt refresh when the short-lived challenge is rejected.
+        public Task<ApiResponse<TResponse>> PostAnonymousAsync<TRequest, TResponse>(string url, TRequest data)
+            => SendAsync<TResponse>(
+                () => CreateRequest(HttpMethod.Post, url, JsonContent.Create(data)),
+                retryAfterRefresh: false,
+                attachAccessToken: false);
+
         public Task<ApiResponse<TResponse>> PutAsync<TRequest, TResponse>(string url, TRequest data)
             => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Put, url, JsonContent.Create(data)));
 

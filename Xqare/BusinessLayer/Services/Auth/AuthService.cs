@@ -235,13 +235,14 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task<LoginResponse> VerifyMfaChallengeAsync(VerifyMfaChallengeRequest request)
         {
-            var response = await _api.PostAsync<VerifyMfaChallengeRequest, LoginResponse>(
+            var response = await _api.PostAnonymousAsync<VerifyMfaChallengeRequest, LoginResponse>(
                 "api/auth/verify-mfa-challenge", request);
             if (!response.IsSuccess || response.Data == null)
                 return response.Data ?? new LoginResponse
                 {
                     IsSuccess = false,
-                    Message = response.ErrorMessage ?? "The request could not be completed. Please try again."
+                    Message = ExtractBackendMessage(response.ErrorMessage)
+                        ?? "MFA verification could not be completed. Please sign in again and retry."
                 };
             await ApplySessionAsync(response.Data);
             return response.Data;
