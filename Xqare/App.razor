@@ -68,10 +68,14 @@
         await _fluentValidationLoadLock.WaitAsync();
         try
         {
+            context.CancellationToken.ThrowIfCancellationRequested();
+
             if (_fluentValidationLoaded)
                 return;
 
             await AssemblyLoader.LoadAssembliesAsync(new[] { "FluentValidation.dll" });
+            context.CancellationToken.ThrowIfCancellationRequested();
+
             _fluentValidationLoaded = true;
         }
         finally
