@@ -52,6 +52,8 @@
 
     private async Task OnNavigateAsync(NavigationContext context)
     {
+        context.CancellationToken.ThrowIfCancellationRequested();
+
         var route = context.Path.Split('?', '#')[0].Trim('/');
 
         // These forms construct FluentValidation validators directly. Keep the
@@ -65,18 +67,16 @@
         if (!requiresValidation || _fluentValidationLoaded)
             return;
 
-        await _fluentValidationLoadLock.WaitAsync();
+        await _fluentValidationLoadLock.WaitAsync(context.CancellationToken);
         try
         {
-            context.CancellationToken.ThrowIfCancellationRequested();
-
             if (_fluentValidationLoaded)
                 return;
 
             await AssemblyLoader.LoadAssembliesAsync(new[] { "FluentValidation.dll" });
-            context.CancellationToken.ThrowIfCancellationRequested();
-
             _fluentValidationLoaded = true;
+
+            context.CancellationToken.ThrowIfCancellationRequested();
         }
         finally
         {
