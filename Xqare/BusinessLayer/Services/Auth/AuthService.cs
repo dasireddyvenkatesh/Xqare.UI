@@ -302,6 +302,52 @@ namespace Xqare.BusinessLayer.Classes.Auth
             };
         }
 
+        public async Task<OtpOperationResponse> ChangePasswordAsync(ChangePasswordRequest request)
+        {
+            var response = await _api.PostAsync<ChangePasswordRequest, OtpOperationResponse>(
+                "api/auth/change-password", request);
+
+            return response.Data ?? new OtpOperationResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to change your password."
+            };
+        }
+
+        public async Task<ActiveSessionsResponse> GetActiveSessionsAsync()
+        {
+            var response = await _api.GetAsync<ActiveSessionsResponse>("api/auth/sessions");
+            return response.Data ?? new ActiveSessionsResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to retrieve active sessions."
+            };
+        }
+
+        public async Task<SessionActionResponse> RevokeSessionAsync(Guid sessionId)
+        {
+            var response = await _api.PostAsync<object, SessionActionResponse>(
+                $"api/auth/sessions/{sessionId:D}/revoke", new { });
+
+            return response.Data ?? new SessionActionResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to revoke the selected session."
+            };
+        }
+
+        public async Task<SessionActionResponse> RevokeOtherSessionsAsync()
+        {
+            var response = await _api.PostAsync<object, SessionActionResponse>(
+                "api/auth/sessions/revoke-others", new { });
+
+            return response.Data ?? new SessionActionResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to revoke other sessions."
+            };
+        }
+
         private async Task ApplySessionAsync(LoginResponse response)
         {
             if (!response.IsSuccess || string.IsNullOrWhiteSpace(response.AccessToken) ||

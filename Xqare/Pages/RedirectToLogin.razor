@@ -7,43 +7,47 @@
 
 @if (_checkingSession)
 {
-    <div class="d-flex justify-center align-center" style="min-height: 40vh;">
-        <MudStack AlignItems="AlignItems.Center" Spacing="2">
-            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
-            <MudText Typo="Typo.body2" Color="Color.Secondary">Restoring your session...</MudText>
-        </MudStack>
-    </div>
+    <section class="session-restore-page">
+        <MudPaper Class="session-restore-card" Elevation="0">
+            <div class="session-restore-brand"><span>X</span>QARE</div>
+            <MudProgressCircular Indeterminate="true" Color="Color.Warning" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Class="session-restore-title">Restoring your session</MudText>
+            <MudText Typo="Typo.body2" Class="session-restore-subtitle">
+                Checking your secure connection...
+            </MudText>
+        </MudPaper>
+    </section>
 }
 else if (_restoreUnavailable)
 {
-    <MudContainer MaxWidth="MaxWidth.Small" Class="py-10">
-        <MudPaper Class="pa-6 session-restore-panel" Elevation="1">
+    <section class="session-restore-page">
+        <MudPaper Class="session-restore-card session-restore-error" Elevation="0">
+            <div class="session-restore-brand"><span>X</span>QARE</div>
             <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Warning" Size="Size.Large" />
-            <MudText Typo="Typo.h6" Class="mt-3">We couldn't verify your session</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">
+            <MudText Typo="Typo.h6" Class="session-restore-title">We couldn't verify your session</MudText>
+            <MudText Typo="Typo.body2" Class="session-restore-subtitle">
                 The authentication service did not respond. Your saved session has not been cleared.
                 Check your connection and try again.
             </MudText>
-            <MudStack Direction="Row" Spacing="2" Class="mt-5" Wrap="Wrap.Wrap">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                           Disabled="_checkingSession" OnClick="RetrySessionRestore">
+            <MudStack Direction="Row" Spacing="2" Class="session-restore-actions" Justify="Justify.Center" Wrap="Wrap.Wrap">
+                <MudButton Variant="Variant.Filled" Color="Color.Warning"
+                           Disabled="_checkingSession" OnClick="RetrySessionRestore"
+                           Class="session-restore-primary">
                     Try again
                 </MudButton>
-                <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
-                           OnClick="NavigateToLogin">
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="NavigateToLogin">
                     Go to sign in
                 </MudButton>
             </MudStack>
         </MudPaper>
-    </MudContainer>
+    </section>
 }
 
 @code {
     private bool _checkingSession = true;
     private bool _restoreUnavailable;
 
-    protected override Task OnInitializedAsync()
-        => RestoreSessionAsync();
+    protected override Task OnInitializedAsync() => RestoreSessionAsync();
 
     private async Task RestoreSessionAsync()
     {
@@ -68,8 +72,7 @@ else if (_restoreUnavailable)
         }
         catch
         {
-            // An unexpected client-side failure is retryable too. Do not clear
-            // the stored access token here because the failure isn't proof of expiry.
+            // A client/network failure is retryable and must not clear stored credentials.
             _restoreUnavailable = true;
         }
         finally
@@ -78,8 +81,7 @@ else if (_restoreUnavailable)
         }
     }
 
-    private Task RetrySessionRestore()
-        => RestoreSessionAsync();
+    private Task RetrySessionRestore() => RestoreSessionAsync();
 
     private void NavigateToLogin()
     {
@@ -87,7 +89,6 @@ else if (_restoreUnavailable)
         var destination = string.IsNullOrWhiteSpace(returnUrl)
             ? "/login"
             : $"/login?returnUrl={Uri.EscapeDataString(returnUrl)}";
-
         Nav.NavigateTo(destination, replace: true);
     }
 }
