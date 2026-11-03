@@ -86,7 +86,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task<OtpOperationResponse> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
-            var response = await _api.PostAsync<ForgotPasswordRequest, OtpOperationResponse>(
+            var response = await _api.PostAnonymousAsync<ForgotPasswordRequest, OtpOperationResponse>(
                 "api/auth/forgot-password", request);
 
             if (response.IsSuccess && response.Data != null)
@@ -102,7 +102,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task<OtpOperationResponse> ResetPasswordAsync(ResetPasswordRequest request)
         {
-            var response = await _api.PostAsync<ResetPasswordRequest, OtpOperationResponse>(
+            var response = await _api.PostAnonymousAsync<ResetPasswordRequest, OtpOperationResponse>(
                 "api/auth/reset-password", request);
 
             if (response.IsSuccess && response.Data != null)
@@ -131,7 +131,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             request.DeviceId = await _device.GetDeviceIdAsync();
             request.DeviceName = await _device.GetDeviceNameAsync();
 
-            var response = await _api.PostAsync<LoginRequest, LoginResponse>("api/auth/login", request);
+            var response = await _api.PostAnonymousAsync<LoginRequest, LoginResponse>("api/auth/login", request);
 
             if (!response.IsSuccess || response.Data == null)
                 return new LoginResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
@@ -159,7 +159,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             request.DeviceId = await _device.GetDeviceIdAsync();
             request.DeviceName = await _device.GetDeviceNameAsync();
 
-            var response = await _api.PostAsync<RegisterRequest, RegisterResponse>("api/auth/register", request);
+            var response = await _api.PostAnonymousAsync<RegisterRequest, RegisterResponse>("api/auth/register", request);
 
             if (!response.IsSuccess || response.Data == null)
                 return response.Data ?? new RegisterResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
@@ -170,7 +170,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task<OtpOperationResponse> ResendOtpAsync(string email)
         {
-            var response = await _api.PostAsync<EmailOtpRequest, OtpOperationResponse>(
+            var response = await _api.PostAnonymousAsync<EmailOtpRequest, OtpOperationResponse>(
                 "api/auth/resend-email-otp", new EmailOtpRequest { Email = email });
 
             if (response.IsSuccess && response.Data != null)
@@ -225,7 +225,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             request.DeviceId = await _device.GetDeviceIdAsync();
             request.DeviceName = await _device.GetDeviceNameAsync();
 
-            var response = await _api.PostAsync<VerifyEmailOtpRequest, LoginResponse>(endpoint, request);
+            var response = await _api.PostAnonymousAsync<VerifyEmailOtpRequest, LoginResponse>(endpoint, request);
             if (!response.IsSuccess || response.Data == null)
                 return response.Data ?? new LoginResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
 
