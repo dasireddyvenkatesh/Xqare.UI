@@ -16,6 +16,7 @@ namespace Xqare.BusinessLayer.Services.Common
         private readonly ITokenService _tokenService;
         private readonly JwtAuthStateProvider _authStateProvider;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
+        private bool _refreshSessionRejected;
 
         public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider)
         {
@@ -47,6 +48,12 @@ namespace Xqare.BusinessLayer.Services.Common
             await _refreshLock.WaitAsync();
             try
             {
+                // A rejected refresh cookie remains rejected for this client until
+                // a successful sign-in explicitly resets this state. This stops
+                // concurrent 401 responses from repeatedly posting refresh-token.
+                if (_refreshSessionRejected)
+                    return SessionRestoreOutcome.Rejected;
+
                 // A different request may have refreshed the session while this
                 // request was waiting. Reuse that token instead of rotating the
                 // refresh cookie again.
@@ -72,7 +79,10 @@ namespace Xqare.BusinessLayer.Services.Common
                 using var response = await _http.SendAsync(request, timeout.Token);
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    _refreshSessionRejected = true;
                     return SessionRestoreOutcome.Rejected;
+                }
 
                 if (!response.IsSuccessStatusCode)
                     return SessionRestoreOutcome.Unavailable;
@@ -84,6 +94,7 @@ namespace Xqare.BusinessLayer.Services.Common
                 if (result == null || !result.IsSuccess || string.IsNullOrWhiteSpace(result.AccessToken))
                     return SessionRestoreOutcome.Unavailable;
 
+                _refreshSessionRejected = false;
                 await _tokenService.SetTokenAsync(result.AccessToken);
                 _authStateProvider.NotifyUserAuthentication();
                 return SessionRestoreOutcome.Restored;
@@ -111,6 +122,11 @@ namespace Xqare.BusinessLayer.Services.Common
         public Task<SessionRestoreOutcome> RestoreSessionAsync()
             => TryRefreshTokenAsync(accessTokenUsed: null);
 
+        public void ResetRefreshState()
+        {
+            _refreshSessionRejected = false;
+        }
+
 
         private async Task<ApiResponse<T>> SendAsync<T>(
             Func<HttpRequestMessage> requestFactory,
@@ -128,7 +144,13 @@ namespace Xqare.BusinessLayer.Services.Common
                 HttpResponseMessage responseToRead = response;
                 HttpResponseMessage? retryResponse = null;
 
-                if (response.StatusCode == HttpStatusCode.Unauthorized && retryAfterRefresh)
+                // A missing bearer token means there is no authenticated request
+                // to recover. Startup restoration is handled explicitly by the
+                // protected-route restoration component; do not create a refresh
+                // request for every anonymous endpoint call.
+                if (response.StatusCode == HttpStatusCode.Unauthorized &&
+                    retryAfterRefresh &&
+                    !string.IsNullOrWhiteSpace(accessTokenUsed))
                 {
                     var refreshOutcome = await TryRefreshTokenAsync(accessTokenUsed);
                     if (refreshOutcome == SessionRestoreOutcome.Rejected)

@@ -356,6 +356,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 return;
             }
 
+            _api.ResetRefreshState();
             await _tokenService.SetTokenAsync(response.AccessToken);
             if (_authStateProvider is JwtAuthStateProvider jwt)
                 jwt.NotifyUserAuthentication();

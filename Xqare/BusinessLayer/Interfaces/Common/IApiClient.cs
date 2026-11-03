@@ -18,5 +18,6 @@ namespace Xqare.BusinessLayer.Interfaces.Common
 
         // Shares the same serialized refresh flow used by requests that receive 401.
         Task<SessionRestoreOutcome> RestoreSessionAsync();
+        void ResetRefreshState();
     }
 }
