@@ -328,7 +328,7 @@
 
                 if (response.RequiresMfa)
                 {
-                    otpRequest.Email = loginRequest.Email;
+                    emailOtpRequest.Email = loginRequest.Email;
                     mfaChallengeToken = response.MfaChallengeToken;
                     mfaRequest.ChallengeToken = mfaChallengeToken;
                     mfaRequest.Code = string.Empty;
@@ -383,12 +383,7 @@
             }
             else
             {
-                var otpResponse = await AuthService.VerifyMfaChallengeAsync(new VerifyMfaChallengeRequest
-                {
-                    Code = otpRequest.OtpCode.Trim(),
-                    Factor = isRecoveryCodeStep ? "recovery" : "totp",
-                    ChallengeToken = mfaChallengeToken
-                });
+                var otpResponse = await AuthService.VerifyMfaChallengeAsync(mfaRequest);
 
                 if (!otpResponse.IsSuccess)
                 {
@@ -461,14 +456,16 @@
         isEmailVerificationStep = false;
         isRecoveryCodeStep = false;
         mfaChallengeToken = null;
-        otpRequest = new();
+        emailOtpRequest = new();
+        mfaRequest = new() { Factor = "totp" };
         timer?.Stop();
     }
 
     void ToggleRecoveryCode()
     {
         isRecoveryCodeStep = !isRecoveryCodeStep;
-        otpRequest.OtpCode = string.Empty;
+        mfaRequest.Factor = isRecoveryCodeStep ? "recovery" : "totp";
+        mfaRequest.Code = string.Empty;
     }
     private void NavigateAfterLogin()
     {
@@ -526,14 +523,15 @@
         if (query.TryGetValue("mfa", out var mfaValue) &&
             string.Equals(mfaValue.ToString(), "required", StringComparison.OrdinalIgnoreCase))
         {
-            otpRequest.Email = query.TryGetValue("email", out var emailValue)
+            emailOtpRequest.Email = query.TryGetValue("email", out var emailValue)
                 ? emailValue.ToString()
                 : string.Empty;
-            loginRequest.Email = otpRequest.Email;
+            loginRequest.Email = emailOtpRequest.Email;
+            mfaRequest = new VerifyMfaChallengeRequest { Factor = "totp" };
             isMfaStep = true;
             isEmailVerificationStep = false;
             isRecoveryCodeStep = false;
-            otpRequest.OtpCode = string.Empty;
+            emailOtpRequest.OtpCode = string.Empty;
 
             if (query.TryGetValue("message", out var messageValue) &&
                 !string.IsNullOrWhiteSpace(messageValue.ToString()))
