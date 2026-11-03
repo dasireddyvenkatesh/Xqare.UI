@@ -16,7 +16,7 @@ namespace Xqare.BusinessLayer.Services.Common
         private readonly ITokenService _tokenService;
         private readonly JwtAuthStateProvider _authStateProvider;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
-        private bool _refreshSessionRejected;
+        private volatile bool _refreshSessionRejected;
 
         public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider)
         {
@@ -135,6 +135,18 @@ namespace Xqare.BusinessLayer.Services.Common
         {
             try
             {
+                // After an explicit refresh rejection, do not send further protected
+                // requests until a successful sign-in resets the client state.
+                if (attachAccessToken && _refreshSessionRejected)
+                {
+                    return new ApiResponse<T>
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.Unauthorized,
+                        ErrorMessage = "Session expired. Please sign in again."
+                    };
+                }
+
                 using var request = requestFactory();
                 string? accessTokenUsed = null;
                 if (attachAccessToken)
