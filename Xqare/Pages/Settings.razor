@@ -1,0 +1,609 @@
+@page "/settings"
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.Auth
+@attribute [Authorize]
+@inject IAuthService AuthService
+@inject ISnackbar Snackbar
+
+<PageTitle>Settings | XQARE</PageTitle>
+<section class="settings-page">
+    <MudContainer MaxWidth="MaxWidth.False" Class="settings-container">
+        <div class="settings-heading">
+            <div>
+                <MudText Typo="Typo.h4" Class="settings-title">Settings</MudText>
+                <MudText Typo="Typo.body2" Class="settings-subtitle">Manage your sign-in security, devices and account access.</MudText>
+            </div>
+            <MudChip T="string" Color="Color.Success" Variant="Variant.Outlined">
+                <MudIcon Icon="@Icons.Material.Filled.Shield" Size="Size.Small" Class="mr-1" />
+                Account security
+            </MudChip>
+        </div>
+
+        @if (_loading)
+        {
+            <MudPaper Class="settings-state-card" Elevation="0">
+                <MudProgressLinear Indeterminate="true" Color="Color.Warning" />
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Loading your account security…</MudText>
+            </MudPaper>
+        }
+        else
+        {
+            <MudGrid Spacing="3" Class="settings-grid">
+                <MudItem xs="12" lg="6">
+                    <MudPaper Class="settings-card" Elevation="0">
+                        <div class="settings-card-heading">
+                            <span class="settings-icon"><MudIcon Icon="@Icons.Material.Filled.Security" /></span>
+                            <div class="settings-card-heading-copy">
+                                <MudText Typo="Typo.h6" Class="settings-card-title">Two-factor authentication</MudText>
+                                <MudText Typo="Typo.caption" Class="settings-muted">Protect your account with an authenticator app.</MudText>
+                            </div>
+                            @if (_totp != null && _totp.IsSuccess)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="@(_totp.IsEnabled ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
+                                    @(_totp.IsEnabled ? "Enabled" : "Not enabled")
+                                </MudChip>
+                            }
+                        </div>
+                        <MudDivider Class="settings-divider" />
+
+                        @if (_totpError != null)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">@_totpError</MudAlert>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="LoadTotpAsync" Class="mt-3">Retry</MudButton>
+                        }
+                        else if (_totp == null || !_totp.IsSuccess)
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">Authenticator status is unavailable.</MudAlert>
+                        }
+                        else
+                        {
+                            <div class="settings-summary">
+                                <div class="settings-summary-icon"><MudIcon Icon="@Icons.Material.Filled.PhoneAndroid" /></div>
+                                <div class="settings-summary-copy">
+                                    <MudText Typo="Typo.subtitle2" Class="settings-summary-title">Authenticator app</MudText>
+                                    <MudText Typo="Typo.caption" Class="settings-muted">Google Authenticator, Microsoft Authenticator or any TOTP-compatible app.</MudText>
+                                </div>
+                                <MudChip T="string" Color="@(_totp.IsEnabled ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
+                                    @(_totp.IsEnabled ? "Protected" : "Action needed")
+                                </MudChip>
+                            </div>
+
+                            @if (_totp.IsEnabled)
+                            {
+                                <div class="settings-stats">
+                                    <div class="settings-stat">
+                                        <MudText Typo="Typo.caption" Class="settings-muted">Enabled since</MudText>
+                                        <MudText Typo="Typo.body2" Class="settings-stat-value">@(_totp.EnabledAt?.ToLocalTime().ToString("dd MMM yyyy") ?? "Active")</MudText>
+                                    </div>
+                                    <div class="settings-stat">
+                                        <MudText Typo="Typo.caption" Class="settings-muted">Recovery codes</MudText>
+                                        <MudText Typo="Typo.body2" Class="settings-stat-value">@_totp.RecoveryCodesRemaining remaining</MudText>
+                                    </div>
+                                </div>
+                                @if (_totp.RecoveryCodesRemaining <= 3)
+                                {
+                                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="settings-alert">
+                                        You have few recovery codes remaining. Generate a new set and store them safely.
+                                    </MudAlert>
+                                }
+                                <div class="settings-actions">
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ShowRecovery" StartIcon="@Icons.Material.Filled.Key">Recovery codes</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="BeginEnrollment" StartIcon="@Icons.Material.Filled.Sync">Replace authenticator</MudButton>
+                                    <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="ShowDisable" StartIcon="@Icons.Material.Filled.RemoveCircleOutline">Disable</MudButton>
+                                </div>
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="settings-alert">
+                                    Add an authenticator to require a one-time code after your password when signing in.
+                                </MudAlert>
+                                <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(!_totp.CanEnroll)"
+                                           OnClick="BeginEnrollment" Class="settings-primary">
+                                    Set up authenticator
+                                </MudButton>
+                                @if (!_totp.CanEnroll)
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Warning" Class="mt-2">Authenticator setup is currently unavailable.</MudText>
+                                }
+                            }
+                        }
+
+                        @if (_showEnrollment)
+                        {
+                            <MudPaper Outlined="true" Class="settings-action-panel">
+                                <MudText Typo="Typo.subtitle1" Class="settings-panel-title">@(_totp?.IsEnabled == true ? "Replace authenticator" : "Set up authenticator")</MudText>
+                                <MudText Typo="Typo.caption" Class="settings-muted">Confirm your current password. Replacing an authenticator also requires its current code.</MudText>
+                                <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                              InputType="InputType.Password" @bind-Value="_enrollmentPassword" FullWidth="true" />
+                                @if (_totp?.IsEnabled == true)
+                                {
+                                    <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense" MaxLength="6" @bind-Value="_currentCode" FullWidth="true" />
+                                }
+                                <div class="settings-form-actions">
+                                    <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="StartEnrollmentAsync" Class="settings-primary">Continue</MudButton>
+                                    <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
+                                </div>
+                                @if (_enrollment?.IsSuccess == true)
+                                {
+                                    <MudDivider Class="settings-divider" />
+                                    <MudText Typo="Typo.subtitle1" Class="settings-panel-title">Scan this QR code</MudText>
+                                    <MudText Typo="Typo.caption" Class="settings-muted">Add XQARE to your authenticator app, then enter its current six-digit code.</MudText>
+                                    @if (!string.IsNullOrWhiteSpace(_enrollment.QrCodeDataUri))
+                                    {
+                                        <img src="@_enrollment.QrCodeDataUri" alt="XQARE authenticator setup QR code" class="settings-qr" />
+                                    }
+                                    <MudTextField T="string" Label="Manual setup key" Value="@_enrollment.Secret" ReadOnly="true"
+                                                  Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
+                                    <MudTextField T="string" Label="Authenticator code" @bind-Value="_enrollmentCode"
+                                                  Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" FullWidth="true" />
+                                    <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="ConfirmEnrollmentAsync" Class="settings-primary">
+                                        Verify and enable
+                                    </MudButton>
+                                }
+                            </MudPaper>
+                        }
+
+                        @if (_showRecovery)
+                        {
+                            <MudPaper Outlined="true" Class="settings-action-panel">
+                                <MudText Typo="Typo.subtitle1" Class="settings-panel-title">Regenerate recovery codes</MudText>
+                                <MudText Typo="Typo.caption" Class="settings-muted">Previous unused codes will be invalidated.</MudText>
+                                <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
+                                              Margin="Margin.Dense" MaxLength="6" @bind-Value="_recoveryCode" FullWidth="true" />
+                                <div class="settings-form-actions">
+                                    <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="RegenerateRecoveryAsync" Class="settings-primary">Generate new codes</MudButton>
+                                    <MudButton Variant="Variant.Text" OnClick="ClosePanels">Cancel</MudButton>
+                                </div>
+                            </MudPaper>
+                        }
+
+                        @if (_showDisable)
+                        {
+                            <MudPaper Outlined="true" Class="settings-action-panel settings-danger-panel">
+                                <MudText Typo="Typo.subtitle1" Class="settings-panel-title">Disable authenticator</MudText>
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="settings-alert">
+                                    Two-factor verification will no longer be required after this action.
+                                </MudAlert>
+                                <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                              InputType="InputType.Password" @bind-Value="_disablePassword" FullWidth="true" />
+                                <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
+                                              Margin="Margin.Dense" MaxLength="6" @bind-Value="_disableCode" FullWidth="true" />
+                                <div class="settings-form-actions">
+                                    <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_busy" OnClick="DisableTotpAsync">Disable authenticator</MudButton>
+                                    <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
+                                </div>
+                            </MudPaper>
+                        }
+
+                        @if (_recoveryCodes.Count > 0)
+                        {
+                            <MudPaper Outlined="true" Class="settings-recovery-panel">
+                                <div class="settings-panel-heading">
+                                    <MudText Typo="Typo.subtitle1" Class="settings-panel-title">Your recovery codes</MudText>
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">Shown once</MudChip>
+                                </div>
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="settings-alert">
+                                    Save these codes somewhere secure. Each code can be used only once.
+                                </MudAlert>
+                                <div class="settings-recovery-grid">
+                                    @foreach (var code in _recoveryCodes)
+                                    {
+                                        <span class="settings-recovery-code">@code</span>
+                                    }
+                                </div>
+                                <MudButton Variant="Variant.Filled" Color="Color.Warning" Class="settings-primary" OnClick="DismissRecoveryCodes">I have saved these codes</MudButton>
+                            </MudPaper>
+                        }
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" lg="6">
+                    <MudPaper Class="settings-card" Elevation="0">
+                        <div class="settings-card-heading">
+                            <span class="settings-icon"><MudIcon Icon="@Icons.Material.Filled.Devices" /></span>
+                            <div class="settings-card-heading-copy">
+                                <MudText Typo="Typo.h6" Class="settings-card-title">Active sessions</MudText>
+                                <MudText Typo="Typo.caption" Class="settings-muted">Review devices signed in to your account.</MudText>
+                            </div>
+                            <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small" StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadSessionsAsync">Refresh</MudButton>
+                        </div>
+                        <MudDivider Class="settings-divider" />
+                        @if (_sessionsLoading)
+                        {
+                            <MudProgressLinear Indeterminate="true" Color="Color.Warning" />
+                        }
+                        else if (_sessionsError != null)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">@_sessionsError</MudAlert>
+                        }
+                        else if (_sessions.Count == 0)
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">No active sessions found.</MudText>
+                        }
+                        else
+                        {
+                            <div class="settings-session-list">
+                                @foreach (var session in _sessions)
+                                {
+                                    <div class="settings-session-row" @key="session.SessionId">
+                                        <span class="settings-session-icon"><MudIcon Icon="@DeviceIcon(session.DeviceName)" /></span>
+                                        <div class="settings-session-copy">
+                                            <MudText Typo="Typo.body2" Class="settings-session-device">@session.DeviceName</MudText>
+                                            <MudText Typo="Typo.caption" Class="settings-muted">
+                                                @if (session.IsCurrentSession)
+                                                {
+                                                    <span>Current device</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Last active @((session.LastActivityAt ?? session.CreatedAt).ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"))</span>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(session.IpAddress))
+                                                {
+                                                    <span> · @session.IpAddress</span>
+                                                }
+                                            </MudText>
+                                        </div>
+                                        @if (session.IsCurrentSession)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Outlined">Current</MudChip>
+                                        }
+                                        else
+                                        {
+                                            <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" Disabled="_busy"
+                                                       OnClick="@(() => RevokeSessionAsync(session))">Revoke</MudButton>
+                                        }
+                                    </div>
+                                    <MudDivider />
+                                }
+                            </div>
+                            @if (_sessions.Any(x => !x.IsCurrentSession))
+                            {
+                                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="_busy"
+                                           Class="settings-revoke-others" OnClick="RevokeOtherSessionsAsync">
+                                    Sign out other devices
+                                </MudButton>
+                            }
+                        }
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" lg="6">
+                    <MudPaper Class="settings-card" Elevation="0">
+                        <div class="settings-card-heading">
+                            <span class="settings-icon"><MudIcon Icon="@Icons.Material.Filled.Password" /></span>
+                            <div class="settings-card-heading-copy">
+                                <MudText Typo="Typo.h6" Class="settings-card-title">Change password</MudText>
+                                <MudText Typo="Typo.caption" Class="settings-muted">Confirm your current password to set a new one.</MudText>
+                            </div>
+                        </div>
+                        <MudDivider Class="settings-divider" />
+                        <MudForm @ref="_passwordForm">
+                            <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                          InputType="InputType.Password" FullWidth="true" Required="true" @bind-Value="_password.CurrentPassword" />
+                            <MudTextField T="string" Label="New password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                          InputType="InputType.Password" FullWidth="true" Required="true" @bind-Value="_password.NewPassword" />
+                            <MudTextField T="string" Label="Confirm new password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                          InputType="InputType.Password" FullWidth="true" Required="true" @bind-Value="_password.ConfirmPassword" />
+                        </MudForm>
+                        <MudText Typo="Typo.caption" Class="settings-muted settings-password-hint">
+                            At least 8 characters, with uppercase, lowercase, a number and a symbol.
+                        </MudText>
+                        <div class="settings-form-actions">
+                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="_busy" OnClick="ChangePasswordAsync" Class="settings-primary">Change password</MudButton>
+                        </div>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" lg="6">
+                    <MudPaper Class="settings-card settings-logout-card" Elevation="0">
+                        <div class="settings-card-heading">
+                            <span class="settings-icon settings-icon-danger"><MudIcon Icon="@Icons.Material.Filled.Logout" /></span>
+                            <div class="settings-card-heading-copy">
+                                <MudText Typo="Typo.h6" Class="settings-card-title">Account actions</MudText>
+                                <MudText Typo="Typo.caption" Class="settings-muted">Sign out from this device securely.</MudText>
+                            </div>
+                        </div>
+                        <MudDivider Class="settings-divider" />
+                        @if (!_confirmLogout)
+                        {
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout" OnClick="() => _confirmLogout = true">
+                                Log out
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">
+                                Are you sure you want to log out from this device?
+                            </MudAlert>
+                            <div class="settings-form-actions">
+                                <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="LogoutAsync">Yes, log out</MudButton>
+                                <MudButton Variant="Variant.Text" OnClick="() => _confirmLogout = false">Cancel</MudButton>
+                            </div>
+                        }
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudContainer>
+</section>
+
+@code {
+    private bool _loading = true;
+    private bool _busy;
+    private bool _sessionsLoading;
+    private bool _confirmLogout;
+    private string? _totpError;
+    private string? _sessionsError;
+    private TotpStatusResponse? _totp;
+    private List<ActiveSessionDto> _sessions = new();
+    private MudForm? _passwordForm;
+    private ChangePasswordRequest _password = new();
+    private bool _showEnrollment;
+    private bool _showRecovery;
+    private bool _showDisable;
+    private string _enrollmentPassword = string.Empty;
+    private string _currentCode = string.Empty;
+    private string _enrollmentCode = string.Empty;
+    private string _recoveryCode = string.Empty;
+    private string _disablePassword = string.Empty;
+    private string _disableCode = string.Empty;
+    private TotpEnrollmentStartResponse? _enrollment;
+    private readonly List<string> _recoveryCodes = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadTotpAsync();
+            await LoadSessionsAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadTotpAsync()
+    {
+        try
+        {
+            _totp = await AuthService.GetTotpStatusAsync();
+            _totpError = _totp.IsSuccess ? null : _totp.Message;
+        }
+        catch
+        {
+            _totpError = "Unable to retrieve authenticator status. Please retry.";
+        }
+    }
+
+    private async Task LoadSessionsAsync()
+    {
+        _sessionsLoading = true;
+        _sessionsError = null;
+        try
+        {
+            var response = await AuthService.GetActiveSessionsAsync();
+            if (!response.IsSuccess)
+            {
+                _sessionsError = response.Message;
+                _sessions.Clear();
+                return;
+            }
+            _sessions = response.Sessions.OrderByDescending(x => x.IsCurrentSession)
+                .ThenByDescending(x => x.LastActivityAt ?? x.CreatedAt).ToList();
+        }
+        catch
+        {
+            _sessionsError = "Unable to retrieve active sessions. Please retry.";
+        }
+        finally
+        {
+            _sessionsLoading = false;
+        }
+    }
+
+    private void BeginEnrollment()
+    {
+        ClosePanels();
+        _showEnrollment = true;
+        _enrollment = null;
+        _enrollmentPassword = string.Empty;
+        _currentCode = string.Empty;
+        _enrollmentCode = string.Empty;
+    }
+
+    private void ShowRecovery()
+    {
+        ClosePanels();
+        _showRecovery = true;
+        _recoveryCode = string.Empty;
+    }
+
+    private void ShowDisable()
+    {
+        ClosePanels();
+        _showDisable = true;
+        _disablePassword = string.Empty;
+        _disableCode = string.Empty;
+    }
+
+    private void ClosePanels()
+    {
+        _showEnrollment = false;
+        _showRecovery = false;
+        _showDisable = false;
+    }
+
+    private async Task StartEnrollmentAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_enrollmentPassword))
+        {
+            Snackbar.Add("Enter your current password.", Severity.Warning);
+            return;
+        }
+        if (_totp?.IsEnabled == true && !IsSixDigitCode(_currentCode))
+        {
+            Snackbar.Add("Enter your current six-digit authenticator code.", Severity.Warning);
+            return;
+        }
+        _busy = true;
+        try
+        {
+            var response = await AuthService.StartTotpEnrollmentAsync(new TotpEnrollmentStartRequest
+            {
+                CurrentPassword = _enrollmentPassword,
+                CurrentTotpCode = _currentCode
+            });
+            if (!response.IsSuccess)
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
+            }
+            _enrollment = response;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task ConfirmEnrollmentAsync()
+    {
+        if (!IsSixDigitCode(_enrollmentCode))
+        {
+            Snackbar.Add("Enter the six-digit code from your authenticator app.", Severity.Warning);
+            return;
+        }
+        _busy = true;
+        try
+        {
+            var response = await AuthService.ConfirmTotpEnrollmentAsync(new TotpEnrollmentConfirmRequest { Code = _enrollmentCode });
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (!response.IsSuccess) return;
+            _recoveryCodes.Clear();
+            _recoveryCodes.AddRange(response.RecoveryCodes);
+            ClosePanels();
+            _enrollment = null;
+            await LoadTotpAsync();
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task RegenerateRecoveryAsync()
+    {
+        if (!IsSixDigitCode(_recoveryCode))
+        {
+            Snackbar.Add("Enter the current six-digit authenticator code.", Severity.Warning);
+            return;
+        }
+        _busy = true;
+        try
+        {
+            var response = await AuthService.RegenerateTotpRecoveryCodesAsync(new TotpRecoveryCodesRegenerateRequest { Code = _recoveryCode });
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (!response.IsSuccess) return;
+            _recoveryCodes.Clear();
+            _recoveryCodes.AddRange(response.RecoveryCodes);
+            ClosePanels();
+            await LoadTotpAsync();
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task DisableTotpAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_disablePassword) || !IsSixDigitCode(_disableCode))
+        {
+            Snackbar.Add("Enter your current password and authenticator code.", Severity.Warning);
+            return;
+        }
+        _busy = true;
+        try
+        {
+            var response = await AuthService.DisableTotpAsync(new TotpDisableRequest
+            {
+                CurrentPassword = _disablePassword,
+                Code = _disableCode
+            });
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (!response.IsSuccess) return;
+            ClosePanels();
+            _recoveryCodes.Clear();
+            await LoadTotpAsync();
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task ChangePasswordAsync()
+    {
+        if (_passwordForm != null)
+        {
+            await _passwordForm.ValidateAsync();
+            if (!_passwordForm.IsValid) return;
+        }
+        if (_password.NewPassword != _password.ConfirmPassword)
+        {
+            Snackbar.Add("New password and confirmation do not match.", Severity.Warning);
+            return;
+        }
+        _busy = true;
+        try
+        {
+            var response = await AuthService.ChangePasswordAsync(_password);
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (!response.IsSuccess) return;
+            _password = new();
+            await LoadSessionsAsync();
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task RevokeSessionAsync(ActiveSessionDto session)
+    {
+        _busy = true;
+        try
+        {
+            var response = await AuthService.RevokeSessionAsync(session.SessionId);
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (response.IsSuccess) await LoadSessionsAsync();
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task RevokeOtherSessionsAsync()
+    {
+        _busy = true;
+        try
+        {
+            var response = await AuthService.RevokeOtherSessionsAsync();
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (response.IsSuccess) await LoadSessionsAsync();
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task LogoutAsync()
+    {
+        _busy = true;
+        await AuthService.Logout();
+    }
+
+    private void DismissRecoveryCodes() => _recoveryCodes.Clear();
+
+    private static bool IsSixDigitCode(string? value)
+        => value is { Length: 6 } && value.All(c => c is >= '0' and <= '9');
+
+    private static string DeviceIcon(string? deviceName)
+    {
+        var value = deviceName ?? string.Empty;
+        return value.Contains("Android", StringComparison.OrdinalIgnoreCase) ||
+               value.Contains("iPhone", StringComparison.OrdinalIgnoreCase) ||
+               value.Contains("Mobile", StringComparison.OrdinalIgnoreCase)
+            ? Icons.Material.Filled.Smartphone
+            : Icons.Material.Filled.Computer;
+    }
+}
