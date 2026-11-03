@@ -167,7 +167,6 @@
 
                         <MudTextField Label="Confirm Password"
                                       MaxLength="128"
-                                      MaxLength="128"
                                       Variant="Variant.Outlined"
                                       InputType="@(showConfirmPassword? InputType.Text: InputType.Password)"
                                       @bind-Value="registerRequest.ConfirmPassword"
@@ -250,6 +249,7 @@
                                       HelperText="At least 8 characters, including uppercase, lowercase, a number and a symbol." />
 
                         <MudTextField Label="Confirm Password"
+                                      MaxLength="128"
                                       Variant="Variant.Outlined"
                                       InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
                                       @bind-Value="otpRequest.ConfirmPassword"
