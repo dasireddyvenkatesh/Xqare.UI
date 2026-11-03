@@ -29,6 +29,16 @@
 
     /* Shared component shape */
     --xq-card-radius: 14px;
+
+    /* Reusable palette details and alpha variants */
+    --xq-primary-rgb: 245, 166, 35;
+    --xq-white-rgb: 255, 255, 255;
+    --xq-text-inverse: #FFFFFF;
+    --xq-text-muted: #9CA3AF;
+    --xq-navy-gradient-mid: #22345A;
+    --xq-navy-gradient-deep: #223A5F;
+    --xq-border-subtle: #F1F3F7;
+    --xq-surface-hover: #F9FAFB;
 }
 
 

@@ -1,4 +1,4 @@
-.dashboard-page { min-height: 100vh; width: 100%; background: #f5f7fb; }
+.dashboard-page { min-height: 100vh; width: 100%; background: var(--xq-page-bg); }
 .dashboard-page ::deep .dashboard-content {
     width: 100%;
     max-width: none;
