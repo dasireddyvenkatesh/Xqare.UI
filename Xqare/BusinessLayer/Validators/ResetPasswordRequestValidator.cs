@@ -7,6 +7,7 @@ namespace Xqare.BusinessLayer.Validators
     {
         public ResetPasswordRequestValidator()
         {
+            RuleFor(x => x.Token).NotEmpty().MaximumLength(512);
             RuleFor(x => x.Password)
                 .NotEmpty()
                 .MinimumLength(8)
