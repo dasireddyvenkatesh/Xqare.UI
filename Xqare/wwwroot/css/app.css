@@ -1,3 +1,36 @@
+/* =========================================================
+   XQARE GLOBAL DESIGN TOKENS
+   Shared palette for page-level CSS and MudBlazor theme.
+   Keep the matching values in Theme/XqareTheme.cs aligned.
+   ========================================================= */
+:root {
+    /* Brand */
+    --xq-primary: #F5A623;
+    --xq-primary-hover: #E99A12;
+    --xq-navy: #1A2540;
+    --xq-navy-deep: #0F2A44;
+    --xq-navy-alt: #243B5B;
+
+    /* Surfaces */
+    --xq-page-bg: #F5F7FB;
+    --xq-surface: #FFFFFF;
+    --xq-surface-muted: #F8FAFC;
+    --xq-border: #E5EAF0;
+
+    /* Typography colors */
+    --xq-text-primary: #1F2937;
+    --xq-text-secondary: #64748B;
+
+    /* Semantic states */
+    --xq-success: #16A34A;
+    --xq-warning: #F5A623;
+    --xq-error: #DC2626;
+    --xq-info: #2563EB;
+
+    /* Shared component shape */
+    --xq-card-radius: 14px;
+}
+
 
 html,
 body {
