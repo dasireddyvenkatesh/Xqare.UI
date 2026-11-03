@@ -328,7 +328,6 @@
 
                 if (response.RequiresMfa)
                 {
-                    emailOtpRequest.Email = loginRequest.Email;
                     mfaChallengeToken = response.MfaChallengeToken;
                     mfaRequest.ChallengeToken = mfaChallengeToken;
                     mfaRequest.Code = string.Empty;
