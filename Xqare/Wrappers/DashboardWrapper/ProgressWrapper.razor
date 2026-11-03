@@ -42,10 +42,10 @@
                     <div class="progress-item" @key="item.Label">
                         <div class="progress-item-label">
                             <MudIcon Icon="@(item.IsComplete ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)"
-                                     Class="progress-item-icon @(item.IsComplete ? "is-complete" : "")" />
+                                     Class="@($"progress-item-icon {(item.IsComplete ? "is-complete" : string.Empty)}")" />
                             <MudText Typo="Typo.body2" Class="progress-item-text">@item.Label</MudText>
                         </div>
-                        <MudText Typo="Typo.caption" Class="progress-item-status @(item.IsComplete ? "is-complete" : "")">
+                        <MudText Typo="Typo.caption" Class="@($"progress-item-status {(item.IsComplete ? "is-complete" : string.Empty)}")">
                             @(item.IsComplete ? "Added" : "Add")
                         </MudText>
                     </div>
