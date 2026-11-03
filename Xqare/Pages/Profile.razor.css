@@ -1,7 +1,7 @@
 .profile-page {
     min-height: 100vh; padding: clamp(14px, 2.2vw, 28px); background: #f5f7fb; color: #1a2540;
 }
-.profile-page ::deep .profile-container { width: 100%; max-width: 1280px; }
+.profile-page ::deep .profile-container { width: 100%; max-width: none; margin: 0; }
 .profile-heading {
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 12px; margin-bottom: 19px;

@@ -3,51 +3,105 @@
 @implements IDisposable
 @inject NavigationManager Navigation
 
-<div class="xq-nav-root">
+<div class="xq-nav-root @(IsCollapsed ? "xq-nav-root-collapsed" : "") @(IsMobileDrawer ? "xq-nav-root-mobile" : "")">
     <div class="xq-nav-brand">
-        <MudText Typo="Typo.h6" Class="xq-nav-brand-text">XQARE</MudText>
-        <MudText Typo="Typo.caption" Class="xq-nav-brand-caption">MENTORSHIP HUB</MudText>
+        @if (!IsCollapsed)
+        {
+            <div class="xq-brand-wordmark" aria-label="XQARE">
+                <span class="xq-brand-x">X</span><span class="xq-brand-rest">QARE</span>
+            </div>
+            <MudTooltip Text="@(IsMobileDrawer ? "Close navigation" : "Collapse navigation")" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Inherit" Size="Size.Small"
+                               OnClick="ToggleOrCloseAsync"
+                               AriaLabel="@(IsMobileDrawer ? "Close navigation" : "Collapse navigation")"
+                               Class="xq-sidebar-toggle xq-sidebar-close" />
+            </MudTooltip>
+        }
+        else
+        {
+            <MudTooltip Text="Expand navigation" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Size="Size.Medium"
+                               OnClick="ToggleOrCloseAsync" AriaLabel="Expand navigation"
+                               Class="xq-sidebar-toggle" />
+            </MudTooltip>
+        }
     </div>
-    <div class="xq-nav-section-label">WORKSPACE</div>
+
+    @if (!IsCollapsed)
+    {
+        <div class="xq-nav-section-label">WORKSPACE</div>
+    }
     <MudNavMenu Class="xq-nav-menu">
-        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/dashboard")' OnClick='@(() => NavigateAsync("/dashboard"))'>
-            <MudIcon Icon="@Icons.Material.Filled.Dashboard" /><span>Dashboard</span>
-        </MudButton>
-        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/community")' OnClick='@(() => NavigateAsync("/community"))'>
-            <MudIcon Icon="@Icons.Material.Filled.Groups" /><span>Community</span>
-        </MudButton>
-        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/career-insights")' OnClick='@(() => NavigateAsync("/career-insights"))'>
-            <MudIcon Icon="@Icons.Material.Filled.Lightbulb" /><span>Insights</span>
-        </MudButton>
+        <MudTooltip Text="Dashboard" Placement="Placement.Right">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/dashboard")" OnClick='@(() => NavigateAsync("/dashboard"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Dashboard" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Dashboard</span> }
+            </MudButton>
+        </MudTooltip>
+        <MudTooltip Text="Community" Placement="Placement.Right">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/community")" OnClick='@(() => NavigateAsync("/community"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Groups" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Community</span> }
+            </MudButton>
+        </MudTooltip>
+        <MudTooltip Text="Insights" Placement="Placement.Right">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/career-insights")" OnClick='@(() => NavigateAsync("/career-insights"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Lightbulb" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Insights</span> }
+            </MudButton>
+        </MudTooltip>
     </MudNavMenu>
-    <div class="xq-nav-section-label xq-nav-section-account">ACCOUNT</div>
+
+    @if (!IsCollapsed)
+    {
+        <div class="xq-nav-section-label xq-nav-section-account">ACCOUNT</div>
+    }
     <MudNavMenu Class="xq-nav-menu">
-        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/profile")' OnClick='@(() => NavigateAsync("/profile"))'>
-            <MudIcon Icon="@Icons.Material.Filled.Person" /><span>Profile</span>
-        </MudButton>
-        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/settings")' OnClick='@(() => NavigateAsync("/settings"))'>
-            <MudIcon Icon="@Icons.Material.Filled.Settings" /><span>Settings</span>
-        </MudButton>
+        <MudTooltip Text="Profile" Placement="Placement.Right">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/profile")" OnClick='@(() => NavigateAsync("/profile"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Person" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Profile</span> }
+            </MudButton>
+        </MudTooltip>
+        <MudTooltip Text="Settings" Placement="Placement.Right">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/settings")" OnClick='@(() => NavigateAsync("/settings"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Settings" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Settings</span> }
+            </MudButton>
+        </MudTooltip>
     </MudNavMenu>
-    <div class="xq-nav-footer">
-        <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" />
-        <div>
-            <MudText Typo="Typo.caption" Class="xq-nav-footer-title">Your space, your growth</MudText>
-            <MudText Typo="Typo.caption" Class="xq-nav-footer-caption">Built with XQARE</MudText>
+
+    @if (!IsCollapsed)
+    {
+        <div class="xq-nav-footer">
+            <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" />
+            <div>
+                <MudText Typo="Typo.caption" Class="xq-nav-footer-title">Your space, your growth</MudText>
+                <MudText Typo="Typo.caption" Class="xq-nav-footer-caption">Built with XQARE</MudText>
+            </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="xq-nav-footer-collapsed">
+            <MudTooltip Text="Your space, your growth" Placement="Placement.Right">
+                <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" />
+            </MudTooltip>
+        </div>
+    }
 </div>
 
 @code {
+    [Parameter] public bool IsCollapsed { get; set; }
+    [Parameter] public bool IsMobileDrawer { get; set; }
+    [Parameter] public EventCallback OnToggleRequested { get; set; }
+    [Parameter] public EventCallback OnCloseRequested { get; set; }
     [Parameter] public EventCallback OnNavigate { get; set; }
 
     protected override void OnInitialized()
     {
         Navigation.LocationChanged += HandleLocationChanged;
     }
-
-    private void HandleLocationChanged(object? sender, LocationChangedEventArgs args)
-        => _ = InvokeAsync(StateHasChanged);
 
     private string NavClass(string path)
     {
@@ -69,6 +123,22 @@
         if (OnNavigate.HasDelegate)
             await OnNavigate.InvokeAsync();
     }
+
+    private async Task ToggleOrCloseAsync()
+    {
+        if (IsMobileDrawer)
+        {
+            if (OnCloseRequested.HasDelegate)
+                await OnCloseRequested.InvokeAsync();
+        }
+        else if (OnToggleRequested.HasDelegate)
+        {
+            await OnToggleRequested.InvokeAsync();
+        }
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs args)
+        => _ = InvokeAsync(StateHasChanged);
 
     public void Dispose()
     {
