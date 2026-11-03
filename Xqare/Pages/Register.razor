@@ -156,6 +156,7 @@
                                       HelperTextOnFocus="true" />
 
                         <MudTextField Label="Password"
+                                      MaxLength="128"
                                       Variant="Variant.Outlined"
                                       InputType="@(showPassword? InputType.Text: InputType.Password)"
                                       @bind-Value="registerRequest.Password"
@@ -165,6 +166,8 @@
                                       OnAdornmentClick="TogglePassword" />
 
                         <MudTextField Label="Confirm Password"
+                                      MaxLength="128"
+                                      MaxLength="128"
                                       Variant="Variant.Outlined"
                                       InputType="@(showConfirmPassword? InputType.Text: InputType.Password)"
                                       @bind-Value="registerRequest.ConfirmPassword"
@@ -236,6 +239,7 @@
                                       InputMode="InputMode.numeric" />
 
                         <MudTextField Label="Set Password"
+                                      MaxLength="128"
                                       Variant="Variant.Outlined"
                                       InputType="@(showPassword ? InputType.Text : InputType.Password)"
                                       @bind-Value="otpRequest.Password"
