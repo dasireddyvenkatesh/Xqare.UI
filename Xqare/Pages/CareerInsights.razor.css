@@ -153,7 +153,7 @@
     cursor: pointer;
     min-height: 420px;
     overflow: hidden;
-    box-shadow: 0 22px 55px rgba(0,0,0,.08);
+    box-shadow: 0 22px 55px rgba(25,60,92,.08);
 }
 
 .career-insights-page ::deep .featured-card__media {
@@ -332,7 +332,7 @@
 
     .career-insights-page ::deep .insight-card:hover {
         border-color: rgba(var(--xq-primary-rgb), .55);
-        box-shadow: 0 16px 36px rgba(0,0,0,.12),0 0 0 3px rgba(var(--xq-primary-rgb), .12);
+        box-shadow: 0 16px 36px rgba(25,60,92,.12),0 0 0 3px rgba(var(--xq-primary-rgb), .12);
         transform: translateY(-2px);
     }
 
