@@ -8,7 +8,7 @@ namespace Xqare.BusinessLayer.Validators
         public LoginRequestValidator()
         {
             RuleFor(x => x.Email)
-                .NotEmpty().EmailAddress();
+                .NotEmpty().EmailAddress().MaximumLength(256);
 
             RuleFor(x => x.Password)
                 .NotEmpty().WithMessage("Password is required.");
