@@ -1,7 +1,7 @@
 .settings-page {
     min-height: 100vh;
     width: 100%;
-    padding: clamp(16px, 2.2vw, 28px);
+    padding: clamp(12px, 1.5vw, 20px);
     background: #f5f7fb;
     color: #1a2540;
 }
@@ -18,7 +18,7 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 19px;
+    margin-bottom: 12px;
 }
 
 .settings-page ::deep .settings-title {
@@ -37,15 +37,18 @@
 }
 
 .settings-page ::deep .settings-grid {
-    align-items: stretch;
+    align-items: flex-start !important;
+}
+
+.settings-page ::deep .settings-grid > .mud-grid-item {
+    align-self: flex-start;
 }
 
 .settings-page ::deep .settings-card {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    display: block;
+    height: auto;
     min-width: 0;
-    padding: clamp(16px, 2vw, 22px);
+    padding: clamp(14px, 1.6vw, 19px);
     border: 1px solid #e7ebf1;
     border-radius: 14px;
     background: #ffffff;
@@ -90,7 +93,7 @@
 }
 
 .settings-page ::deep .settings-divider {
-    margin: 17px 0 !important;
+    margin: 12px 0 !important;
     border-color: #edf0f4 !important;
 }
 
@@ -157,7 +160,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 9px;
-    margin-top: 15px;
+    margin-top: 11px;
 }
 
 .settings-page ::deep .settings-primary {
@@ -251,7 +254,7 @@
     align-items: center;
     gap: 11px;
     min-width: 0;
-    padding: 13px 0;
+    padding: 9px 0;
 }
 
 .settings-session-icon {
@@ -307,7 +310,7 @@
 }
 
 .settings-page ::deep .settings-logout-card {
-    min-height: 185px;
+    min-height: 0;
 }
 
 .settings-page ::deep .settings-state-card {

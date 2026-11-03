@@ -3,32 +3,48 @@
     place-items: center;
     width: 100%;
     min-height: 100vh;
-    padding: 24px;
+    min-height: 100dvh;
+    padding: clamp(16px, 4vw, 28px);
     background: #f5f7fb;
 }
-.session-restore-card {
+.session-restore-page ::deep .session-restore-card {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    width: min(100%, 460px);
-    padding: clamp(25px, 5vw, 42px);
+    gap: 14px;
+    width: min(100%, 440px);
+    padding: clamp(24px, 5vw, 36px);
     border: 1px solid #e5eaf0;
-    border-radius: 18px;
+    border-radius: 16px;
     background: #ffffff;
     text-align: center;
-    box-shadow: 0 10px 32px rgba(26,37,64,.07);
+    box-shadow: 0 8px 24px rgba(26,37,64,.06);
 }
 .session-restore-brand {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     color: #1a2540;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 900;
     letter-spacing: .04em;
 }
 .session-restore-brand span { color: #f5b400; }
-.session-restore-title { color: #1a2540 !important; font-weight: 800 !important; }
-.session-restore-subtitle { max-width: 360px; color: #64748b !important; line-height: 1.6; }
-.session-restore-actions { flex-wrap: wrap; margin-top: 8px; }
-.session-restore-primary { color: #1a2540 !important; font-weight: 800; }
+.session-restore-page ::deep .session-restore-title {
+    color: #1a2540 !important;
+    font-weight: 800 !important;
+}
+.session-restore-page ::deep .session-restore-subtitle {
+    max-width: 360px;
+    color: #64748b !important;
+    line-height: 1.6;
+}
+.session-restore-page ::deep .session-restore-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 6px;
+}
+.session-restore-page ::deep .session-restore-primary {
+    color: #1a2540 !important;
+    font-weight: 800;
+}
