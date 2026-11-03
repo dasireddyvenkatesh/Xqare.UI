@@ -1,42 +1,75 @@
-﻿@using MudBlazor
+@using MudBlazor
+@using Xqare.BusinessLayer.Interfaces.Profile
+@inject IProfileService ProfileService
+@inject NavigationManager Navigation
 
 <section class="welcome-wrapper">
-
     <div class="welcome-card">
-
-        <!-- Left Content -->
         <div class="welcome-content">
-
-            <MudText Typo="Typo.h4" Class="welcome-title">
-                Welcome back, 👋
-            </MudText>
-
+            <MudText Typo="Typo.overline" Class="welcome-eyebrow">YOUR XQARE SPACE</MudText>
+            <MudText Typo="Typo.h4" Class="welcome-title">Welcome back, @_firstName 👋</MudText>
             <MudText Typo="Typo.body1" Class="welcome-subtitle">
-                Start building your career with clarity.
+                Your career journey is looking great today!
             </MudText>
-
             <div class="welcome-actions">
-
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Warning"
-                           Class="primary-btn">
+                <MudButton Variant="Variant.Filled" Color="Color.Warning" Class="primary-btn" OnClick="OpenCommunity">
                     Join Community
                 </MudButton>
-
-                <MudButton Variant="Variant.Outlined"
-                           Color="Color.Default"
-                           Class="secondary-btn">
+                <MudButton Variant="Variant.Outlined" Color="Color.Default" Class="secondary-btn" OnClick="OpenProfile">
                     Complete Profile
                 </MudButton>
-
             </div>
-
+            <div class="welcome-search-row">
+                <MudTextField T="string" @bind-Value="_searchText"
+                              Placeholder="Search career insights and guidance"
+                              Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                              Class="welcome-search-field" />
+                <MudButton Variant="Variant.Filled" Color="Color.Warning"
+                           EndIcon="@Icons.Material.Filled.ArrowForward"
+                           Class="welcome-search-button" OnClick="SearchInsights">
+                    Search
+                </MudButton>
+            </div>
             <MudText Typo="Typo.caption" Class="welcome-footer">
-                More features — including mentorship, career opportunities, and AI-powered tools — are coming soon.
+                Explore insights, connect with peers and keep building your career with XQARE.
             </MudText>
-
         </div>
-
+        <div class="welcome-decoration welcome-decoration-one"></div>
+        <div class="welcome-decoration welcome-decoration-two"></div>
     </div>
-
 </section>
+
+@code {
+    private string _firstName = "there";
+    private string _searchText = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var profile = await ProfileService.GetMyProfileAsync();
+            if (profile.IsSuccess)
+            {
+                var name = !string.IsNullOrWhiteSpace(profile.FirstName)
+                    ? profile.FirstName
+                    : profile.DisplayName?.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                if (!string.IsNullOrWhiteSpace(name))
+                    _firstName = name.Trim();
+            }
+        }
+        catch
+        {
+            // Keep the dashboard usable when profile retrieval is temporarily unavailable.
+        }
+    }
+
+    private void OpenCommunity() => Navigation.NavigateTo("/community");
+    private void OpenProfile() => Navigation.NavigateTo("/profile");
+
+    private void SearchInsights()
+    {
+        var query = Uri.EscapeDataString(_searchText.Trim());
+        Navigation.NavigateTo(string.IsNullOrWhiteSpace(query) ? "/career-insights" : $"/career-insights?search={query}");
+    }
+}

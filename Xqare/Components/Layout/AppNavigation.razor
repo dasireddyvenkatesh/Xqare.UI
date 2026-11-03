@@ -1,0 +1,57 @@
+@using MudBlazor
+@inject NavigationManager Navigation
+
+<div class="xq-nav-root">
+    <div class="xq-nav-brand">
+        <MudText Typo="Typo.h6" Class="xq-nav-brand-text">XQARE</MudText>
+        <MudText Typo="Typo.caption" Class="xq-nav-brand-caption">MENTORSHIP HUB</MudText>
+    </div>
+    <div class="xq-nav-section-label">WORKSPACE</div>
+    <MudNavMenu Class="xq-nav-menu">
+        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/dashboard")' OnClick='@(() => NavigateAsync("/dashboard"))'>
+            <MudIcon Icon="@Icons.Material.Filled.Dashboard" /><span>Dashboard</span>
+        </MudButton>
+        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/community")' OnClick='@(() => NavigateAsync("/community"))'>
+            <MudIcon Icon="@Icons.Material.Filled.Groups" /><span>Community</span>
+        </MudButton>
+        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/career-insights")' OnClick='@(() => NavigateAsync("/career-insights"))'>
+            <MudIcon Icon="@Icons.Material.Filled.Lightbulb" /><span>Insights</span>
+        </MudButton>
+    </MudNavMenu>
+    <div class="xq-nav-section-label xq-nav-section-account">ACCOUNT</div>
+    <MudNavMenu Class="xq-nav-menu">
+        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/profile")' OnClick='@(() => NavigateAsync("/profile"))'>
+            <MudIcon Icon="@Icons.Material.Filled.Person" /><span>Profile</span>
+        </MudButton>
+        <MudButton FullWidth="true" Variant="Variant.Text" Class='@NavClass("/settings")' OnClick='@(() => NavigateAsync("/settings"))'>
+            <MudIcon Icon="@Icons.Material.Filled.Settings" /><span>Settings</span>
+        </MudButton>
+    </MudNavMenu>
+    <div class="xq-nav-footer">
+        <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" />
+        <div>
+            <MudText Typo="Typo.caption" Class="xq-nav-footer-title">Your space, your growth</MudText>
+            <MudText Typo="Typo.caption" Class="xq-nav-footer-caption">Built with XQARE</MudText>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnNavigate { get; set; }
+
+    private string NavClass(string path)
+    {
+        var current = "/" + Navigation.ToBaseRelativePath(Navigation.Uri).Trim('/');
+        var normalized = path.TrimEnd('/');
+        var active = string.Equals(current, normalized, StringComparison.OrdinalIgnoreCase) ||
+                     current.StartsWith(normalized + "/", StringComparison.OrdinalIgnoreCase);
+        return active ? "xq-nav-link xq-nav-link-active" : "xq-nav-link";
+    }
+
+    private async Task NavigateAsync(string path)
+    {
+        Navigation.NavigateTo(path);
+        if (OnNavigate.HasDelegate)
+            await OnNavigate.InvokeAsync();
+    }
+}
