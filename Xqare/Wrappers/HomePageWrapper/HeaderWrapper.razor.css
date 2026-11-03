@@ -159,3 +159,25 @@
         color: #f4b400 !important;
     }
 
+
+
+/* Compact shared header rhythm across desktop and mobile. */
+::deep .mud-appbar.header {
+    min-height: 56px;
+    padding: 3px 0;
+}
+::deep .header-container {
+    min-height: 50px;
+    padding-inline: clamp(12px, 2vw, 24px);
+}
+::deep .nav-desktop { gap: 12px; }
+::deep .nav-links { gap: 16px; }
+::deep .signup-btn { padding: 5px 16px; }
+@media (max-width: 991.98px) {
+    ::deep .mud-appbar.header { min-height: 52px; }
+    ::deep .header-container { min-height: 48px; }
+    ::deep .nav-mobile { gap: 2px !important; }
+    ::deep .nav-mobile .mud-icon-button { padding: 6px; }
+    .drawer-header { padding: 12px 16px; }
+    .drawer-content { padding: 16px; gap: 12px; }
+}

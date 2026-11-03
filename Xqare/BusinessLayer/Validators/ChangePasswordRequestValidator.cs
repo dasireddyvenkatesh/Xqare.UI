@@ -22,7 +22,8 @@ namespace Xqare.BusinessLayer.Validators
 
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty().WithMessage("Confirm your new password.")
-                .Equal(x => x.NewPassword).WithMessage("Passwords do not match.");
+                .Equal(x => x.NewPassword).WithMessage("Passwords do not match.")
+                .MaximumLength(128);
         }
     }
 }

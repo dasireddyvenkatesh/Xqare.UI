@@ -148,6 +148,7 @@
                                       Immediate="true" />
 
                         <MudTextField Label="Email Address"
+                                      MaxLength="256"
                                       InputType="InputType.Email"
                                       Variant="Variant.Outlined"
                                       @bind-Value="registerRequest.Email"
@@ -156,6 +157,7 @@
                                       HelperTextOnFocus="true" />
 
                         <MudTextField Label="Password"
+                                      MaxLength="128"
                                       Variant="Variant.Outlined"
                                       InputType="@(showPassword? InputType.Text: InputType.Password)"
                                       @bind-Value="registerRequest.Password"
@@ -165,6 +167,7 @@
                                       OnAdornmentClick="TogglePassword" />
 
                         <MudTextField Label="Confirm Password"
+                                      MaxLength="128"
                                       Variant="Variant.Outlined"
                                       InputType="@(showConfirmPassword? InputType.Text: InputType.Password)"
                                       @bind-Value="registerRequest.ConfirmPassword"
@@ -221,7 +224,7 @@
                             ← Back to registration
                         </MudButton>
 
-                        <MudTextField Label="Email"
+                        <MudTextField Label="Email" MaxLength="256"
                                       Value="otpRequest.Email"
                                       For="@(() => otpRequest.Email)"
                                       Variant="Variant.Outlined"
@@ -236,6 +239,7 @@
                                       InputMode="InputMode.numeric" />
 
                         <MudTextField Label="Set Password"
+                                      MaxLength="128"
                                       Variant="Variant.Outlined"
                                       InputType="@(showPassword ? InputType.Text : InputType.Password)"
                                       @bind-Value="otpRequest.Password"
@@ -246,6 +250,7 @@
                                       HelperText="At least 8 characters, including uppercase, lowercase, a number and a symbol." />
 
                         <MudTextField Label="Confirm Password"
+                                      MaxLength="128"
                                       Variant="Variant.Outlined"
                                       InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
                                       @bind-Value="otpRequest.ConfirmPassword"

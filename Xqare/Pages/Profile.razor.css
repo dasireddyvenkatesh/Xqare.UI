@@ -9,9 +9,10 @@
 .profile-page ::deep .profile-page-title { color: #1a2540 !important; font-weight: 800 !important; letter-spacing: -.025em; }
 .profile-page ::deep .profile-page-subtitle { margin-top: 4px; color: #64748b !important; }
 .profile-page ::deep .profile-status-chip { font-weight: 700; }
-.profile-page ::deep .profile-cards-grid { align-items: stretch; }
+.profile-page ::deep .profile-cards-grid { align-items: flex-start !important; row-gap: 8px !important; }
+.profile-page ::deep .profile-cards-grid > .mud-grid-item { align-self: flex-start !important; display: block !important; }
 .profile-page ::deep .profile-card {
-    height: 100%; min-width: 0; padding: clamp(16px, 2vw, 22px);
+    height: auto !important; min-height: 0 !important; min-width: 0; padding: clamp(16px, 2vw, 22px);
     border: 1px solid #e7ebf1; border-radius: 14px; background: #fff;
     box-shadow: 0 4px 14px rgba(26,37,64,.045);
 }
@@ -79,4 +80,15 @@
 .profile-page ::deep .profile-state-card .mud-progress-linear { width: 100%; }
 @supports (padding: max(0px)) {
     .profile-page { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+}
+
+
+@media (max-width: 600px) {
+    .profile-page { padding: 12px; }
+    .profile-heading { gap: 8px; margin-bottom: 12px; }
+    .profile-page ::deep .profile-card { padding: 14px; }
+    .profile-page ::deep .profile-divider { margin: 12px 0 !important; }
+    .profile-person-summary { margin-top: 14px; }
+    .profile-info-row { padding: 8px 0; }
+    .notification-row { padding: 10px 0; }
 }

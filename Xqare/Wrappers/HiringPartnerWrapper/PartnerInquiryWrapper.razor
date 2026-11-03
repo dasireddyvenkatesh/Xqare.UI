@@ -36,6 +36,7 @@
 
                     <MudItem xs="12" md="6">
                         <MudTextField Label="Company Name"
+                                      MaxLength="100"
                                       Variant="Variant.Outlined"
                                       Immediate="true"
                                       Disabled="_processing"
@@ -45,6 +46,7 @@
 
                     <MudItem xs="12" md="6">
                         <MudTextField Label="Contact Person"
+                                      MaxLength="100"
                                       Variant="Variant.Outlined"
                                       Disabled="_processing"
                                       @bind-Value="_model.ContactPerson"
@@ -53,6 +55,7 @@
 
                     <MudItem xs="12" md="6">
                         <MudTextField Label="Work Email"
+                                      MaxLength="256"
                                       Variant="Variant.Outlined"
                                       InputType="InputType.Email"
                                       Disabled="_processing"
@@ -75,6 +78,7 @@
 
                     <MudItem xs="12" md="6">
                         <MudTextField Label="Company Website"
+                                      MaxLength="2048"
                                       Variant="Variant.Outlined"
                                       Disabled="_processing"
                                       @bind-Value="_model.CompanyWebsite"
@@ -119,6 +123,7 @@
                     <MudItem xs="12">
 
                         <MudTextField Label="Roles You're Hiring For"
+                                      MaxLength="300"
                                       Variant="Variant.Outlined"
                                       Disabled="_processing"
                                       @bind-Value="_model.Roles"
@@ -131,6 +136,7 @@
                     <MudItem xs="12">
 
                         <MudTextField Label="Additional Details"
+                                      MaxLength="2000"
                                       Variant="Variant.Outlined"
                                       Lines="4"
                                       TextArea="true"

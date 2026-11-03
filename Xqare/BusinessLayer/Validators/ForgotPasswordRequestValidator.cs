@@ -8,7 +8,7 @@ namespace Xqare.BusinessLayer.Validators
         public ForgotPasswordRequestValidator()
         {
             RuleFor(x => x.Email)
-                .NotEmpty().EmailAddress();
+                .NotEmpty().EmailAddress().MaximumLength(256);
         }
     }
 }

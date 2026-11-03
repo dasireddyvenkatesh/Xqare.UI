@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
 using Xqare;
-using Xqare.BusinessLayer.Classes;
 using Xqare.BusinessLayer.Classes.Auth;
 using Xqare.BusinessLayer.Classes.Common;
 using Xqare.BusinessLayer.Classes.ContactUs;
@@ -27,7 +26,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseU
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
-builder.Services.AddSingleton<VisitCounterService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IContactUsService, ContactUsService>();
 builder.Services.AddScoped<IPartnershipService, PartnershipService>();

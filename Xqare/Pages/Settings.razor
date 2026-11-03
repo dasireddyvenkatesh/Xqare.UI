@@ -34,7 +34,7 @@
         }
         else
         {
-            <MudGrid Spacing="3" Class="settings-grid">
+            <MudGrid Spacing="2" Class="settings-grid">
                 <MudItem xs="12" lg="6">
                     <MudPaper Class="settings-card" Elevation="0">
                         <div class="settings-card-heading">
@@ -120,7 +120,7 @@
                                 <MudText Typo="Typo.subtitle1" Class="settings-panel-title">@(_totp?.IsEnabled == true ? "Replace authenticator" : "Set up authenticator")</MudText>
                                 <MudText Typo="Typo.caption" Class="settings-muted">Confirm your current password. Replacing an authenticator also requires its current code.</MudText>
                                 <MudForm @ref="_enrollmentForm" Model="_enrollmentRequest" Validation="_enrollmentValidator.ToMudValidator()">
-                                    <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                    <MudTextField T="string" Label="Current password" MaxLength="128" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                   InputType="InputType.Password" For="@(() => _enrollmentRequest.CurrentPassword)"
                                                   @bind-Value="_enrollmentRequest.CurrentPassword" FullWidth="true" />
                                     @if (_totp?.IsEnabled == true)
@@ -182,7 +182,7 @@
                                     Two-factor verification will no longer be required after this action.
                                 </MudAlert>
                                 <MudForm @ref="_disableForm" Model="_disableRequest" Validation="_disableValidator.ToMudValidator()">
-                                    <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                    <MudTextField T="string" Label="Current password" MaxLength="128" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                   InputType="InputType.Password" For="@(() => _disableRequest.CurrentPassword)"
                                                   @bind-Value="_disableRequest.CurrentPassword" FullWidth="true" />
                                     <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
@@ -303,11 +303,11 @@
                         </div>
                         <MudDivider Class="settings-divider" />
                         <MudForm @ref="_passwordForm" Model="_password" Validation="_passwordValidator.ToMudValidator()" Class="settings-password-form">
-                            <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                            <MudTextField T="string" Label="Current password" MaxLength="128" Variant="Variant.Outlined" Margin="Margin.Dense"
                                           InputType="InputType.Password" FullWidth="true" For="@(() => _password.CurrentPassword)" @bind-Value="_password.CurrentPassword" />
-                            <MudTextField T="string" Label="New password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                            <MudTextField T="string" Label="New password" MaxLength="128" Variant="Variant.Outlined" Margin="Margin.Dense"
                                           InputType="InputType.Password" FullWidth="true" For="@(() => _password.NewPassword)" @bind-Value="_password.NewPassword" />
-                            <MudTextField T="string" Label="Confirm new password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                            <MudTextField T="string" Label="Confirm new password" MaxLength="128" Variant="Variant.Outlined" Margin="Margin.Dense"
                                           InputType="InputType.Password" FullWidth="true" For="@(() => _password.ConfirmPassword)" @bind-Value="_password.ConfirmPassword" />
                         </MudForm>
                         <MudText Typo="Typo.caption" Class="settings-muted settings-password-hint">
