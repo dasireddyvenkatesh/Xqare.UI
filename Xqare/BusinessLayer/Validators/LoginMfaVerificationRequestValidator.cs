@@ -8,7 +8,7 @@ namespace Xqare.BusinessLayer.Validators
         public LoginMfaVerificationRequestValidator(Func<bool> isRecoveryCodeStep)
         {
             RuleFor(x => x.Email)
-                .NotEmpty().EmailAddress();
+                .NotEmpty().EmailAddress().MaximumLength(256);
 
             RuleFor(x => x.OtpCode)
                 .NotEmpty().WithMessage("A verification code is required.")
