@@ -148,6 +148,7 @@
                                       Immediate="true" />
 
                         <MudTextField Label="Email Address"
+                                      MaxLength="256"
                                       InputType="InputType.Email"
                                       Variant="Variant.Outlined"
                                       @bind-Value="registerRequest.Email"
@@ -223,7 +224,7 @@
                             ← Back to registration
                         </MudButton>
 
-                        <MudTextField Label="Email"
+                        <MudTextField Label="Email" MaxLength="256"
                                       Value="otpRequest.Email"
                                       For="@(() => otpRequest.Email)"
                                       Variant="Variant.Outlined"
