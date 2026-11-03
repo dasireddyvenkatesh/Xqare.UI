@@ -206,8 +206,11 @@
                             <span class="settings-icon"><MudIcon Icon="@Icons.Material.Filled.Devices" /></span>
                             <div class="settings-card-heading-copy">
                                 <MudText Typo="Typo.h6" Class="settings-card-title">Active sessions</MudText>
-                                <MudText Typo="Typo.caption" Class="settings-muted">Review devices signed in to your account.</MudText>
+                                <MudText Typo="Typo.caption" Class="settings-muted">Manage up to two devices signed in to your account.</MudText>
                             </div>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined" Class="settings-device-count">
+                                @Math.Min(_sessions.Count, 2) of 2 devices
+                            </MudChip>
                             <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small" StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadSessionsAsync">Refresh</MudButton>
                         </div>
                         <MudDivider Class="settings-divider" />
@@ -241,9 +244,9 @@
                                                 {
                                                     <span>Last active @((session.LastActivityAt ?? session.CreatedAt).ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"))</span>
                                                 }
-                                                @if (!string.IsNullOrWhiteSpace(session.IpAddress))
+                                                @if (session.IsCurrentSession && !string.IsNullOrWhiteSpace(session.IpAddress))
                                                 {
-                                                    <span> · @session.IpAddress</span>
+                                                    <span> · IPv4: @session.IpAddress</span>
                                                 }
                                             </MudText>
                                         </div>
@@ -281,7 +284,7 @@
                             </div>
                         </div>
                         <MudDivider Class="settings-divider" />
-                        <MudForm @ref="_passwordForm">
+                        <MudForm @ref="_passwordForm" Class="settings-password-form">
                             <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
                                           InputType="InputType.Password" FullWidth="true" Required="true" @bind-Value="_password.CurrentPassword" />
                             <MudTextField T="string" Label="New password" Variant="Variant.Outlined" Margin="Margin.Dense"
