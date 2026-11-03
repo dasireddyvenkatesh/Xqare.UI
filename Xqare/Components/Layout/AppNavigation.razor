@@ -1,4 +1,6 @@
 @using MudBlazor
+@using Microsoft.AspNetCore.Components.Routing
+@implements IDisposable
 @inject NavigationManager Navigation
 
 <div class="xq-nav-root">
@@ -39,9 +41,22 @@
 @code {
     [Parameter] public EventCallback OnNavigate { get; set; }
 
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += HandleLocationChanged;
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs args)
+        => _ = InvokeAsync(StateHasChanged);
+
     private string NavClass(string path)
     {
-        var current = "/" + Navigation.ToBaseRelativePath(Navigation.Uri).Trim('/');
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var queryIndex = relative.IndexOfAny(new[] { '?', '#' });
+        if (queryIndex >= 0)
+            relative = relative[..queryIndex];
+
+        var current = "/" + relative.Trim('/');
         var normalized = path.TrimEnd('/');
         var active = string.Equals(current, normalized, StringComparison.OrdinalIgnoreCase) ||
                      current.StartsWith(normalized + "/", StringComparison.OrdinalIgnoreCase);
@@ -53,5 +68,10 @@
         Navigation.NavigateTo(path);
         if (OnNavigate.HasDelegate)
             await OnNavigate.InvokeAsync();
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= HandleLocationChanged;
     }
 }

@@ -1,27 +1,49 @@
-@using MudBlazor
+﻿@using MudBlazor
 @inject NavigationManager Navigation
 
 <section class="quick-actions">
-    <div class="actions-grid">
-        <div class="action-card" role="button" tabindex="0" @onclick='() => NavigateTo("/community")'>
-            <MudIcon Icon="@Icons.Material.Filled.Groups" Class="action-icon" />
-            <MudText Typo="Typo.h6" Class="action-title">Community</MudText>
-            <MudText Typo="Typo.body2" Class="action-desc">Join discussions and connect with peers.</MudText>
-            <MudText Typo="Typo.caption" Class="action-link">Explore community <MudIcon Icon="@Icons.Material.Filled.ArrowForward" /></MudText>
-        </div>
-        <div class="action-card" role="button" tabindex="0" @onclick='() => NavigateTo("/profile")'>
-            <MudIcon Icon="@Icons.Material.Filled.Person" Class="action-icon" />
-            <MudText Typo="Typo.h6" Class="action-title">Complete Profile</MudText>
-            <MudText Typo="Typo.body2" Class="action-desc">Add details to unlock better opportunities.</MudText>
-            <MudText Typo="Typo.caption" Class="action-link">Update profile <MudIcon Icon="@Icons.Material.Filled.ArrowForward" /></MudText>
-        </div>
-        <div class="action-card" role="button" tabindex="0" @onclick='() => NavigateTo("/career-insights")'>
-            <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="action-icon" />
-            <MudText Typo="Typo.h6" Class="action-title">Career Insights</MudText>
-            <MudText Typo="Typo.body2" Class="action-desc">Explore curated content to guide your growth.</MudText>
-            <MudText Typo="Typo.caption" Class="action-link">Explore insights <MudIcon Icon="@Icons.Material.Filled.ArrowForward" /></MudText>
-        </div>
-    </div>
-</section>
 
-@code { private void NavigateTo(string path) => Navigation.NavigateTo(path); }
+    <div class="actions-grid">
+
+        <!-- Community -->
+        <div class="action-card" role="button" tabindex="0" @onclick='() => Navigation.NavigateTo("/community")'>
+            <MudIcon Icon="@Icons.Material.Filled.Group" Class="action-icon" />
+
+            <MudText Typo="Typo.h6" Class="action-title">
+                Community
+            </MudText>
+
+            <MudText Typo="Typo.body2" Class="action-desc">
+                Join discussions and connect with peers.
+            </MudText>
+        </div>
+
+        <!-- Profile -->
+        <div class="action-card" role="button" tabindex="0" @onclick='() => Navigation.NavigateTo("/profile")'>
+            <MudIcon Icon="@Icons.Material.Filled.Person" Class="action-icon" />
+
+            <MudText Typo="Typo.h6" Class="action-title">
+                Complete Profile
+            </MudText>
+
+            <MudText Typo="Typo.body2" Class="action-desc">
+                Add details to unlock better opportunities.
+            </MudText>
+        </div>
+
+        <!-- Insights -->
+        <div class="action-card" role="button" tabindex="0" @onclick='() => Navigation.NavigateTo("/career-insights")'>
+            <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="action-icon" />
+
+            <MudText Typo="Typo.h6" Class="action-title">
+                Career Insights
+            </MudText>
+
+            <MudText Typo="Typo.body2" Class="action-desc">
+                Explore curated content to guide your growth
+            </MudText>
+        </div>
+
+    </div>
+
+</section>

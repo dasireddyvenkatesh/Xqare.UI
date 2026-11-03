@@ -9,8 +9,8 @@
 .profile-page ::deep .profile-page-title { color: #1a2540 !important; font-weight: 800 !important; letter-spacing: -.025em; }
 .profile-page ::deep .profile-page-subtitle { margin-top: 4px; color: #64748b !important; }
 .profile-page ::deep .profile-status-chip { font-weight: 700; }
-.profile-cards-grid { align-items: stretch; }
-.profile-card {
+.profile-page ::deep .profile-cards-grid { align-items: stretch; }
+.profile-page ::deep .profile-card {
     height: 100%; min-width: 0; padding: clamp(16px, 2vw, 22px);
     border: 1px solid #e7ebf1; border-radius: 14px; background: #fff;
     box-shadow: 0 4px 14px rgba(26,37,64,.045);
@@ -48,22 +48,34 @@
 .profile-role-list { display: flex; flex-wrap: wrap; gap: 5px; }
 .profile-edit-form { padding-top: 4px; }
 .profile-form-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #edf0f4; }
-.profile-primary-button { border-radius: 9px; color: #1a2540 !important; font-weight: 800; text-transform: none; }
+.profile-page ::deep .profile-primary-button { border-radius: 9px; color: #1a2540 !important; font-weight: 800; text-transform: none; }
 .profile-page ::deep .profile-card .mud-input-outlined-border { border-color: #dce4ed; }
 .profile-page ::deep .profile-card .mud-input-control { width: 100%; }
 .notification-list { display: flex; flex-direction: column; }
-.notification-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; padding: 14px 0; }
-.notification-copy { flex: 1 1 auto; min-width: 0; }
+.notification-row { display: grid; grid-template-columns: minmax(0, 1fr) 56px; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 14px 0; }
+.notification-copy { width: 100%; min-width: 0; max-width: 100%; }
 .profile-page ::deep .notification-title { color: #1a2540 !important; font-weight: 700 !important; }
 .profile-page ::deep .notification-description { color: #8290a4 !important; }
-.profile-page ::deep .notification-row .mud-switch { flex: 0 0 auto; }
+.profile-page ::deep .notification-row .notification-toggle {
+    display: flex !important;
+    flex: 0 0 56px !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+    justify-self: end;
+    margin: 0 !important;
+}
+.profile-page ::deep .notification-row .notification-toggle .mud-switch-label {
+    width: auto;
+    min-width: 0;
+}
 .profile-page ::deep .notification-row .mud-switch.mud-disabled { opacity: .52; }
 .profile-page ::deep .notification-note { margin-top: 14px; border-radius: 10px; }
-.profile-state-card {
+.profile-page ::deep .profile-state-card {
     display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 38px 22px;
     border: 1px solid #e7ebf1; border-radius: 14px; background: #fff; text-align: center;
 }
-.profile-state-icon { color: #9aa8b8; font-size: 42px; }
+.profile-page ::deep .profile-state-icon { color: #9aa8b8; font-size: 42px; }
 .profile-page ::deep .profile-state-card .mud-progress-linear { width: 100%; }
 @supports (padding: max(0px)) {
     .profile-page { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
