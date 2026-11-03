@@ -248,7 +248,7 @@
     VerifyEmailOtpRequest otpRequest = new();
 
     LoginRequestValidator loginValidator = new();
-    LoginMfaVerificationRequestValidator otpStepValidator = new(() => isRecoveryCodeStep);
+    LoginMfaVerificationRequestValidator otpStepValidator = null!;
 
     private bool _processing = false;
     bool isMfaStep = false;
@@ -478,6 +478,7 @@
 
     protected override Task OnInitializedAsync()
     {
+        otpStepValidator = new LoginMfaVerificationRequestValidator(() => isRecoveryCodeStep);
         var uri = Nav.ToAbsoluteUri(Nav.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
