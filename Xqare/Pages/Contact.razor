@@ -135,6 +135,7 @@
                          OnValidSubmit="Submit" Spacing="3">
 
                     <MudTextField Label="Full Name"
+                                  MaxLength="100"
                                   Variant="Variant.Outlined"
                                   @bind-Value="_model.FullName"
                                   For="@(() => _model.FullName)"
@@ -142,18 +143,21 @@
                                   Immediate=" true" />
 
                     <MudTextField Label="Email Address"
+                                  MaxLength="256"
                                   Variant="Variant.Outlined"
                                   @bind-Value="_model.Email"
                                   For="@(() => _model.Email)"
                                   Placeholder="you@example.com" />
 
                     <MudTextField Label="Subject"
+                                  MaxLength="100"
                                   Variant="Variant.Outlined"
                                   @bind-Value="_model.Subject"
                                   For="@(() => _model.Subject)"
                                   Placeholder="What's this about?" />
 
                     <MudTextField Label="Message"
+                                  MaxLength="500"
                                   Variant="Variant.Outlined"
                                   Lines="5"
                                   @bind-Value="_model.Message"
