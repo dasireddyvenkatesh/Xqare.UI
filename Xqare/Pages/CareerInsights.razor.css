@@ -1,5 +1,4 @@
-﻿.career-insights-page ::deep .career-page {
-    padding-top: 30px;
+.career-insights-page ::deep .career-page {
     min-height: 100vh;
     background: #f8fafc;
 }

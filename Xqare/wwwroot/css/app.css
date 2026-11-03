@@ -322,3 +322,15 @@ code {
 .mud-input-root {
     padding-left: 10px !important;
 }
+
+/* Page-specific MudBlazor main-content spacing overrides. */
+@media (max-width: 959.98px) {
+    .xq-app-layout .mud-main-content:has(.dashboard-page) {
+        padding-top: 0 !important;
+    }
+}
+
+/* Keep the 24px top offset on the Login page only. */
+.mud-main-content.xq-public-main:has(.login-wrapper) {
+    padding-top: 24px !important;
+}
