@@ -9,7 +9,8 @@ namespace Xqare.BusinessLayer.Validators
         {
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .EmailAddress();
+                .EmailAddress()
+                .MaximumLength(256);
 
             RuleFor(x => x.OtpCode)
                 .NotEmpty()
