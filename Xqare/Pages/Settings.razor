@@ -189,9 +189,9 @@
                                     Save these codes somewhere secure. Each code can be used only once.
                                 </MudAlert>
                                 <div class="settings-recovery-grid">
-                                    @foreach (var code in _recoveryCodes)
+                                    @foreach (var recoveryCode in _recoveryCodes)
                                     {
-                                        <span class="settings-recovery-code">@code</span>
+                                        <span class="settings-recovery-code">@recoveryCode</span>
                                     }
                                 </div>
                                 <MudButton Variant="Variant.Filled" Color="Color.Warning" Class="settings-primary" OnClick="DismissRecoveryCodes">I have saved these codes</MudButton>
