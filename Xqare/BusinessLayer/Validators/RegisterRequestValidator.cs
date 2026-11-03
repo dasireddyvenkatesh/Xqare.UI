@@ -10,7 +10,7 @@ namespace Xqare.BusinessLayer.Validators
             RuleFor(x => x.FullName).NotEmpty().MaximumLength(25);
 
 
-            RuleFor(x => x.Email).NotEmpty().EmailAddress();
+            RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(256);
 
             RuleFor(x => x.Password)
                 .NotEmpty()
