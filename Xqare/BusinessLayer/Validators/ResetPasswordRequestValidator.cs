@@ -13,11 +13,13 @@ namespace Xqare.BusinessLayer.Validators
                 .Matches("[A-Z]").WithMessage("One uppercase required")
                 .Matches("[a-z]").WithMessage("One lowercase required")
                 .Matches("[0-9]").WithMessage("One number required")
-                .Matches(@"[\W_]").WithMessage("One symbol required");
+                .Matches(@"[\W_]").WithMessage("One symbol required")
+                .MaximumLength(128).WithMessage("Password cannot exceed 128 characters.");
 
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty()
-                .Equal(x => x.Password).WithMessage("Passwords do not match");
+                .Equal(x => x.Password).WithMessage("Passwords do not match")
+                .MaximumLength(128);
         }
     }
 }
