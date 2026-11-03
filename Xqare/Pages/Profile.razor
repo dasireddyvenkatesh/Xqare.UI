@@ -96,8 +96,9 @@
                                     </MudItem>
                                     <MudItem xs="12">
                                         <MudTextField T="string" Label="Phone number" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                      FullWidth="true" MaxLength="32" InputType="InputType.Telephone"
-                                                      For="@(() => _edit.PhoneNumber)" @bind-Value="_edit.PhoneNumber" />
+                                                      FullWidth="true" MaxLength="16" InputType="InputType.Telephone"
+                                                      For="@(() => _edit.PhoneNumber)" @bind-Value="_edit.PhoneNumber"
+                                                      HelperText="Indian mobile number: 10 digits, with optional +91 prefix." />
                                     </MudItem>
                                     <MudItem xs="12">
                                         <MudTextField T="string" Label="Bio" Variant="Variant.Outlined" Margin="Margin.Dense"
