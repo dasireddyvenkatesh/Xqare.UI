@@ -1,7 +1,25 @@
+:root {
+    --xq-navy: #1A2540;
+    --xq-navy-alt: #243B5B;
+    --xq-gold: #F5A623;
+    --xq-gold-hover: #E99A12;
+    --xq-page-bg: #F5F7FB;
+    --xq-surface: #FFFFFF;
+    --xq-text: #1F2937;
+    --xq-muted: #64748B;
+    --xq-border: #E5EAF0;
+    --xq-card-radius: 14px;
+    --xq-font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --xq-font-page-title: 24px;
+    --xq-font-section-title: 18px;
+    --xq-font-body: 14px;
+    --xq-font-secondary: 12px;
+}
+
 
 html,
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--xq-font-family);
 }
 
 h1:focus {

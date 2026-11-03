@@ -1,93 +1,163 @@
-﻿/* Card */
-.progress-wrapper{
-    padding:10px 0px;
+.progress-wrapper {
+    width: 100%;
+    min-width: 0;
 }
 
-::deep.progress-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 22px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+::deep .progress-card {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 18px;
+    background: var(--xq-surface, #FFFFFF);
+    border: 1px solid var(--xq-border, #E5EAF0);
+    border-radius: var(--xq-card-radius, 14px);
+    box-shadow: 0 2px 8px rgba(26, 37, 64, 0.035);
 }
 
-/* Title */
-::deep .progress-title {
-    font-weight: 600;
-    margin-bottom: 12px;
-}
-
-/* Top row */
-::deep .progress-top {
+::deep .panel-heading {
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-/* Label */
-::deep .progress-label {
-    color: #374151;
-}
-
-/* Percentage */
-::deep .progress-percent {
-    color: #f59e0b;
+::deep .panel-title {
+    margin: 0;
+    color: var(--xq-text, #1F2937);
+    font-size: 17px;
     font-weight: 600;
+    line-height: 1.35;
 }
 
-/* Progress bar */
+::deep .panel-subtitle {
+    display: block;
+    margin-top: 3px;
+    color: var(--xq-muted, #64748B);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+::deep .panel-link {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding: 3px 5px;
+    color: var(--xq-navy, #1A2540);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: none;
+}
+
+::deep .panel-link:hover {
+    background: rgba(245, 166, 35, 0.12);
+}
+
+::deep .profile-loading-bar {
+    margin: 8px 0 4px;
+}
+
+::deep .profile-progress-empty {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 0 4px;
+    color: var(--xq-muted, #64748B);
+}
+
+::deep .profile-progress-empty .mud-typography-body2 {
+    color: var(--xq-text, #1F2937);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+::deep .profile-progress-empty .mud-typography-caption {
+    color: var(--xq-muted, #64748B);
+    font-size: 12px;
+}
+
+::deep .progress-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 7px;
+}
+
+::deep .progress-label {
+    margin: 0;
+    color: var(--xq-muted, #64748B);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+::deep .progress-percent {
+    margin: 0;
+    color: var(--xq-navy, #1A2540);
+    font-size: 18px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
 ::deep .progress-bar {
-    height: 8px;
+    height: 7px;
+    margin-bottom: 15px;
     border-radius: 999px;
-    margin-bottom: 18px;
 }
 
-/* Items */
 ::deep .progress-items {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 0;
 }
 
-/* Item row */
 ::deep .progress-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 35px;
+    padding: 5px 0;
+    border-top: 1px solid #EEF1F5;
 }
 
-    /* Left side */
-    ::deep .progress-item .left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: #374151;
-    }
-
-    /* Icon styles */
-    ::deep .progress-item .mud-icon-root {
-        font-size: 20px;
-        color: #9ca3af;
-    }
-
-    /* Done */
-    ::deep .progress-item.done .mud-icon-root {
-        color: #f59e0b;
-    }
-
-/* Status */
-::deep .status {
-    font-size: 14px;
+::deep .progress-item-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
 }
 
-    /* Success */
-    ::deep .status.success {
-        color: #f59e0b;
-        font-weight: 500;
-    }
+::deep .progress-item-icon {
+    flex: 0 0 auto;
+    color: #94A3B8;
+    font-size: 17px;
+}
 
-    /* Pending */
-    ::deep .status.pending {
-        color: #6b7280;
-    }
+::deep .progress-item-icon.is-complete {
+    color: #16A34A;
+}
+
+::deep .progress-item-text {
+    color: var(--xq-text, #1F2937);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+::deep .progress-item-status {
+    flex: 0 0 auto;
+    color: #A16207;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+::deep .progress-item-status.is-complete {
+    color: #15803D;
+}
+
+::deep .progress-footnote {
+    display: block;
+    margin-top: 10px;
+    color: var(--xq-muted, #64748B);
+    font-size: 11px;
+    line-height: 1.45;
+}

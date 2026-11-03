@@ -1,16 +1,45 @@
 @page "/dashboard"
 @layout AuthenticatedLayout
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.Profile
 @using Xqare.Wrappers.DashboardWrapper
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
+@inject IProfileService ProfileService
 
 <PageTitle>Dashboard | XQARE</PageTitle>
+
 <section class="dashboard-page">
     <MudContainer MaxWidth="MaxWidth.False" Class="dashboard-content">
-        <WelcomeWrapper />
+        <WelcomeWrapper Profile="_profile" />
         <QuickActionsWrapper />
-        <ProgressWrapper />
-        <InsightsWrapper />
-        <LaunchWrapper />
+
+        <div class="dashboard-body-grid">
+            <ProgressWrapper Profile="_profile" IsLoading="_profileLoading" />
+            <InsightsWrapper />
+        </div>
     </MudContainer>
 </section>
+
+@code {
+    private MyProfileResponse? _profile;
+    private bool _profileLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var profile = await ProfileService.GetMyProfileAsync();
+            if (profile.IsSuccess)
+                _profile = profile;
+        }
+        catch
+        {
+            // Keep the dashboard available when the profile service is temporarily unavailable.
+        }
+        finally
+        {
+            _profileLoading = false;
+        }
+    }
+}

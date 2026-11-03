@@ -1,52 +1,77 @@
-﻿@using MudBlazor
+@using MudBlazor
+@using Xqare.BusinessLayer.DTO
 
-<section class="progress-wrapper">
-
-    <div class="progress-card">
-
-        <!-- Title -->
-        <MudText Typo="Typo.h6" Class="progress-title">
-            Your Progress
-        </MudText>
-
-        <!-- Label + Percentage -->
-        <div class="progress-top">
-            <MudText Typo="Typo.body2" Class="progress-label">
-                Profile Completion
-            </MudText>
-
-            <MudText Typo="Typo.body2" Class="progress-percent">
-                60%
-            </MudText>
+<section class="progress-wrapper" aria-label="Profile progress">
+    <MudPaper Class="dashboard-panel progress-card" Elevation="0">
+        <div class="panel-heading">
+            <div>
+                <MudText Typo="Typo.h6" Class="panel-title">Profile progress</MudText>
+                <MudText Typo="Typo.caption" Class="panel-subtitle">Keep your professional details up to date.</MudText>
+            </div>
+            <MudButton Href="/profile" Variant="Variant.Text" Color="Color.Warning" Class="panel-link">
+                Edit profile
+            </MudButton>
         </div>
 
-        <!-- Progress Bar -->
-        <MudProgressLinear Value="60"
-                           Color="Color.Warning"
-                           Rounded="true"
-                           Class="progress-bar" />
-
-        <!-- Status Items -->
-        <div class="progress-items">
-
-            <div class="progress-item done">
-                <div class="left">
-                    <MudIcon Icon="@Icons.Material.Filled.CheckCircleOutline" />
-                    <span>Community Joined</span>
-                </div>
-                <span class="status success">Yes</span>
+        @if (IsLoading)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Warning" Class="profile-loading-bar" />
+        }
+        else if (Profile is null)
+        {
+            <div class="profile-progress-empty">
+                <MudText Typo="Typo.body2">Your profile summary is unavailable right now.</MudText>
+                <MudText Typo="Typo.caption">You can still open and update your profile.</MudText>
+            </div>
+        }
+        else
+        {
+            <div class="progress-summary">
+                <MudText Typo="Typo.body2" Class="progress-label">Profile details added</MudText>
+                <MudText Typo="Typo.subtitle1" Class="progress-percent">@CompletionPercentage%</MudText>
             </div>
 
-            <div class="progress-item">
-                <div class="left">
-                    <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" />
-                    <span>First Interaction</span>
-                </div>
-                <span class="status pending">Not yet</span>
+            <MudProgressLinear Value="@CompletionPercentage"
+                               Color="Color.Warning"
+                               Rounded="true"
+                               Class="progress-bar" />
+
+            <div class="progress-items">
+                @foreach (var item in CompletionItems)
+                {
+                    <div class="progress-item" @key="item.Label">
+                        <div class="progress-item-label">
+                            <MudIcon Icon="@(item.IsComplete ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)"
+                                     Class="progress-item-icon @(item.IsComplete ? "is-complete" : "")" />
+                            <MudText Typo="Typo.body2" Class="progress-item-text">@item.Label</MudText>
+                        </div>
+                        <MudText Typo="Typo.caption" Class="progress-item-status @(item.IsComplete ? "is-complete" : "")">
+                            @(item.IsComplete ? "Added" : "Add")
+                        </MudText>
+                    </div>
+                }
             </div>
 
-        </div>
-
-    </div>
-
+            <MudText Typo="Typo.caption" Class="progress-footnote">
+                Based on your first name, last name, phone number and professional bio.
+            </MudText>
+        }
+    </MudPaper>
 </section>
+
+@code {
+    [Parameter] public MyProfileResponse? Profile { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+
+    private int CompletionPercentage => CompletionItems.Count(item => item.IsComplete) * 25;
+
+    private IReadOnlyList<ProfileCompletionItem> CompletionItems =>
+    [
+        new("First name", !string.IsNullOrWhiteSpace(Profile?.FirstName)),
+        new("Last name", !string.IsNullOrWhiteSpace(Profile?.LastName)),
+        new("Phone number", !string.IsNullOrWhiteSpace(Profile?.PhoneNumber)),
+        new("Professional bio", !string.IsNullOrWhiteSpace(Profile?.Bio))
+    ];
+
+    private sealed record ProfileCompletionItem(string Label, bool IsComplete);
+}

@@ -1,55 +1,100 @@
-﻿/* Wrapper spacing */
 .welcome-wrapper {
-    padding: 10px 0px;
+    width: 100%;
+    margin: 0 0 16px;
 }
 
-/* Card */
 ::deep .welcome-card {
-    background: linear-gradient(135deg, #1a2540, #22345a);
-    border-radius: 18px;
-    padding: 32px;
-    color: white;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 20px 24px;
+    color: #FFFFFF;
+    background: linear-gradient(120deg, var(--xq-navy, #1A2540), #243B5B);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--xq-card-radius, 14px);
+    box-shadow: 0 5px 16px rgba(26, 37, 64, 0.08);
 }
 
-/* Content */
-::deep .welcome-content {
-    max-width: 600px;
+::deep .welcome-copy {
+    min-width: 0;
 }
 
-/* Title */
 ::deep .welcome-title {
+    margin: 0 0 5px;
+    color: #FFFFFF;
+    font-size: 24px;
     font-weight: 700;
-    margin-bottom: 8px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
 }
 
-/* Subtitle */
 ::deep .welcome-subtitle {
-    color: rgba(255,255,255,0.7);
-    margin-bottom: 20px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
-/* Buttons container */
 ::deep .welcome-actions {
     display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
 }
 
-/* Primary button */
-::deep .primary-btn {
-    border-radius: 10px;
+::deep .welcome-actions .mud-button-root {
+    min-height: 38px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
     font-weight: 600;
+    line-height: 1.2;
+    text-transform: none;
+    box-shadow: none;
 }
 
-/* Secondary button */
-::deep .secondary-btn {
-    border-radius: 10px;
-    color: white;
-    border-color: rgba(255,255,255,0.4);
+::deep .welcome-primary {
+    color: var(--xq-navy, #1A2540) !important;
+    background: var(--xq-gold, #F5A623) !important;
 }
 
-/* Footer text */
-::deep .welcome-footer {
-    color: rgba(255,255,255,0.6);
+::deep .welcome-primary:hover {
+    background: var(--xq-gold-hover, #E99A12) !important;
+}
+
+::deep .welcome-secondary {
+    color: #FFFFFF !important;
+    border-color: rgba(255, 255, 255, 0.42) !important;
+}
+
+::deep .welcome-secondary:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+@media (max-width: 760px) {
+    ::deep .welcome-card {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+        padding: 18px;
+    }
+
+    ::deep .welcome-title {
+        font-size: 21px;
+    }
+}
+
+@media (max-width: 420px) {
+    ::deep .welcome-actions {
+        width: 100%;
+    }
+
+    ::deep .welcome-actions .mud-button-root {
+        flex: 1 1 auto;
+    }
 }

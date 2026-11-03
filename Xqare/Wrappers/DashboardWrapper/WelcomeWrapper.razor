@@ -1,56 +1,55 @@
 @using MudBlazor
-@using Xqare.BusinessLayer.Interfaces.Profile
-@inject IProfileService ProfileService
-@inject NavigationManager Navigation
+@using Xqare.BusinessLayer.DTO
 
-<section class="welcome-wrapper">
+<section class="welcome-wrapper" aria-label="Welcome">
     <div class="welcome-card">
-        <div class="welcome-content">
-            <MudText Typo="Typo.h4" Class="welcome-title">
-                Welcome back, @_firstName 👋
+        <div class="welcome-copy">
+            <MudText Typo="Typo.h5" Class="welcome-title">
+                Welcome back@if (!string.IsNullOrWhiteSpace(GreetingName)){<span>, @GreetingName</span>} 👋
             </MudText>
-            <MudText Typo="Typo.body1" Class="welcome-subtitle">
-                Start building your career with clarity.
+            <MudText Typo="Typo.body2" Class="welcome-subtitle">
+                Your career development workspace is ready.
             </MudText>
-            <div class="welcome-actions">
-                <MudButton Variant="Variant.Filled" Color="Color.Warning" Class="primary-btn" OnClick="OpenCommunity">
-                    Join Community
-                </MudButton>
-                <MudButton Variant="Variant.Outlined" Color="Color.Default" Class="secondary-btn" OnClick="OpenProfile">
-                    Complete Profile
-                </MudButton>
-            </div>
-            <MudText Typo="Typo.caption" Class="welcome-footer">
-                More features — including mentorship, career opportunities, and AI-powered tools — are coming soon.
-            </MudText>
+        </div>
+
+        <div class="welcome-actions">
+            <MudButton Href="/profile"
+                       Variant="Variant.Filled"
+                       Color="Color.Warning"
+                       Class="welcome-primary">
+                @(IsProfileComplete ? "View profile" : "Complete profile")
+            </MudButton>
+            <MudButton Href="/career-insights"
+                       Variant="Variant.Outlined"
+                       Color="Color.Inherit"
+                       Class="welcome-secondary">
+                Explore insights
+            </MudButton>
         </div>
     </div>
 </section>
 
 @code {
-    private string _firstName = "there";
+    [Parameter] public MyProfileResponse? Profile { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private string GreetingName
     {
-        try
+        get
         {
-            var profile = await ProfileService.GetMyProfileAsync();
-            if (profile.IsSuccess)
-            {
-                var name = !string.IsNullOrWhiteSpace(profile.FirstName)
-                    ? profile.FirstName
-                    : profile.DisplayName?.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(Profile?.FirstName))
+                return Profile.FirstName.Trim();
 
-                if (!string.IsNullOrWhiteSpace(name))
-                    _firstName = name.Trim();
-            }
-        }
-        catch
-        {
-            // Keep the welcome panel available if profile retrieval fails temporarily.
+            var displayName = Profile?.DisplayName?
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault();
+
+            return displayName?.Trim() ?? string.Empty;
         }
     }
 
-    private void OpenCommunity() => Navigation.NavigateTo("/community");
-    private void OpenProfile() => Navigation.NavigateTo("/profile");
+    private bool IsProfileComplete =>
+        !string.IsNullOrWhiteSpace(Profile?.FirstName) &&
+        !string.IsNullOrWhiteSpace(Profile?.LastName) &&
+        !string.IsNullOrWhiteSpace(Profile?.PhoneNumber) &&
+        !string.IsNullOrWhiteSpace(Profile?.Bio);
 }
