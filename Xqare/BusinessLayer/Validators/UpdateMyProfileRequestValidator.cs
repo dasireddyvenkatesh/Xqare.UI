@@ -6,7 +6,7 @@ namespace Xqare.BusinessLayer.Validators
 {
     public sealed class UpdateMyProfileRequestValidator : AbstractValidator<UpdateMyProfileRequest>
     {
-        private const string IndianMobilePattern = @"^(?:\+?91[\s-]?)?[6-9][0-9]{9}$";
+        private const string IndianMobilePattern = @"^(?:(?:\+?91|0)[ -]?)?[6-9](?:[ -]?[0-9]){9}$";
 
         public UpdateMyProfileRequestValidator()
         {
