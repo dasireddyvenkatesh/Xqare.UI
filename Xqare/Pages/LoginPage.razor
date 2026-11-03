@@ -178,12 +178,14 @@
                 {
                     <MudForm @ref="form"
                              Model="otpRequest"
+                             Validation="otpStepValidator.ToMudValidator()"
                              OnValidSubmit="Submit"
                              Class="mt-6">
                         <MudButton Variant="Variant.Text" OnClick="BackToLogin" Class="back-btn">
                             ← Back to login
                         </MudButton>
                         <MudTextField Label="Email" Value="loginRequest.Email"
+                                      For="@(() => otpRequest.Email)"
                                       Variant="Variant.Outlined" ReadOnly="true" />
                         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2 mb-2">
                             @if (isEmailVerificationStep)
@@ -246,7 +248,7 @@
     VerifyEmailOtpRequest otpRequest = new();
 
     LoginRequestValidator loginValidator = new();
-    OtpRequestValidator otpValidator = new();
+    LoginMfaVerificationRequestValidator otpStepValidator = new(() => isRecoveryCodeStep);
 
     private bool _processing = false;
     bool isMfaStep = false;
@@ -263,25 +265,9 @@
 
     async Task Submit()
     {
-        if (!isMfaStep)
-        {
-            await form.ValidateAsync();
-            if (!form.IsValid)
-                return;
-        }
-        else
-        {
-            var enteredCode = otpRequest.OtpCode?.Trim() ?? string.Empty;
-            var normalizedCode = new string(enteredCode.Where(char.IsLetterOrDigit).ToArray());
-            var invalidCode = isRecoveryCodeStep
-                ? normalizedCode.Length < 20
-                : enteredCode.Length != 6 || !enteredCode.All(char.IsDigit);
-            if (invalidCode)
-            {
-                Snackbar.Add(isRecoveryCodeStep ? "Enter a valid recovery code." : "Enter the six-digit verification code.", Severity.Warning);
-                return;
-            }
-        }
+        await form.ValidateAsync();
+        if (!form.IsValid)
+            return;
 
         _processing = true;
         try
