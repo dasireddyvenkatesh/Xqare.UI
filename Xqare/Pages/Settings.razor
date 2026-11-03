@@ -182,7 +182,7 @@
                                     Two-factor verification will no longer be required after this action.
                                 </MudAlert>
                                 <MudForm @ref="_disableForm" Model="_disableRequest" Validation="_disableValidator.ToMudValidator()">
-                                    <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                    <MudTextField T="string" Label="Current password" MaxLength="128" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                   InputType="InputType.Password" For="@(() => _disableRequest.CurrentPassword)"
                                                   @bind-Value="_disableRequest.CurrentPassword" FullWidth="true" />
                                     <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
@@ -303,7 +303,7 @@
                         </div>
                         <MudDivider Class="settings-divider" />
                         <MudForm @ref="_passwordForm" Model="_password" Validation="_passwordValidator.ToMudValidator()" Class="settings-password-form">
-                            <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                            <MudTextField T="string" Label="Current password" MaxLength="128" Variant="Variant.Outlined" Margin="Margin.Dense"
                                           InputType="InputType.Password" FullWidth="true" For="@(() => _password.CurrentPassword)" @bind-Value="_password.CurrentPassword" />
                             <MudTextField T="string" Label="New password" MaxLength="128" Variant="Variant.Outlined" Margin="Margin.Dense"
                                           InputType="InputType.Password" FullWidth="true" For="@(() => _password.NewPassword)" @bind-Value="_password.NewPassword" />
