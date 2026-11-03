@@ -128,6 +128,7 @@
                              OnValidSubmit="Submit">
 
                         <MudTextField Label="Email Address"
+                                      MaxLength="256"
                                       Variant="Variant.Outlined"
                                       @bind-Value="loginRequest.Email"
                                       For="@(() => loginRequest.Email)"
@@ -184,7 +185,7 @@
                         <MudButton Variant="Variant.Text" OnClick="BackToLogin" Class="back-btn">
                             ← Back to login
                         </MudButton>
-                        <MudTextField Label="Email" Value="loginRequest.Email"
+                        <MudTextField Label="Email" MaxLength="256" Value="loginRequest.Email"
                                       For="@(() => otpRequest.Email)"
                                       Variant="Variant.Outlined" ReadOnly="true" />
                         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2 mb-2">
