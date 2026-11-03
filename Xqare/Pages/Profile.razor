@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Authorization
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.Profile
+@using Xqare.BusinessLayer.Validators
+@using Xqare.BusinessLayer.Validators.FluentValidation
 @attribute [Authorize]
 @inject IProfileService ProfileService
 @inject ISnackbar Snackbar
@@ -80,27 +82,27 @@
 
                         @if (_editing)
                         {
-                            <MudForm @ref="_form" Class="profile-edit-form">
+                            <MudForm @ref="_form" Model="_edit" Validation="_editValidator.ToMudValidator()" Class="profile-edit-form">
                                 <MudGrid Spacing="2">
                                     <MudItem xs="12" sm="6">
                                         <MudTextField T="string" Label="First name" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                       FullWidth="true" Required="true" RequiredError="First name is required."
-                                                      MaxLength="80" @bind-Value="_edit.FirstName" />
+                                                      MaxLength="80" For="@(() => _edit.FirstName)" @bind-Value="_edit.FirstName" />
                                     </MudItem>
                                     <MudItem xs="12" sm="6">
                                         <MudTextField T="string" Label="Last name" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                       FullWidth="true" Required="true" RequiredError="Last name is required."
-                                                      MaxLength="80" @bind-Value="_edit.LastName" />
+                                                      MaxLength="80" For="@(() => _edit.LastName)" @bind-Value="_edit.LastName" />
                                     </MudItem>
                                     <MudItem xs="12">
                                         <MudTextField T="string" Label="Phone number" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                       FullWidth="true" MaxLength="32" InputType="InputType.Telephone"
-                                                      @bind-Value="_edit.PhoneNumber" />
+                                                      For="@(() => _edit.PhoneNumber)" @bind-Value="_edit.PhoneNumber" />
                                     </MudItem>
                                     <MudItem xs="12">
                                         <MudTextField T="string" Label="Bio" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                       FullWidth="true" Lines="3" MaxLength="600" Counter="600"
-                                                      @bind-Value="_edit.Bio" Placeholder="Tell people a little about yourself." />
+                                                      For="@(() => _edit.Bio)" @bind-Value="_edit.Bio" Placeholder="Tell people a little about yourself." />
                                     </MudItem>
                                 </MudGrid>
                                 <div class="profile-form-actions">
@@ -236,6 +238,7 @@
     private bool _saving;
     private MyProfileResponse? _profile;
     private UpdateMyProfileRequest _edit = new();
+    private readonly UpdateMyProfileRequestValidator _editValidator = new();
     private MudForm? _form;
 
     private string DisplayName
@@ -298,12 +301,6 @@
             await _form.ValidateAsync();
             if (!_form.IsValid) return;
         }
-        if (string.IsNullOrWhiteSpace(_edit.FirstName) || string.IsNullOrWhiteSpace(_edit.LastName))
-        {
-            Snackbar.Add("First name and last name are required.", Severity.Warning);
-            return;
-        }
-
         _saving = true;
         try
         {

@@ -3,9 +3,13 @@
 @using Microsoft.AspNetCore.Authorization
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.Auth
+@using Xqare.BusinessLayer.Validators
+@using Xqare.BusinessLayer.Validators.FluentValidation
+@using Microsoft.AspNetCore.Components.Authorization
 @attribute [Authorize]
 @inject IAuthService AuthService
 @inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Settings | XQARE</PageTitle>
 <section class="settings-page">
@@ -115,17 +119,21 @@
                             <MudPaper Outlined="true" Class="settings-action-panel">
                                 <MudText Typo="Typo.subtitle1" Class="settings-panel-title">@(_totp?.IsEnabled == true ? "Replace authenticator" : "Set up authenticator")</MudText>
                                 <MudText Typo="Typo.caption" Class="settings-muted">Confirm your current password. Replacing an authenticator also requires its current code.</MudText>
-                                <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                              InputType="InputType.Password" @bind-Value="_enrollmentPassword" FullWidth="true" />
-                                @if (_totp?.IsEnabled == true)
-                                {
-                                    <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
-                                                  Margin="Margin.Dense" MaxLength="6" @bind-Value="_currentCode" FullWidth="true" />
-                                }
-                                <div class="settings-form-actions">
-                                    <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="StartEnrollmentAsync" Class="settings-primary">Continue</MudButton>
-                                    <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
-                                </div>
+                                <MudForm @ref="_enrollmentForm" Model="_enrollmentRequest" Validation="_enrollmentValidator.ToMudValidator()">
+                                    <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                  InputType="InputType.Password" For="@(() => _enrollmentRequest.CurrentPassword)"
+                                                  @bind-Value="_enrollmentRequest.CurrentPassword" FullWidth="true" />
+                                    @if (_totp?.IsEnabled == true)
+                                    {
+                                        <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" MaxLength="6" For="@(() => _enrollmentRequest.CurrentTotpCode)"
+                                                      @bind-Value="_enrollmentRequest.CurrentTotpCode" FullWidth="true" />
+                                    }
+                                    <div class="settings-form-actions">
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="StartEnrollmentAsync" Class="settings-primary">Continue</MudButton>
+                                        <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
+                                    </div>
+                                </MudForm>
                                 @if (_enrollment?.IsSuccess == true)
                                 {
                                     <MudDivider Class="settings-divider" />
@@ -137,11 +145,14 @@
                                     }
                                     <MudTextField T="string" Label="Manual setup key" Value="@_enrollment.Secret" ReadOnly="true"
                                                   Variant="Variant.Outlined" Margin="Margin.Dense" FullWidth="true" />
-                                    <MudTextField T="string" Label="Authenticator code" @bind-Value="_enrollmentCode"
-                                                  Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" FullWidth="true" />
-                                    <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="ConfirmEnrollmentAsync" Class="settings-primary">
-                                        Verify and enable
-                                    </MudButton>
+                                    <MudForm @ref="_enrollmentConfirmForm" Model="_enrollmentConfirmRequest" Validation="_enrollmentConfirmValidator.ToMudValidator()">
+                                        <MudTextField T="string" Label="Authenticator code" @bind-Value="_enrollmentConfirmRequest.Code"
+                                                      For="@(() => _enrollmentConfirmRequest.Code)"
+                                                      Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" FullWidth="true" />
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="ConfirmEnrollmentAsync" Class="settings-primary">
+                                            Verify and enable
+                                        </MudButton>
+                                    </MudForm>
                                 }
                             </MudPaper>
                         }
@@ -151,12 +162,15 @@
                             <MudPaper Outlined="true" Class="settings-action-panel">
                                 <MudText Typo="Typo.subtitle1" Class="settings-panel-title">Regenerate recovery codes</MudText>
                                 <MudText Typo="Typo.caption" Class="settings-muted">Previous unused codes will be invalidated.</MudText>
-                                <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
-                                              Margin="Margin.Dense" MaxLength="6" @bind-Value="_recoveryCode" FullWidth="true" />
-                                <div class="settings-form-actions">
-                                    <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="RegenerateRecoveryAsync" Class="settings-primary">Generate new codes</MudButton>
-                                    <MudButton Variant="Variant.Text" OnClick="ClosePanels">Cancel</MudButton>
-                                </div>
+                                <MudForm @ref="_recoveryForm" Model="_recoveryRequest" Validation="_recoveryValidator.ToMudValidator()">
+                                    <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense" MaxLength="6" For="@(() => _recoveryRequest.Code)"
+                                                  @bind-Value="_recoveryRequest.Code" FullWidth="true" />
+                                    <div class="settings-form-actions">
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="RegenerateRecoveryAsync" Class="settings-primary">Generate new codes</MudButton>
+                                        <MudButton Variant="Variant.Text" OnClick="ClosePanels">Cancel</MudButton>
+                                    </div>
+                                </MudForm>
                             </MudPaper>
                         }
 
@@ -167,14 +181,18 @@
                                 <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="settings-alert">
                                     Two-factor verification will no longer be required after this action.
                                 </MudAlert>
-                                <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                              InputType="InputType.Password" @bind-Value="_disablePassword" FullWidth="true" />
-                                <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
-                                              Margin="Margin.Dense" MaxLength="6" @bind-Value="_disableCode" FullWidth="true" />
-                                <div class="settings-form-actions">
-                                    <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_busy" OnClick="DisableTotpAsync">Disable authenticator</MudButton>
-                                    <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
-                                </div>
+                                <MudForm @ref="_disableForm" Model="_disableRequest" Validation="_disableValidator.ToMudValidator()">
+                                    <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                  InputType="InputType.Password" For="@(() => _disableRequest.CurrentPassword)"
+                                                  @bind-Value="_disableRequest.CurrentPassword" FullWidth="true" />
+                                    <MudTextField T="string" Label="Current authenticator code" Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense" MaxLength="6" For="@(() => _disableRequest.Code)"
+                                                  @bind-Value="_disableRequest.Code" FullWidth="true" />
+                                    <div class="settings-form-actions">
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_busy" OnClick="DisableTotpAsync">Disable authenticator</MudButton>
+                                        <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
+                                    </div>
+                                </MudForm>
                             </MudPaper>
                         }
 
@@ -284,13 +302,13 @@
                             </div>
                         </div>
                         <MudDivider Class="settings-divider" />
-                        <MudForm @ref="_passwordForm" Class="settings-password-form">
+                        <MudForm @ref="_passwordForm" Model="_password" Validation="_passwordValidator.ToMudValidator()" Class="settings-password-form">
                             <MudTextField T="string" Label="Current password" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                          InputType="InputType.Password" FullWidth="true" Required="true" @bind-Value="_password.CurrentPassword" />
+                                          InputType="InputType.Password" FullWidth="true" For="@(() => _password.CurrentPassword)" @bind-Value="_password.CurrentPassword" />
                             <MudTextField T="string" Label="New password" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                          InputType="InputType.Password" FullWidth="true" Required="true" @bind-Value="_password.NewPassword" />
+                                          InputType="InputType.Password" FullWidth="true" For="@(() => _password.NewPassword)" @bind-Value="_password.NewPassword" />
                             <MudTextField T="string" Label="Confirm new password" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                          InputType="InputType.Password" FullWidth="true" Required="true" @bind-Value="_password.ConfirmPassword" />
+                                          InputType="InputType.Password" FullWidth="true" For="@(() => _password.ConfirmPassword)" @bind-Value="_password.ConfirmPassword" />
                         </MudForm>
                         <MudText Typo="Typo.caption" Class="settings-muted settings-password-hint">
                             At least 8 characters, with uppercase, lowercase, a number and a symbol.
@@ -344,16 +362,23 @@
     private TotpStatusResponse? _totp;
     private List<ActiveSessionDto> _sessions = new();
     private MudForm? _passwordForm;
+    private readonly ChangePasswordRequestValidator _passwordValidator = new();
+    private readonly TotpEnrollmentStartRequestValidator _enrollmentValidator = new();
+    private readonly TotpEnrollmentConfirmRequestValidator _enrollmentConfirmValidator = new();
+    private readonly TotpRecoveryCodesRegenerateRequestValidator _recoveryValidator = new();
+    private readonly TotpDisableRequestValidator _disableValidator = new();
     private ChangePasswordRequest _password = new();
+    private TotpEnrollmentStartRequest _enrollmentRequest = new();
+    private TotpEnrollmentConfirmRequest _enrollmentConfirmRequest = new();
+    private TotpRecoveryCodesRegenerateRequest _recoveryRequest = new();
+    private TotpDisableRequest _disableRequest = new();
+    private MudForm? _enrollmentForm;
+    private MudForm? _enrollmentConfirmForm;
+    private MudForm? _recoveryForm;
+    private MudForm? _disableForm;
     private bool _showEnrollment;
     private bool _showRecovery;
     private bool _showDisable;
-    private string _enrollmentPassword = string.Empty;
-    private string _currentCode = string.Empty;
-    private string _enrollmentCode = string.Empty;
-    private string _recoveryCode = string.Empty;
-    private string _disablePassword = string.Empty;
-    private string _disableCode = string.Empty;
     private TotpEnrollmentStartResponse? _enrollment;
     private readonly List<string> _recoveryCodes = new();
 
@@ -361,8 +386,14 @@
     {
         try
         {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity?.IsAuthenticated != true)
+                return;
+
             await LoadTotpAsync();
-            await LoadSessionsAsync();
+            var refreshedAuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (refreshedAuthState.User.Identity?.IsAuthenticated == true)
+                await LoadSessionsAsync();
         }
         finally
         {
@@ -414,24 +445,22 @@
         ClosePanels();
         _showEnrollment = true;
         _enrollment = null;
-        _enrollmentPassword = string.Empty;
-        _currentCode = string.Empty;
-        _enrollmentCode = string.Empty;
+        _enrollmentRequest = new();
+        _enrollmentConfirmRequest = new();
     }
 
     private void ShowRecovery()
     {
         ClosePanels();
         _showRecovery = true;
-        _recoveryCode = string.Empty;
+        _recoveryRequest = new();
     }
 
     private void ShowDisable()
     {
         ClosePanels();
         _showDisable = true;
-        _disablePassword = string.Empty;
-        _disableCode = string.Empty;
+        _disableRequest = new();
     }
 
     private void ClosePanels()
@@ -443,12 +472,13 @@
 
     private async Task StartEnrollmentAsync()
     {
-        if (string.IsNullOrWhiteSpace(_enrollmentPassword))
+        if (_enrollmentForm != null)
         {
-            Snackbar.Add("Enter your current password.", Severity.Warning);
-            return;
+            await _enrollmentForm.ValidateAsync();
+            if (!_enrollmentForm.IsValid)
+                return;
         }
-        if (_totp?.IsEnabled == true && !IsSixDigitCode(_currentCode))
+        if (_totp?.IsEnabled == true && !IsSixDigitCode(_enrollmentRequest.CurrentTotpCode))
         {
             Snackbar.Add("Enter your current six-digit authenticator code.", Severity.Warning);
             return;
@@ -456,11 +486,7 @@
         _busy = true;
         try
         {
-            var response = await AuthService.StartTotpEnrollmentAsync(new TotpEnrollmentStartRequest
-            {
-                CurrentPassword = _enrollmentPassword,
-                CurrentTotpCode = _currentCode
-            });
+            var response = await AuthService.StartTotpEnrollmentAsync(_enrollmentRequest);
             if (!response.IsSuccess)
             {
                 Snackbar.Add(response.Message, Severity.Error);
@@ -476,15 +502,16 @@
 
     private async Task ConfirmEnrollmentAsync()
     {
-        if (!IsSixDigitCode(_enrollmentCode))
+        if (_enrollmentConfirmForm != null)
         {
-            Snackbar.Add("Enter the six-digit code from your authenticator app.", Severity.Warning);
-            return;
+            await _enrollmentConfirmForm.ValidateAsync();
+            if (!_enrollmentConfirmForm.IsValid)
+                return;
         }
         _busy = true;
         try
         {
-            var response = await AuthService.ConfirmTotpEnrollmentAsync(new TotpEnrollmentConfirmRequest { Code = _enrollmentCode });
+            var response = await AuthService.ConfirmTotpEnrollmentAsync(_enrollmentConfirmRequest);
             Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
             if (!response.IsSuccess) return;
             _recoveryCodes.Clear();
@@ -498,15 +525,16 @@
 
     private async Task RegenerateRecoveryAsync()
     {
-        if (!IsSixDigitCode(_recoveryCode))
+        if (_recoveryForm != null)
         {
-            Snackbar.Add("Enter the current six-digit authenticator code.", Severity.Warning);
-            return;
+            await _recoveryForm.ValidateAsync();
+            if (!_recoveryForm.IsValid)
+                return;
         }
         _busy = true;
         try
         {
-            var response = await AuthService.RegenerateTotpRecoveryCodesAsync(new TotpRecoveryCodesRegenerateRequest { Code = _recoveryCode });
+            var response = await AuthService.RegenerateTotpRecoveryCodesAsync(_recoveryRequest);
             Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
             if (!response.IsSuccess) return;
             _recoveryCodes.Clear();
@@ -519,19 +547,16 @@
 
     private async Task DisableTotpAsync()
     {
-        if (string.IsNullOrWhiteSpace(_disablePassword) || !IsSixDigitCode(_disableCode))
+        if (_disableForm != null)
         {
-            Snackbar.Add("Enter your current password and authenticator code.", Severity.Warning);
-            return;
+            await _disableForm.ValidateAsync();
+            if (!_disableForm.IsValid)
+                return;
         }
         _busy = true;
         try
         {
-            var response = await AuthService.DisableTotpAsync(new TotpDisableRequest
-            {
-                CurrentPassword = _disablePassword,
-                Code = _disableCode
-            });
+            var response = await AuthService.DisableTotpAsync(_disableRequest);
             Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
             if (!response.IsSuccess) return;
             ClosePanels();
@@ -547,11 +572,6 @@
         {
             await _passwordForm.ValidateAsync();
             if (!_passwordForm.IsValid) return;
-        }
-        if (_password.NewPassword != _password.ConfirmPassword)
-        {
-            Snackbar.Add("New password and confirmation do not match.", Severity.Warning);
-            return;
         }
         _busy = true;
         try
