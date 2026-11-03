@@ -140,6 +140,7 @@
                              OnValidSubmit="Submit">
 
                         <MudTextField Label="Full Name"
+                                      MaxLength="100"
                                       Variant="Variant.Outlined"
                                       @bind-Value="registerRequest.FullName"
                                       For="@(() => registerRequest.FullName)"

@@ -3,27 +3,21 @@ using Xqare.BusinessLayer.DTO;
 
 namespace Xqare.BusinessLayer.Validators
 {
+    // Used only by the email-verification step during sign-in.
+    // TOTP and recovery codes use VerifyMfaChallengeRequestValidator.
     public sealed class LoginMfaVerificationRequestValidator : AbstractValidator<VerifyEmailOtpRequest>
     {
-        public LoginMfaVerificationRequestValidator(Func<bool> isRecoveryCodeStep)
+        public LoginMfaVerificationRequestValidator()
         {
             RuleFor(x => x.Email)
-                .NotEmpty().EmailAddress().MaximumLength(256);
+                .NotEmpty().WithMessage("Email is required.")
+                .EmailAddress().WithMessage("Enter a valid email address.")
+                .MaximumLength(256);
 
             RuleFor(x => x.OtpCode)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage("A verification code is required.")
-                .Must(code =>
-                {
-                    var value = code?.Trim() ?? string.Empty;
-                    if (isRecoveryCodeStep())
-                    {
-                        var normalized = new string(value.Where(char.IsLetterOrDigit).ToArray());
-                        return normalized.Length >= 20 && normalized.Length <= 36;
-                    }
-
-                    return value.Length == 6 && value.All(char.IsDigit);
-                })
-                .WithMessage("Enter a valid six-digit code or recovery code.");
+                .Matches(@"^[0-9]{6}$").WithMessage("Enter the six-digit email verification code.");
         }
     }
 }

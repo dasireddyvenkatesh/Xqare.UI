@@ -7,7 +7,10 @@ namespace Xqare.BusinessLayer.Validators
     {
         public RegisterRequestValidator()
         {
-            RuleFor(x => x.FullName).NotEmpty().MaximumLength(25);
+            RuleFor(x => x.FullName)
+                .NotEmpty().WithMessage("Full name is required.")
+                .MaximumLength(100).WithMessage("Full name cannot exceed 100 characters.")
+                .Matches(NameValidationRules.Pattern).WithMessage("Use letters only, with spaces, apostrophes or hyphens.");
 
 
             RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(256);
@@ -23,7 +26,8 @@ namespace Xqare.BusinessLayer.Validators
 
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty()
-                .Equal(x => x.Password).WithMessage("Passwords do not match");
+                .Equal(x => x.Password).WithMessage("Passwords do not match")
+                .MaximumLength(128);
 
         }
     }

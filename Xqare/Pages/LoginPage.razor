@@ -175,25 +175,62 @@
                         </MudText>
                     </MudForm>
                 }
+                else if (isEmailVerificationStep)
+                {
+                    <MudForm @ref="form"
+                             Model="emailOtpRequest"
+                             Validation="emailOtpValidator.ToMudValidator()"
+                             OnValidSubmit="Submit"
+                             Class="mt-6">
+                        <MudButton Variant="Variant.Text" OnClick="BackToLogin" Class="back-btn">
+                            ← Back to login
+                        </MudButton>
+                        <MudTextField Label="Email" MaxLength="256" Value="emailOtpRequest.Email"
+                                      For="@(() => emailOtpRequest.Email)"
+                                      Variant="Variant.Outlined" ReadOnly="true" />
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2 mb-2">
+                            Enter the six-digit code sent to your registered email address.
+                        </MudText>
+                        <MudTextField Label="Email verification code"
+                                      Variant="Variant.Outlined"
+                                      @bind-Value="emailOtpRequest.OtpCode"
+                                      For="@(() => emailOtpRequest.OtpCode)"
+                                      MaxLength="6" Immediate="true"
+                                      InputMode="InputMode.numeric" />
+                        <MudButton Variant="Variant.Text" Disabled="@isResendDisabled"
+                                   OnClick="ResendOtp" Class="resend-btn">
+                            @(isResendDisabled ? $"Resend in {secondsRemaining} s" : "Resend code")
+                        </MudButton>
+                        <MudButton Disabled="@_processing" FullWidth Variant="Variant.Filled"
+                                   OnClick="Submit" Class="login-btn">
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                    <MudText>Verifying...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Verify and Sign In →</MudText>
+                                }
+                            </MudStack>
+                        </MudButton>
+                    </MudForm>
+                }
                 else
                 {
                     <MudForm @ref="form"
-                             Model="otpRequest"
-                             Validation="otpStepValidator.ToMudValidator()"
+                             Model="mfaRequest"
+                             Validation="mfaValidator.ToMudValidator()"
                              OnValidSubmit="Submit"
                              Class="mt-6">
                         <MudButton Variant="Variant.Text" OnClick="BackToLogin" Class="back-btn">
                             ← Back to login
                         </MudButton>
                         <MudTextField Label="Email" MaxLength="256" Value="loginRequest.Email"
-                                      For="@(() => otpRequest.Email)"
                                       Variant="Variant.Outlined" ReadOnly="true" />
                         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2 mb-2">
-                            @if (isEmailVerificationStep)
-                            {
-                                <span>Enter the code sent to your registered email address.</span>
-                            }
-                            else if (isRecoveryCodeStep)
+                            @if (isRecoveryCodeStep)
                             {
                                 <span>Enter one of your saved recovery codes.</span>
                             }
@@ -202,24 +239,17 @@
                                 <span>Open your authenticator app and enter the current six-digit code.</span>
                             }
                         </MudText>
-                        <MudTextField Label="@(isRecoveryCodeStep ? "Recovery code" : (isEmailVerificationStep ? "Email verification code" : "Authenticator code"))"
-                                      Variant="Variant.Outlined" @bind-Value="otpRequest.OtpCode"
-                                      MaxLength="@(isRecoveryCodeStep ? 36 : 6)" Immediate="true"
+                        <MudTextField Label="@(isRecoveryCodeStep ? "Recovery code" : "Authenticator code")"
+                                      Variant="Variant.Outlined"
+                                      @bind-Value="mfaRequest.Code"
+                                      For="@(() => mfaRequest.Code)"
+                                      MaxLength="@(isRecoveryCodeStep ? 36 : 6)"
+                                      Immediate="true"
                                       InputMode="@(isRecoveryCodeStep ? InputMode.text : InputMode.numeric)" />
-                        @if (isMfaStep && !isEmailVerificationStep)
-                        {
-                            <MudButton Variant="Variant.Text" Color="Color.Primary"
-                                       OnClick="ToggleRecoveryCode" Class="resend-btn">
-                                @(isRecoveryCodeStep ? "Use authenticator code" : "Use a recovery code")
-                            </MudButton>
-                        }
-                        @if (isEmailVerificationStep)
-                        {
-                            <MudButton Variant="Variant.Text" Disabled="@isResendDisabled"
-                                       OnClick="ResendOtp" Class="resend-btn">
-                                @(isResendDisabled ? $"Resend in {secondsRemaining} s" : "Resend code")
-                            </MudButton>
-                        }
+                        <MudButton Variant="Variant.Text" Color="Color.Primary"
+                                   OnClick="ToggleRecoveryCode" Class="resend-btn">
+                            @(isRecoveryCodeStep ? "Use authenticator code" : "Use a recovery code")
+                        </MudButton>
                         <MudButton Disabled="@_processing" FullWidth Variant="Variant.Filled"
                                    OnClick="Submit" Class="login-btn">
                             <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
@@ -246,10 +276,12 @@
 
     MudForm form = new();
     LoginRequest loginRequest = new();
-    VerifyEmailOtpRequest otpRequest = new();
+    VerifyEmailOtpRequest emailOtpRequest = new();
+    VerifyMfaChallengeRequest mfaRequest = new();
 
     LoginRequestValidator loginValidator = new();
-    LoginMfaVerificationRequestValidator otpStepValidator = null!;
+    LoginMfaVerificationRequestValidator emailOtpValidator = new();
+    VerifyMfaChallengeRequestValidator mfaValidator = new();
 
     private bool _processing = false;
     bool isMfaStep = false;
@@ -286,7 +318,7 @@
 
                 if (response.RequiresEmailVerification)
                 {
-                    otpRequest.Email = loginRequest.Email;
+                    emailOtpRequest.Email = loginRequest.Email;
                     isEmailVerificationStep = true;
                     isMfaStep = true;
                     StartTimer();
@@ -296,8 +328,10 @@
 
                 if (response.RequiresMfa)
                 {
-                    otpRequest.Email = loginRequest.Email;
                     mfaChallengeToken = response.MfaChallengeToken;
+                    mfaRequest.ChallengeToken = mfaChallengeToken;
+                    mfaRequest.Code = string.Empty;
+                    mfaRequest.Factor = "totp";
                     isRecoveryCodeStep = false;
                     isEmailVerificationStep = false;
                     isMfaStep = true;
@@ -315,7 +349,7 @@
             }
             else if (isEmailVerificationStep)
             {
-                var otpResponse = await AuthService.VerifyEmailOtpAsync(otpRequest);
+                var otpResponse = await AuthService.VerifyEmailOtpAsync(emailOtpRequest);
 
                 if (!otpResponse.IsSuccess)
                 {
@@ -325,7 +359,11 @@
 
                 if (otpResponse.RequiresMfa)
                 {
-                    otpRequest.OtpCode = string.Empty;
+                    emailOtpRequest.OtpCode = string.Empty;
+                    mfaChallengeToken = otpResponse.MfaChallengeToken;
+                    mfaRequest.ChallengeToken = mfaChallengeToken;
+                    mfaRequest.Code = string.Empty;
+                    mfaRequest.Factor = "totp";
                     isRecoveryCodeStep = false;
                     isEmailVerificationStep = false;
                     Snackbar.Add(otpResponse.Message, Severity.Info);
@@ -344,12 +382,7 @@
             }
             else
             {
-                var otpResponse = await AuthService.VerifyMfaChallengeAsync(new VerifyMfaChallengeRequest
-                {
-                    Code = otpRequest.OtpCode.Trim(),
-                    Factor = isRecoveryCodeStep ? "recovery" : "totp",
-                    ChallengeToken = mfaChallengeToken
-                });
+                var otpResponse = await AuthService.VerifyMfaChallengeAsync(mfaRequest);
 
                 if (!otpResponse.IsSuccess)
                 {
@@ -422,14 +455,16 @@
         isEmailVerificationStep = false;
         isRecoveryCodeStep = false;
         mfaChallengeToken = null;
-        otpRequest = new();
+        emailOtpRequest = new();
+        mfaRequest = new() { Factor = "totp" };
         timer?.Stop();
     }
 
     void ToggleRecoveryCode()
     {
         isRecoveryCodeStep = !isRecoveryCodeStep;
-        otpRequest.OtpCode = string.Empty;
+        mfaRequest.Factor = isRecoveryCodeStep ? "recovery" : "totp";
+        mfaRequest.Code = string.Empty;
     }
     private void NavigateAfterLogin()
     {
@@ -479,7 +514,6 @@
 
     protected override Task OnInitializedAsync()
     {
-        otpStepValidator = new LoginMfaVerificationRequestValidator(() => isRecoveryCodeStep);
         var uri = Nav.ToAbsoluteUri(Nav.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
@@ -488,14 +522,15 @@
         if (query.TryGetValue("mfa", out var mfaValue) &&
             string.Equals(mfaValue.ToString(), "required", StringComparison.OrdinalIgnoreCase))
         {
-            otpRequest.Email = query.TryGetValue("email", out var emailValue)
+            emailOtpRequest.Email = query.TryGetValue("email", out var emailValue)
                 ? emailValue.ToString()
                 : string.Empty;
-            loginRequest.Email = otpRequest.Email;
+            loginRequest.Email = emailOtpRequest.Email;
+            mfaRequest = new VerifyMfaChallengeRequest { Factor = "totp" };
             isMfaStep = true;
             isEmailVerificationStep = false;
             isRecoveryCodeStep = false;
-            otpRequest.OtpCode = string.Empty;
+            emailOtpRequest.OtpCode = string.Empty;
 
             if (query.TryGetValue("message", out var messageValue) &&
                 !string.IsNullOrWhiteSpace(messageValue.ToString()))

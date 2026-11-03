@@ -24,8 +24,11 @@ namespace Xqare.BusinessLayer.Validators
                 .MaximumLength(100);
 
             RuleFor(x => x.ContactPerson)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage("Contact person is required.")
-                .MaximumLength(100);
+                .MaximumLength(100)
+                .Matches(NameValidationRules.Pattern)
+                .WithMessage("Use letters only, with spaces, apostrophes or hyphens.");
 
             RuleFor(x => x.Phone)
                 .MaximumLength(10)
