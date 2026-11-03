@@ -1,44 +1,65 @@
-@using MudBlazor
-@using Xqare.Models.Carrer_Insights
+﻿@using MudBlazor
 
-<section class="insights-wrapper" aria-label="Career insights">
-    <MudPaper Class="dashboard-panel insights-card" Elevation="0">
-        <div class="panel-heading">
-            <div>
-                <MudText Typo="Typo.h6" Class="panel-title">Explore career insights</MudText>
-                <MudText Typo="Typo.caption" Class="panel-subtitle">Practical guidance for your next career step.</MudText>
-            </div>
-            <MudButton Href="/career-insights" Variant="Variant.Text" Color="Color.Warning" Class="panel-link">
-                View all
-            </MudButton>
+<section class="insights-wrapper">
+
+    <div class="insights-card">
+
+        <!-- Header -->
+        <div class="insights-header">
+            <MudText Typo="Typo.h6" Class="insights-title">
+                Latest Insights
+            </MudText>
+
+            <MudText Class="view-all">
+                View All →
+            </MudText>
         </div>
 
+        <!-- Items -->
         <div class="insights-list">
-            @foreach (var article in Articles)
-            {
-                <MudButton Href="@($"/career-insights/{article.Id}")"
-                           Variant="Variant.Text"
-                           FullWidth="true"
-                           Class="insight-item"
-                           @key="article.Id">
-                    <span class="insight-copy">
-                        <MudText Typo="Typo.caption" Class="insight-meta">
-                            @article.CategoryName · @article.ReadMinutes min read
-                        </MudText>
-                        <MudText Typo="Typo.body2" Class="insight-title">@article.Title</MudText>
-                        <MudText Typo="Typo.caption" Class="insight-desc">@article.Summary</MudText>
-                    </span>
-                    <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="insight-arrow" />
-                </MudButton>
-            }
-        </div>
-    </MudPaper>
-</section>
 
-@code {
-    private IReadOnlyList<CareerInsightArticle> Articles { get; } =
-        CareerInsightSeed.Build().Articles
-            .OrderByDescending(article => article.PublishedOn)
-            .Take(3)
-            .ToArray();
-}
+            <div class="insight-item">
+                <div>
+                    <div class="insight-title">How to choose the right career path</div>
+                    <div class="insight-desc">
+                        A practical guide for early-career professionals navigating options.
+                    </div>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.ArrowForward" />
+            </div>
+
+            <div class="insight-item">
+                <div>
+                    <div class="insight-title">Skills that matter in 2026</div>
+                    <div class="insight-desc">
+                        The most in-demand skills employers are looking for this year.
+                    </div>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.ArrowForward" />
+            </div>
+
+            <div class="insight-item">
+                <div>
+                    <div class="insight-title">Building your professional network</div>
+                    <div class="insight-desc">
+                        Strategies to connect with the right people in your industry.
+                    </div>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.ArrowForward" />
+            </div>
+
+            <div class="insight-item">
+                <div>
+                    <div class="insight-title">Remote work best practices</div>
+                    <div class="insight-desc">
+                        Stay productive and visible while working from anywhere.
+                    </div>
+                </div>
+                <MudIcon Icon="@Icons.Material.Filled.ArrowForward" />
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
