@@ -24,7 +24,7 @@ namespace Xqare.BusinessLayer.Validators
                 .Must((request, value) =>
                 {
                     var code = value?.Trim() ?? string.Empty;
-                    var factor = request.Factor.Trim().ToLowerInvariant();
+                    var factor = (request.Factor ?? string.Empty).Trim().ToLowerInvariant();
 
                     if (factor == "recovery")
                     {
