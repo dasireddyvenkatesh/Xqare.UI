@@ -65,3 +65,16 @@
 .xq-mobile-menu-button { color: #1a2540 !important; }
 .xq-mobile-action-button { color: #52647a !important; }
 .xq-mobile-action-button:disabled { opacity: .42; }
+
+
+/* Keep the authenticated shell compact at both breakpoints. */
+.xq-mobile-topbar {
+    min-height: 52px;
+    gap: 4px;
+    padding: 3px clamp(8px, 2vw, 12px);
+}
+.xq-app-layout ::deep .xq-mobile-menu-button,
+.xq-app-layout ::deep .xq-mobile-action-button { padding: 6px; }
+@media (min-width: 960px) {
+    .xq-app-layout ::deep .xq-desktop-drawer { max-width: 240px; }
+}
