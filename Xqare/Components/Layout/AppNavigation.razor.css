@@ -65,7 +65,7 @@
     text-align: left;
     text-transform: none;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     transition: background .18s ease, color .18s ease;
 }
 .xq-nav-root ::deep .xq-nav-link .mud-button-label {
