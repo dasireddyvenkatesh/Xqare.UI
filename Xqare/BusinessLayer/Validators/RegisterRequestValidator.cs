@@ -9,7 +9,7 @@ namespace Xqare.BusinessLayer.Validators
         {
             RuleFor(x => x.FullName)
                 .NotEmpty().WithMessage("Full name is required.")
-                .MaximumLength(25).WithMessage("Full name cannot exceed 25 characters.")
+                .MaximumLength(100).WithMessage("Full name cannot exceed 100 characters.")
                 .Matches(NameValidationRules.Pattern).WithMessage("Use letters only, with spaces, apostrophes or hyphens.");
 
 
