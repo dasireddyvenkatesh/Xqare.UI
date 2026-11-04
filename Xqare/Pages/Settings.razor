@@ -487,8 +487,11 @@
                 var message = query.TryGetValue("message", out var linkMessage)
                     ? linkMessage.ToString()
                     : succeeded ? "The provider has been connected." : "The provider could not be connected.";
-                Snackbar.Add(message, succeeded ? Severity.Success : Severity.Error);
+                // Remove the one-time OAuth result from the address bar first.
+                // Snackbar is configured with ClearAfterNavigation=true, so add the
+                // notification only after navigation has completed.
                 Nav.NavigateTo("/settings", replace: true);
+                Snackbar.Add(message, succeeded ? Severity.Success : Severity.Error);
             }
 
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
