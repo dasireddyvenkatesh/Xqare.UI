@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+using FluentValidation;
 using Xqare.BusinessLayer.DTO;
 
 namespace Xqare.BusinessLayer.Validators
