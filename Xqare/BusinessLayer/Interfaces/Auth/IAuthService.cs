@@ -20,6 +20,7 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
         Task<OtpOperationResponse> ChangePasswordAsync(ChangePasswordRequest request);
         Task<ConnectedAccountsResponse> GetConnectedAccountsAsync();
         Task<OtpOperationResponse> ConnectExternalAccountAsync(string provider);
+        Task<OtpOperationResponse> DisconnectExternalAccountAsync(string provider, DisconnectExternalLoginRequest request);
         Task<ActiveSessionsResponse> GetActiveSessionsAsync();
         Task<SessionActionResponse> RevokeSessionAsync(Guid sessionId);
         Task<SessionActionResponse> RevokeOtherSessionsAsync();
