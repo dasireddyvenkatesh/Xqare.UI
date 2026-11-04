@@ -184,8 +184,6 @@
                         <MudButton Variant="Variant.Text" OnClick="BackToLogin" Class="back-btn">
                             ← Back to login
                         </MudButton>
-                        <MudTextField Label="Email" MaxLength="256" Value="loginRequest.Email"
-                                      Variant="Variant.Outlined" ReadOnly="true" />
                         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2 mb-2">
                             @if (isRecoveryCodeStep)
                             {
@@ -388,9 +386,6 @@
         if (query.TryGetValue("mfa", out var mfaValue) &&
             string.Equals(mfaValue.ToString(), "required", StringComparison.OrdinalIgnoreCase))
         {
-            loginRequest.Email = query.TryGetValue("email", out var emailValue)
-                ? emailValue.ToString()
-                : string.Empty;
             mfaRequest = new VerifyMfaChallengeRequest { Factor = "totp" };
             isMfaStep = true;
             isRecoveryCodeStep = false;
