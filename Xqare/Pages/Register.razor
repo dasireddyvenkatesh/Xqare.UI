@@ -262,7 +262,7 @@
                             }
                         </MudButton>
 
-                        <MudButton Disabled="@_processing"
+                        <MudButton Disabled="@(_processing || isOtpLocked)"
                                    FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
@@ -273,6 +273,10 @@
                                 {
                                     <MudProgressCircular Size="Size.Small" Indeterminate="true" />
                                     <MudText>Processing...</MudText>
+                                }
+                                else if (isOtpLocked)
+                                {
+                                    <MudText>Locked for @FormatCountdown(secondsRemaining)</MudText>
                                 }
                                 else
                                 {
@@ -311,6 +315,7 @@
     bool isResendDisabled = true;
     bool isRegistrationRetryDisabled;
     bool _resending;
+    bool isOtpLocked;
     int secondsRemaining = 60;
     Timer timer = new();
 
@@ -379,6 +384,13 @@
                 if (!otpResponse.IsSuccess)
                 {
                     Snackbar.Add(otpResponse.Message ?? "OTP verification failed.", Severity.Error);
+
+                    if (otpResponse.RetryAfterSeconds is > 0)
+                    {
+                        isOtpLocked = true;
+                        StartTimer(otpResponse.RetryAfterSeconds.Value);
+                    }
+
                     return;
                 }
 
@@ -487,6 +499,7 @@
             {
                 isResendDisabled = false;
                 isRegistrationRetryDisabled = false;
+                isOtpLocked = false;
                 timer.Stop();
             }
 
@@ -503,6 +516,7 @@
         timer?.Dispose();
         isResendDisabled = false;
         isRegistrationRetryDisabled = false;
+        isOtpLocked = false;
     }
 
     async Task RegisterWithGoogle()
