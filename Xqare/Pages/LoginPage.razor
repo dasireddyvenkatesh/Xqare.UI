@@ -556,8 +556,10 @@
                 var error = query.TryGetValue("message", out var errorValue)
                     ? errorValue.ToString()
                     : "External sign-in failed. Please try again.";
+                // Keep the login page mounted after queuing the Snackbar.
+                // MudBlazor is configured with ClearAfterNavigation=true, so navigating
+                // immediately here would clear the notification before it is visible.
                 Snackbar.Add(error, Severity.Error);
-                Nav.NavigateTo("/login", forceLoad: false, replace: true);
             }
         }
 
