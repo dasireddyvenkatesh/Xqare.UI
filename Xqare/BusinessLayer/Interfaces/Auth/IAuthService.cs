@@ -9,7 +9,7 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
         Task<OtpOperationResponse> ForgotPasswordAsync(ForgotPasswordRequest request);
         Task<OtpOperationResponse> ResetPasswordAsync(ResetPasswordRequest request);
         Task<RegisterResponse> RegisterAsync(RegisterRequest request);
-        Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyEmailOtpRequest request);
+        Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyRegisterEmailOtpRequest request);
         Task<LoginResponse> VerifyEmailOtpAsync(VerifyEmailOtpRequest request);
         Task<LoginResponse> VerifyMfaChallengeAsync(VerifyMfaChallengeRequest request);
         Task<TotpStatusResponse> GetTotpStatusAsync();
