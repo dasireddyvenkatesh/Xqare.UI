@@ -392,18 +392,61 @@ code {
 
 /* Authenticated workspace: this layout has its own mobile top bar,
    so MudMainContent must not reserve space for a MudBlazor AppBar. */
+/* =========================================================
+   XQARE GLOBAL PAGE LAYOUT
+   Layout shells own outer positioning. Page components own
+   only their internal content and component spacing.
+   ========================================================= */
+
+/* Public pages do not use a MudBlazor AppBar. */
+.mud-main-content.xq-public-main {
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.xq-public-content {
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+}
+
+/* Preserve Login's intentional offset without :has() selectors. */
+.xq-public-content .login-wrapper {
+    margin-block-start: 24px;
+    min-height: calc(100vh - 24px);
+}
+
+/* Authenticated pages use a custom mobile top bar. */
 .mud-layout.xq-app-layout .mud-main-content.xq-app-main {
-    padding-top: 0 !important;
-    padding-block-start: 0 !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-/* Legal pages begin with their own hero spacing, not MudBlazor's app-bar offset. */
-.mud-main-content.xq-public-main:has(.legal-page) {
-    padding-top: 0 !important;
-    padding-block-start: 0 !important;
+.xq-app-main .xq-route-content {
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
 }
 
-/* Keep the 24px top offset on the Login page only. */
-.mud-main-content.xq-public-main:has(.login-wrapper) {
-    padding-top: 24px !important;
+/* Shared legal structure; no page-specific wrapper class is required. */
+.legal-hero,
+.privacy-hero {
+    padding-block: var(--xq-padding-legal-hero-block);
+    color: var(--xq-text-inverse);
+}
+
+.legal-container,
+.privacy-container {
+    margin-block-start: -40px;
+    margin-block-end: 60px;
+}
+
+.legal-card,
+.privacy-card {
+    padding: var(--xq-padding-card);
+    border-radius: var(--xq-card-radius);
 }
