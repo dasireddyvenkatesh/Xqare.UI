@@ -157,26 +157,6 @@
                                       HelperText="Please enter your personal email id"
                                       HelperTextOnFocus="true" />
 
-                        <MudTextField Label="Password"
-                                      MaxLength="128"
-                                      Variant="Variant.Outlined"
-                                      InputType="@(showPassword? InputType.Text: InputType.Password)"
-                                      @bind-Value="registerRequest.Password"
-                                      For="@(() => registerRequest.Password)"
-                                      Adornment="Adornment.End"
-                                      AdornmentIcon="@(showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                                      OnAdornmentClick="TogglePassword" />
-
-                        <MudTextField Label="Confirm Password"
-                                      MaxLength="128"
-                                      Variant="Variant.Outlined"
-                                      InputType="@(showConfirmPassword? InputType.Text: InputType.Password)"
-                                      @bind-Value="registerRequest.ConfirmPassword"
-                                      For="@(() => registerRequest.ConfirmPassword)"
-                                      Adornment="Adornment.End"
-                                      AdornmentIcon="@(showConfirmPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                                      OnAdornmentClick="ToggleConfirmPassword" />
-
                         <MudButton Disabled="@_processing"
                                    FullWidth
                                    Variant="Variant.Filled"
@@ -354,7 +334,7 @@
                     otpRequest.Email = string.IsNullOrWhiteSpace(response.Email)
                         ? registerRequest.Email
                         : response.Email;
-                    // The email owner sets the final password on the OTP step.
+                    // Password is collected only after the OTP proves mailbox ownership.
                     otpRequest.Password = string.Empty;
                     otpRequest.ConfirmPassword = string.Empty;
                     isOtpStep = true;
