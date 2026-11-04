@@ -213,19 +213,20 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return null;
         }
 
-        public Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyEmailOtpRequest request)
+        public Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyRegisterEmailOtpRequest request)
             => VerifyEmailOtpCoreAsync("api/auth/verify-register-email-otp", request);
 
         public Task<LoginResponse> VerifyEmailOtpAsync(VerifyEmailOtpRequest request)
             => VerifyEmailOtpCoreAsync("api/auth/verify-email-otp", request);
 
-        private async Task<LoginResponse> VerifyEmailOtpCoreAsync(string endpoint, VerifyEmailOtpRequest request)
+        private async Task<LoginResponse> VerifyEmailOtpCoreAsync<TRequest>(string endpoint, TRequest request)
+            where TRequest : VerifyEmailOtpRequest
         {
             request.Email = request.Email?.Trim() ?? string.Empty;
             request.DeviceId = await _device.GetDeviceIdAsync();
             request.DeviceName = await _device.GetDeviceNameAsync();
 
-            var response = await _api.PostAnonymousAsync<VerifyEmailOtpRequest, LoginResponse>(endpoint, request);
+            var response = await _api.PostAnonymousAsync<TRequest, LoginResponse>(endpoint, request);
             if (!response.IsSuccess || response.Data == null)
                 return response.Data ?? new LoginResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
 
