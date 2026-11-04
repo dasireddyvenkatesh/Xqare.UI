@@ -397,6 +397,12 @@ code {
     padding-block-start: 0 !important;
 }
 
+/* Legal pages begin with their own hero spacing, not MudBlazor's app-bar offset. */
+.mud-main-content.xq-public-main:has(.legal-page) {
+    padding-top: 0 !important;
+    padding-block-start: 0 !important;
+}
+
 /* Keep the 24px top offset on the Login page only. */
 .mud-main-content.xq-public-main:has(.login-wrapper) {
     padding-top: 24px !important;
