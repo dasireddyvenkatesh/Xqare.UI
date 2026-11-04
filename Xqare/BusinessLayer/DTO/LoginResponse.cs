@@ -10,6 +10,8 @@
 
         public bool RequiresEmailVerification { get; set; }
 
+        public int? RetryAfterSeconds { get; set; }
+
         public string AccessToken { get; set; } = default!;
 
         public string? RefreshToken { get; set; }
