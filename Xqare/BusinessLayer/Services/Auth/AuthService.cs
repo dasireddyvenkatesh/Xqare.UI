@@ -216,9 +216,6 @@ namespace Xqare.BusinessLayer.Classes.Auth
         public Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyRegisterEmailOtpRequest request)
             => VerifyEmailOtpCoreAsync("api/auth/verify-register-email-otp", request);
 
-        public Task<LoginResponse> VerifyEmailOtpAsync(VerifyEmailOtpRequest request)
-            => VerifyEmailOtpCoreAsync("api/auth/verify-email-otp", request);
-
         private async Task<LoginResponse> VerifyEmailOtpCoreAsync<TRequest>(string endpoint, TRequest request)
             where TRequest : VerifyEmailOtpRequest
         {
