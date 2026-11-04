@@ -7,6 +7,7 @@
         public string? UserPublicId { get; set; }
         public string Email { get; set; }
         public bool RequiresEmailVerification { get; set; }
+        public bool CanVerifyExistingOtp { get; set; }
         public int? RetryAfterSeconds { get; set; }
     }
 }
