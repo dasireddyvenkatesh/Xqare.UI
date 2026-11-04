@@ -126,10 +126,14 @@
                                     </MudItem>
                                     <MudItem xs="12">
                                         <MudTextField T="string" Label="Phone number" Variant="Variant.Outlined"
-                                                      Margin="Margin.Dense" FullWidth="true" MaxLength="32"
-                                                      InputType="InputType.Telephone"
-                                                      For="@(() => _edit.PhoneNumber)" @bind-Value="_edit.PhoneNumber"
-                                                      HelperText="Indian mobile number: 10 digits, optionally with +91 or 0. Spaces and hyphens are accepted." />
+                                                      Margin="Margin.Dense" FullWidth="true" MaxLength="10"
+                                                      InputType="InputType.Telephone" InputMode="InputMode.numeric"
+                                                      Pattern="[0-9]*" Immediate="true"
+                                                      Adornment="Adornment.Start" AdornmentText="+91"
+                                                      AdornmentColor="Color.Secondary"
+                                                      For="@(() => _edit.PhoneNumber)"
+                                                      Value="_edit.PhoneNumber" ValueChanged="HandlePhoneNumberChanged"
+                                                      HelperText="Enter your 10-digit Indian mobile number only." />
                                     </MudItem>
                                     <MudItem xs="12">
                                         <MudTextField T="string" Label="About you" Variant="Variant.Outlined"
@@ -180,7 +184,7 @@
                                 <div class="profile-detail">
                                     <MudText Typo="Typo.overline" Class="profile-field-label">PHONE NUMBER</MudText>
                                     <MudText Typo="Typo.body1" Class="profile-field-value">
-                                        @ValueOrFallback(_profile.PhoneNumber)
+                                        @FormatPhoneNumber(_profile.PhoneNumber)
                                     </MudText>
                                 </div>
                                 <div class="profile-detail profile-detail-bio">
@@ -364,7 +368,7 @@
         {
             FirstName = _profile.FirstName,
             LastName = _profile.LastName,
-            PhoneNumber = _profile.PhoneNumber,
+            PhoneNumber = ToIndianPhoneDigits(_profile.PhoneNumber),
             Bio = _profile.Bio
         };
     }
@@ -410,7 +414,17 @@
                 ? null
                 : _edit.Bio.Trim();
 
-            var response = await ProfileService.UpdateMyProfileAsync(_edit);
+            var request = new UpdateMyProfileRequest
+            {
+                FirstName = _edit.FirstName,
+                LastName = _edit.LastName,
+                PhoneNumber = string.IsNullOrWhiteSpace(_edit.PhoneNumber)
+                    ? null
+                    : $"+91{_edit.PhoneNumber}",
+                Bio = _edit.Bio
+            };
+
+            var response = await ProfileService.UpdateMyProfileAsync(request);
             if (!response.IsSuccess)
             {
                 Snackbar.Add(response.Message, Severity.Error);
@@ -430,6 +444,46 @@
         {
             _saving = false;
         }
+    }
+
+    private Task HandlePhoneNumberChanged(string? value)
+    {
+        var digits = new string((value ?? string.Empty).Where(char.IsAsciiDigit).ToArray());
+
+        if (digits.Length == 13 && digits.StartsWith("910", StringComparison.Ordinal))
+            digits = digits[3..];
+        else if (digits.Length == 12 && digits.StartsWith("91", StringComparison.Ordinal))
+            digits = digits[2..];
+        else if (digits.Length == 11 && digits.StartsWith("0", StringComparison.Ordinal))
+            digits = digits[1..];
+
+        _edit.PhoneNumber = digits.Length > 10 ? digits[..10] : digits;
+        return Task.CompletedTask;
+    }
+
+    private static string ToIndianPhoneDigits(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var digits = new string(value.Where(char.IsAsciiDigit).ToArray());
+
+        if (digits.Length == 13 && digits.StartsWith("910", StringComparison.Ordinal))
+            digits = digits[3..];
+        else if (digits.Length == 12 && digits.StartsWith("91", StringComparison.Ordinal))
+            digits = digits[2..];
+        else if (digits.Length == 11 && digits.StartsWith("0", StringComparison.Ordinal))
+            digits = digits[1..];
+
+        return digits.Length > 10 ? digits[..10] : digits;
+    }
+
+    private static string FormatPhoneNumber(string? value)
+    {
+        var digits = ToIndianPhoneDigits(value);
+        return digits.Length == 10
+            ? $"+91 {digits[..5]} {digits[5..]}"
+            : ValueOrFallback(value);
     }
 
     private static string ValueOrFallback(string? value, string fallback = "Not added yet")

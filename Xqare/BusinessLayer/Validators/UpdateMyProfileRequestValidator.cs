@@ -6,7 +6,7 @@ namespace Xqare.BusinessLayer.Validators
 {
     public sealed class UpdateMyProfileRequestValidator : AbstractValidator<UpdateMyProfileRequest>
     {
-        private const string IndianMobilePattern = @"^(?:(?:\+?91|0)[ -]?)?[6-9](?:[ -]?[0-9]){9}$";
+        private const string IndianMobilePattern = @"^[6-9][0-9]{9}$";
 
         public UpdateMyProfileRequestValidator()
         {
@@ -25,7 +25,7 @@ namespace Xqare.BusinessLayer.Validators
             RuleFor(x => x.PhoneNumber)
                 .Must(value => string.IsNullOrWhiteSpace(value) ||
                                Regex.IsMatch(value.Trim(), IndianMobilePattern))
-                .WithMessage("Enter a valid Indian mobile number (10 digits, optionally with +91).");
+                .WithMessage("Enter a valid 10-digit Indian mobile number.");
 
             RuleFor(x => x.Bio).MaximumLength(600);
         }

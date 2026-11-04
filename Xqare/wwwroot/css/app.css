@@ -53,6 +53,7 @@
     --xq-padding-card-compact: var(--xq-space-5);
     --xq-padding-legal-hero-block: clamp(var(--xq-space-10), 6vw, var(--xq-space-20));
     --xq-padding-control-inline: 0.625rem;
+    --xq-padding-authenticated-page-top: var(--xq-space-2);
 
     /* Reusable palette details and alpha variants */
     --xq-primary-rgb: 245, 166, 35;
@@ -388,6 +389,11 @@ code {
 
 .mud-input-root {
     padding-left: var(--xq-padding-control-inline) !important;
+}
+
+/* Apply one compact top offset to every authenticated workspace page. */
+.xq-route-content > :is(.dashboard-page, .profile-page, .settings-page) {
+    padding-block-start: var(--xq-padding-authenticated-page-top) !important;
 }
 
 /* Page-specific MudBlazor main-content spacing overrides. */
