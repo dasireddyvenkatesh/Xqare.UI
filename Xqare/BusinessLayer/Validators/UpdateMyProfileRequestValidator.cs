@@ -1,6 +1,4 @@
-using FluentValidation;
 using Xqare.BusinessLayer.DTO;
-using System.Text.RegularExpressions;
 
 namespace Xqare.BusinessLayer.Validators
 {
@@ -12,17 +10,15 @@ namespace Xqare.BusinessLayer.Validators
         {
             RuleFor(x => x.FirstName)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("First name is required.")
-                .MaximumLength(80).WithMessage("First name cannot exceed 80 characters.")
-                .Matches(NameValidationRules.Pattern)
-                .WithMessage("First name can contain letters, spaces, apostrophes and hyphens only.");
+                .Must(NameValidationRules.IsValid)
+                .WithMessage("First name is required and can contain letters, spaces, apostrophes and hyphens only.")
+                .MaximumLength(80).WithMessage("First name cannot exceed 80 characters.");
 
             RuleFor(x => x.LastName)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("Last name is required.")
-                .MaximumLength(80).WithMessage("Last name cannot exceed 80 characters.")
-                .Matches(NameValidationRules.Pattern)
-                .WithMessage("Last name can contain letters, spaces, apostrophes and hyphens only.");
+                .Must(NameValidationRules.IsValid)
+                .WithMessage("Last name is required and can contain letters, spaces, apostrophes and hyphens only.")
+                .MaximumLength(80).WithMessage("Last name cannot exceed 80 characters.");
 
             RuleFor(x => x.PhoneNumber)
                 .Must(value => string.IsNullOrWhiteSpace(value) ||
