@@ -433,8 +433,14 @@ code {
 }
 
 /* Shared legal structure; no page-specific wrapper class is required. */
-.legal-hero,
+.legal-hero {
+    background: #1A3754;
+    padding-block: var(--xq-padding-legal-hero-block);
+    color: var(--xq-text-inverse);
+}
+
 .privacy-hero {
+    background: #1f3f5b;
     padding-block: var(--xq-padding-legal-hero-block);
     color: var(--xq-text-inverse);
 }
