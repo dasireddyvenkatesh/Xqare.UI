@@ -1,21 +1,5 @@
-﻿::deep .legal-hero {
-    background: #1A3754;
-    padding: var(--xq-padding-legal-hero-block) 0;
-    color: white;
-}
-
-::deep .hero-title {
+﻿::deep .hero-title {
     font-weight: 700;
-}
-
-::deep .legal-container {
-    margin-top: -40px;
-    margin-bottom: 60px;
-}
-
-::deep .legal-card {
-    padding: var(--xq-padding-card);
-    border-radius: var(--xq-card-radius);
 }
 
 ::deep .section-title {
