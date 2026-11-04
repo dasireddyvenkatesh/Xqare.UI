@@ -10,6 +10,7 @@
 @inject IAuthService AuthService
 @inject ISnackbar Snackbar
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Nav
 
 <PageTitle>Settings | XQARE</PageTitle>
 <section class="settings-page">
@@ -35,6 +36,55 @@
         else
         {
             <MudGrid Spacing="2" Class="settings-grid">
+                <MudItem xs="12">
+                    <MudPaper Class="settings-card" Elevation="0">
+                        <div class="settings-card-heading">
+                            <span class="settings-icon"><MudIcon Icon="@Icons.Material.Filled.Link" /></span>
+                            <div class="settings-card-heading-copy">
+                                <MudText Typo="Typo.h6" Class="settings-card-title">Connected accounts</MudText>
+                                <MudText Typo="Typo.caption" Class="settings-muted">Manage the external providers you can use to sign in to this XQARE account.</MudText>
+                            </div>
+                        </div>
+                        <MudDivider Class="settings-divider" />
+                        @if (_connectedAccountsError != null)
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">@_connectedAccountsError</MudAlert>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Disabled="_busy"
+                                       OnClick="LoadConnectedAccountsAsync" Class="mt-3">Retry</MudButton>
+                        }
+                        else if (_connectedAccounts != null)
+                        {
+                            <MudText Typo="Typo.body2" Class="settings-summary-title">@_connectedAccounts.Email</MudText>
+                            <MudText Typo="Typo.caption" Class="settings-muted">Connect a provider to this account. You will be asked to authenticate with that provider.</MudText>
+                            <div class="settings-actions mt-3">
+                                @foreach (var provider in SupportedProviders)
+                                {
+                                    var isConnected = _connectedAccounts.ConnectedProviders.Any(x =>
+                                        string.Equals(x, provider, StringComparison.OrdinalIgnoreCase));
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="@(isConnected ? Color.Success : Color.Primary)"
+                                               Disabled="@(_busy || isConnected)"
+                                               OnClick="@(() => ConnectProviderAsync(provider))">
+                                        @(isConnected ? $"{provider} connected" : $"Connect {provider}")
+                                    </MudButton>
+                                }
+                            </div>
+                            @if (!_connectedAccounts.HasPassword)
+                            {
+                                <MudDivider Class="settings-divider" />
+                                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+                                    Password sign-in is not enabled for this account. You can establish a password using a secure reset link sent to your verified email address.
+                                </MudAlert>
+                                <div class="settings-form-actions">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="_busy"
+                                               OnClick="SendPasswordSetupLinkAsync" Class="settings-primary">
+                                        Set password
+                                    </MudButton>
+                                </div>
+                            }
+                        }
+                    </MudPaper>
+                </MudItem>
                 <MudItem xs="12" lg="6">
                     <MudPaper Class="settings-card" Elevation="0">
                         <div class="settings-card-heading">
@@ -292,6 +342,8 @@
                     </MudPaper>
                 </MudItem>
 
+                @if (_connectedAccounts?.HasPassword == true)
+                {
                 <MudItem xs="12" lg="6">
                     <MudPaper Class="settings-card" Elevation="0">
                         <div class="settings-card-heading">
@@ -318,6 +370,7 @@
                         </div>
                     </MudPaper>
                 </MudItem>
+                }
 
                 <MudItem xs="12" lg="6">
                     <MudPaper Class="settings-card settings-logout-card" Elevation="0">
@@ -356,6 +409,9 @@
     private bool _loading = true;
     private bool _busy;
     private bool _sessionsLoading;
+    private ConnectedAccountsResponse? _connectedAccounts;
+    private string? _connectedAccountsError;
+    private static readonly string[] SupportedProviders = { "Google", "GitHub", "LinkedIn", "Twitter" };
     private bool _confirmLogout;
     private string? _totpError;
     private string? _sessionsError;
@@ -386,10 +442,23 @@
     {
         try
         {
+            var uri = Nav.ToAbsoluteUri(Nav.Uri);
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+            if (query.TryGetValue("externalLink", out var linkStatus))
+            {
+                var succeeded = string.Equals(linkStatus.ToString(), "success", StringComparison.OrdinalIgnoreCase);
+                var message = query.TryGetValue("message", out var linkMessage)
+                    ? linkMessage.ToString()
+                    : succeeded ? "The provider has been connected." : "The provider could not be connected.";
+                Snackbar.Add(message, succeeded ? Severity.Success : Severity.Error);
+                Nav.NavigateTo("/settings", replace: true);
+            }
+
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             if (authState.User.Identity?.IsAuthenticated != true)
                 return;
 
+            await LoadConnectedAccountsAsync();
             await LoadTotpAsync();
             var refreshedAuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             if (refreshedAuthState.User.Identity?.IsAuthenticated == true)
@@ -398,6 +467,69 @@
         finally
         {
             _loading = false;
+        }
+    }
+
+    private async Task LoadConnectedAccountsAsync()
+    {
+        _connectedAccountsError = null;
+        try
+        {
+            var response = await AuthService.GetConnectedAccountsAsync();
+            if (!response.IsSuccess)
+            {
+                _connectedAccounts = null;
+                _connectedAccountsError = response.Message;
+                return;
+            }
+
+            _connectedAccounts = response;
+        }
+        catch
+        {
+            _connectedAccounts = null;
+            _connectedAccountsError = "Unable to retrieve connected sign-in methods. Please retry.";
+        }
+    }
+
+    private async Task ConnectProviderAsync(string provider)
+    {
+        _busy = true;
+        try
+        {
+            var response = await AuthService.ConnectExternalAccountAsync(provider);
+            if (!response.IsSuccess)
+                Snackbar.Add(response.Message, Severity.Error);
+        }
+        catch
+        {
+            Snackbar.Add("Unable to start provider connection. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task SendPasswordSetupLinkAsync()
+    {
+        if (_connectedAccounts == null || string.IsNullOrWhiteSpace(_connectedAccounts.Email))
+            return;
+
+        _busy = true;
+        try
+        {
+            var response = await AuthService.ForgotPasswordAsync(
+                new ForgotPasswordRequest { Email = _connectedAccounts.Email });
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Info : Severity.Error);
+        }
+        catch
+        {
+            Snackbar.Add("Unable to request a password setup link. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
         }
     }
 
