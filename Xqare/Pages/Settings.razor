@@ -11,6 +11,7 @@
 @inject ISnackbar Snackbar
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <PageTitle>Settings | XQARE</PageTitle>
 <section class="settings-page">
@@ -446,6 +447,8 @@
     private bool _sessionsLoading;
     private ConnectedAccountsResponse? _connectedAccounts;
     private string? _connectedAccountsError;
+    private string? _pendingOAuthMessage;
+    private Severity _pendingOAuthSeverity;
     private string? _disconnectProvider;
     private string _disconnectPassword = string.Empty;
     private static readonly string[] SupportedProviders = { "Google", "GitHub", "LinkedIn", "Twitter" };
@@ -484,14 +487,10 @@
             if (query.TryGetValue("externalLink", out var linkStatus))
             {
                 var succeeded = string.Equals(linkStatus.ToString(), "success", StringComparison.OrdinalIgnoreCase);
-                var message = query.TryGetValue("message", out var linkMessage)
+                _pendingOAuthMessage = query.TryGetValue("message", out var linkMessage)
                     ? linkMessage.ToString()
                     : succeeded ? "The provider has been connected." : "The provider could not be connected.";
-                // Remove the one-time OAuth result from the address bar first.
-                // Snackbar is configured with ClearAfterNavigation=true, so add the
-                // notification only after navigation has completed.
-                Nav.NavigateTo("/settings", replace: true);
-                Snackbar.Add(message, succeeded ? Severity.Success : Severity.Error);
+                _pendingOAuthSeverity = succeeded ? Severity.Success : Severity.Error;
             }
 
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -508,6 +507,31 @@
         {
             _loading = false;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || string.IsNullOrWhiteSpace(_pendingOAuthMessage))
+            return;
+
+        var message = _pendingOAuthMessage;
+        var severity = _pendingOAuthSeverity;
+        _pendingOAuthMessage = null;
+
+        try
+        {
+            // Replace the browser URL without triggering Blazor navigation.
+            // This avoids MudBlazor ClearAfterNavigation removing the notification.
+            await JS.InvokeVoidAsync("xqareNavigation.replaceUrl", "/settings");
+        }
+        catch
+        {
+            // Notification delivery is more important than cosmetic URL cleanup.
+            // The callback message is still displayed below.
+        }
+
+        Snackbar.Add(message, severity);
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadConnectedAccountsAsync()
