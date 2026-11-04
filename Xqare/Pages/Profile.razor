@@ -9,19 +9,25 @@
 @inject IProfileService ProfileService
 @inject ISnackbar Snackbar
 
-<PageTitle>My Profile | XQARE</PageTitle>
-<section class="profile-page">
+<PageTitle>Profile | XQARE</PageTitle>
+
+<section class="profile-page" aria-labelledby="profile-page-title">
     <MudContainer MaxWidth="MaxWidth.False" Class="profile-container">
         <div class="profile-heading">
-            <div>
-                <MudText Typo="Typo.h4" Class="profile-page-title">My profile</MudText>
-                <MudText Typo="Typo.body2" Class="profile-page-subtitle">Manage your personal information and notification preferences.</MudText>
+            <div class="profile-heading-copy">
+                <MudText Typo="Typo.overline" Class="profile-eyebrow">ACCOUNT</MudText>
+                <MudText Typo="Typo.h4" Class="profile-page-title" id="profile-page-title">Profile</MudText>
+                <MudText Typo="Typo.body2" Class="profile-page-subtitle">
+                    Manage your personal information and keep your account details up to date.
+                </MudText>
             </div>
-            @if (_profile != null && _profile.IsSuccess)
+
+            @if (_profile is { IsSuccess: true })
             {
                 <MudChip T="string" Variant="Variant.Outlined"
-                         Color="@(_profile.IsActive ? Color.Success : Color.Warning)" Class="profile-status-chip">
-                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Class="mr-1" />
+                         Color="@(_profile.IsActive ? Color.Success : Color.Warning)"
+                         Class="profile-status-chip">
+                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Class="mr-2" />
                     @(_profile.IsActive ? "Account active" : "Account inactive")
                 </MudChip>
             }
@@ -31,49 +37,69 @@
         {
             <MudPaper Class="profile-state-card" Elevation="0">
                 <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-                <MudText Typo="Typo.body2" Color="Color.Secondary">Loading your profile…</MudText>
+                <MudText Typo="Typo.subtitle1" Class="profile-state-title">Loading your profile</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Your account information will appear here in a moment.</MudText>
             </MudPaper>
         }
-        else if (_profile == null || !_profile.IsSuccess)
+        else if (_profile is null || !_profile.IsSuccess)
         {
             <MudPaper Class="profile-state-card" Elevation="0">
                 <MudIcon Icon="@Icons.Material.Filled.PersonOff" Class="profile-state-icon" />
-                <MudText Typo="Typo.h6">We couldn't load your profile</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">@(_profile?.Message ?? "Check your connection and try again.")</MudText>
-                <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Refresh"
-                           OnClick="LoadProfileAsync" Class="profile-primary-button">Try again</MudButton>
+                <MudText Typo="Typo.h6" Class="profile-state-title">We couldn't load your profile</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @(_profile?.Message ?? "Check your connection and try again.")
+                </MudText>
+                <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.Refresh"
+                           OnClick="LoadProfileAsync" Class="profile-primary-button">
+                    Try again
+                </MudButton>
             </MudPaper>
         }
         else
         {
-            <MudGrid Spacing="2" Class="profile-cards-grid">
-                <MudItem xs="12" md="6">
-                    <MudPaper Class="profile-card" Elevation="0">
+            <MudGrid Spacing="4" Class="profile-cards-grid">
+                <MudItem xs="12" lg="8">
+                    <MudPaper Class="profile-card profile-main-card" Elevation="0">
                         <div class="profile-card-heading">
                             <div class="profile-card-heading-left">
-                                <span class="profile-card-icon"><MudIcon Icon="@Icons.Material.Filled.PersonOutline" /></span>
-                                <div>
-                                    <MudText Typo="Typo.h6" Class="profile-card-title">Profile Information</MudText>
-                                    <MudText Typo="Typo.caption" Class="profile-card-subtitle">Your personal details on XQARE</MudText>
+                                <span class="profile-card-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.PersonOutline" />
+                                </span>
+                                <div class="profile-card-heading-copy">
+                                    <MudText Typo="Typo.h6" Class="profile-card-title">Personal information</MudText>
+                                    <MudText Typo="Typo.caption" Class="profile-card-subtitle">
+                                        Your name and contact details
+                                    </MudText>
                                 </div>
                             </div>
+
                             @if (!_editing)
                             {
-                                <MudButton Variant="Variant.Text" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Edit"
-                                           Class="profile-edit-button" OnClick="BeginEdit">Edit</MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.EditOutlined"
+                                           Class="profile-edit-button" OnClick="BeginEdit">
+                                    Edit profile
+                                </MudButton>
                             }
                         </div>
 
-                        <div class="profile-person-summary">
-                            <MudAvatar Image="@_profile.ProfileImageUrl" Class="profile-avatar" Color="Color.Warning" Size="Size.Large">
+                        <div class="profile-identity-panel">
+                            <MudAvatar Image="@_profile.ProfileImageUrl" Class="profile-avatar"
+                                       Color="Color.Primary" Size="Size.Large">
                                 @Initials
                             </MudAvatar>
-                            <div class="profile-person-copy">
-                                <MudText Typo="Typo.subtitle1" Class="profile-person-name">@DisplayName</MudText>
-                                <div class="profile-email-state">
-                                    <MudIcon Icon="@(_profile.IsEmailConfirmed ? Icons.Material.Filled.Verified : Icons.Material.Filled.Info)"
-                                             Color="@(_profile.IsEmailConfirmed ? Color.Success : Color.Warning)" Size="Size.Small" />
-                                    <MudText Typo="Typo.caption">@(_profile.IsEmailConfirmed ? "Email verified" : "Email not verified")</MudText>
+                            <div class="profile-identity-copy">
+                                <MudText Typo="Typo.h6" Class="profile-person-name">@DisplayName</MudText>
+                                <div class="profile-identity-email">
+                                    <MudText Typo="Typo.body2" Class="profile-email-value">@_profile.Email</MudText>
+                                    <MudChip T="string" Size="Size.Small"
+                                             Color="@(_profile.IsEmailConfirmed ? Color.Success : Color.Warning)"
+                                             Variant="Variant.Outlined" Class="profile-email-chip">
+                                        <MudIcon Icon="@(_profile.IsEmailConfirmed ? Icons.Material.Filled.Verified : Icons.Material.Filled.Info)"
+                                                 Size="Size.Small" Class="mr-1" />
+                                        @(_profile.IsEmailConfirmed ? "Verified" : "Not verified")
+                                    </MudChip>
                                 </div>
                             </div>
                         </div>
@@ -82,41 +108,55 @@
 
                         @if (_editing)
                         {
-                            <MudForm @ref="_form" Model="_edit" Validation="_editValidator.ToMudValidator()" Class="profile-edit-form">
-                                <MudGrid Spacing="2">
+                            <MudForm @ref="_form" Model="_edit"
+                                     Validation="_editValidator.ToMudValidator()"
+                                     Class="profile-edit-form">
+                                <MudGrid Spacing="3">
                                     <MudItem xs="12" sm="6">
-                                        <MudTextField T="string" Label="First name" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                      FullWidth="true" Required="true" RequiredError="First name is required."
-                                                      MaxLength="80" For="@(() => _edit.FirstName)" @bind-Value="_edit.FirstName" />
+                                        <MudTextField T="string" Label="First name" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" Required="true"
+                                                      RequiredError="First name is required." MaxLength="80"
+                                                      For="@(() => _edit.FirstName)" @bind-Value="_edit.FirstName" />
                                     </MudItem>
                                     <MudItem xs="12" sm="6">
-                                        <MudTextField T="string" Label="Last name" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                      FullWidth="true" Required="true" RequiredError="Last name is required."
-                                                      MaxLength="80" For="@(() => _edit.LastName)" @bind-Value="_edit.LastName" />
+                                        <MudTextField T="string" Label="Last name" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" Required="true"
+                                                      RequiredError="Last name is required." MaxLength="80"
+                                                      For="@(() => _edit.LastName)" @bind-Value="_edit.LastName" />
                                     </MudItem>
                                     <MudItem xs="12">
-                                        <MudTextField T="string" Label="Phone number" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                      FullWidth="true" MaxLength="32" InputType="InputType.Telephone"
+                                        <MudTextField T="string" Label="Phone number" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" MaxLength="32"
+                                                      InputType="InputType.Telephone"
                                                       For="@(() => _edit.PhoneNumber)" @bind-Value="_edit.PhoneNumber"
-                                                      HelperText="Indian mobile number: 10 digits, optional +91 or 0 prefix; spaces and hyphens are accepted." />
+                                                      HelperText="Indian mobile number: 10 digits, optionally with +91 or 0. Spaces and hyphens are accepted." />
                                     </MudItem>
                                     <MudItem xs="12">
-                                        <MudTextField T="string" Label="Bio" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                      FullWidth="true" Lines="3" MaxLength="600" Counter="600"
-                                                      For="@(() => _edit.Bio)" @bind-Value="_edit.Bio" Placeholder="Tell people a little about yourself." />
+                                        <MudTextField T="string" Label="About you" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" Lines="3"
+                                                      MaxLength="600" Counter="600"
+                                                      For="@(() => _edit.Bio)" @bind-Value="_edit.Bio"
+                                                      Placeholder="Add a short introduction about yourself." />
                                     </MudItem>
                                 </MudGrid>
+
                                 <div class="profile-form-actions">
-                                    <MudButton Variant="Variant.Text" Color="Color.Secondary" Disabled="_saving" OnClick="CancelEdit">Cancel</MudButton>
-                                    <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="_saving"
-                                               OnClick="SaveProfileAsync" Class="profile-primary-button">
+                                    <MudButton Variant="Variant.Text" Color="Color.Secondary"
+                                               Disabled="_saving" OnClick="CancelEdit">
+                                        Cancel
+                                    </MudButton>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                               Disabled="_saving" OnClick="SaveProfileAsync"
+                                               Class="profile-primary-button">
                                         @if (_saving)
                                         {
-                                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /><span>Saving</span>
+                                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                                            <span>Saving</span>
                                         }
                                         else
                                         {
-                                            <MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-1" /><span>Save changes</span>
+                                            <MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" />
+                                            <span>Save changes</span>
                                         }
                                     </MudButton>
                                 </div>
@@ -124,52 +164,49 @@
                         }
                         else
                         {
-                            <div class="profile-info-list">
-                                <div class="profile-info-row">
-                                    <div class="profile-info-copy">
-                                        <MudText Typo="Typo.overline" Class="profile-field-label">FULL NAME</MudText>
-                                        <MudText Typo="Typo.body2" Class="profile-field-value">@ValueOrFallback(DisplayName)</MudText>
-                                    </div>
-                                    <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small" Class="profile-row-edit" OnClick="BeginEdit">Edit</MudButton>
+                            <div class="profile-details-grid">
+                                <div class="profile-detail">
+                                    <MudText Typo="Typo.overline" Class="profile-field-label">FIRST NAME</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-field-value">
+                                        @ValueOrFallback(_profile.FirstName)
+                                    </MudText>
                                 </div>
-                                <MudDivider />
-                                <div class="profile-info-row">
-                                    <div class="profile-info-copy">
-                                        <MudText Typo="Typo.overline" Class="profile-field-label">EMAIL</MudText>
-                                        <MudText Typo="Typo.body2" Class="profile-field-value">@_profile.Email</MudText>
-                                    </div>
-                                    <MudChip T="string" Size="Size.Small" Color="@(_profile.IsEmailConfirmed ? Color.Success : Color.Warning)"
-                                             Variant="Variant.Outlined">@(_profile.IsEmailConfirmed ? "Verified" : "Unverified")</MudChip>
+                                <div class="profile-detail">
+                                    <MudText Typo="Typo.overline" Class="profile-field-label">LAST NAME</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-field-value">
+                                        @ValueOrFallback(_profile.LastName)
+                                    </MudText>
                                 </div>
-                                <MudDivider />
-                                <div class="profile-info-row">
-                                    <div class="profile-info-copy">
-                                        <MudText Typo="Typo.overline" Class="profile-field-label">PHONE</MudText>
-                                        <MudText Typo="Typo.body2" Class="profile-field-value">@ValueOrFallback(_profile.PhoneNumber)</MudText>
-                                    </div>
-                                    <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small" Class="profile-row-edit" OnClick="BeginEdit">Edit</MudButton>
+                                <div class="profile-detail">
+                                    <MudText Typo="Typo.overline" Class="profile-field-label">PHONE NUMBER</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-field-value">
+                                        @ValueOrFallback(_profile.PhoneNumber)
+                                    </MudText>
                                 </div>
-                                <MudDivider />
-                                <div class="profile-info-row profile-info-row-bio">
-                                    <div class="profile-info-copy">
-                                        <MudText Typo="Typo.overline" Class="profile-field-label">BIO</MudText>
-                                        <MudText Typo="Typo.body2" Class="profile-field-value profile-bio-value">
-                                            @ValueOrFallback(_profile.Bio, "Add a short introduction about yourself.")
-                                        </MudText>
-                                    </div>
-                                    <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small" Class="profile-row-edit" OnClick="BeginEdit">Edit</MudButton>
+                                <div class="profile-detail profile-detail-bio">
+                                    <MudText Typo="Typo.overline" Class="profile-field-label">ABOUT</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-field-value profile-bio-value">
+                                        @ValueOrFallback(_profile.Bio, "Add a short introduction about yourself.")
+                                    </MudText>
                                 </div>
                             </div>
                         }
 
                         <div class="profile-account-meta">
-                            <MudText Typo="Typo.caption">Member since @_profile.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</MudText>
-                            @if (_profile.Roles.Count > 0)
+                            <div class="profile-member-since">
+                                <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" />
+                                <MudText Typo="Typo.caption">
+                                    Member since @_profile.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
+                                </MudText>
+                            </div>
+
+                            @if (_profile.Roles is { Count: > 0 })
                             {
-                                <div class="profile-role-list">
+                                <div class="profile-role-list" aria-label="Account roles">
                                     @foreach (var role in _profile.Roles)
                                     {
-                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Secondary">@role</MudChip>
+                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                                                 Color="Color.Secondary">@role</MudChip>
                                     }
                                 </div>
                             }
@@ -177,55 +214,80 @@
                     </MudPaper>
                 </MudItem>
 
-                <MudItem xs="12" md="6">
+                <MudItem xs="12" lg="4">
                     <MudPaper Class="profile-card notification-card" Elevation="0">
                         <div class="profile-card-heading">
                             <div class="profile-card-heading-left">
-                                <span class="profile-card-icon"><MudIcon Icon="@Icons.Material.Filled.NotificationsNone" /></span>
-                                <div>
+                                <span class="profile-card-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.NotificationsNone" />
+                                </span>
+                                <div class="profile-card-heading-copy">
                                     <MudText Typo="Typo.h6" Class="profile-card-title">Notifications</MudText>
-                                    <MudText Typo="Typo.caption" Class="profile-card-subtitle">Choose how XQARE can keep you updated</MudText>
+                                    <MudText Typo="Typo.caption" Class="profile-card-subtitle">
+                                        Updates you may be able to manage here
+                                    </MudText>
                                 </div>
                             </div>
-                            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">Coming soon</MudChip>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default"
+                                     Variant="Variant.Outlined" Class="profile-coming-soon">
+                                Coming soon
+                            </MudChip>
                         </div>
+
                         <MudDivider Class="profile-divider" />
-                        <div class="notification-list">
-                            <div class="notification-row">
-                                <div class="notification-copy">
-                                    <MudText Typo="Typo.body2" Class="notification-title">Email Notifications</MudText>
-                                    <MudText Typo="Typo.caption" Class="notification-description">Get platform updates via email</MudText>
+
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined"
+                                  Dense="true" Icon="@Icons.Material.Outlined.Info"
+                                  Class="notification-note">
+                            Notification preferences are not active yet. No settings can be changed from this section today.
+                        </MudAlert>
+
+                        <div class="notification-preview-list">
+                            <div class="notification-preview-row">
+                                <span class="notification-preview-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.MailOutline" />
+                                </span>
+                                <div class="notification-preview-copy">
+                                    <MudText Typo="Typo.body2" Class="notification-title">Email updates</MudText>
+                                    <MudText Typo="Typo.caption" Class="notification-description">
+                                        Important account and platform news
+                                    </MudText>
                                 </div>
-                                <MudSwitch T="bool" Checked="false" Disabled="true" Color="Color.Warning" Class="notification-toggle" />
                             </div>
-                            <MudDivider />
-                            <div class="notification-row">
-                                <div class="notification-copy">
-                                    <MudText Typo="Typo.body2" Class="notification-title">Push Notifications</MudText>
-                                    <MudText Typo="Typo.caption" Class="notification-description">Browser push alerts</MudText>
+                            <div class="notification-preview-row">
+                                <span class="notification-preview-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.NotificationsActive" />
+                                </span>
+                                <div class="notification-preview-copy">
+                                    <MudText Typo="Typo.body2" Class="notification-title">Browser notifications</MudText>
+                                    <MudText Typo="Typo.caption" Class="notification-description">
+                                        Relevant activity and account alerts
+                                    </MudText>
                                 </div>
-                                <MudSwitch T="bool" Checked="false" Disabled="true" Color="Color.Warning" Class="notification-toggle" />
                             </div>
-                            <MudDivider />
-                            <div class="notification-row">
-                                <div class="notification-copy">
-                                    <MudText Typo="Typo.body2" Class="notification-title">Mentor Reminders</MudText>
-                                    <MudText Typo="Typo.caption" Class="notification-description">Reminders before mentoring sessions</MudText>
+                            <div class="notification-preview-row">
+                                <span class="notification-preview-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.EventAvailable" />
+                                </span>
+                                <div class="notification-preview-copy">
+                                    <MudText Typo="Typo.body2" Class="notification-title">Mentor reminders</MudText>
+                                    <MudText Typo="Typo.caption" Class="notification-description">
+                                        Reminders before mentoring sessions
+                                    </MudText>
                                 </div>
-                                <MudSwitch T="bool" Checked="false" Disabled="true" Color="Color.Warning" Class="notification-toggle" />
                             </div>
-                            <MudDivider />
-                            <div class="notification-row">
-                                <div class="notification-copy">
-                                    <MudText Typo="Typo.body2" Class="notification-title">Weekly Digest</MudText>
-                                    <MudText Typo="Typo.caption" Class="notification-description">A summary of your weekly activity</MudText>
+                            <div class="notification-preview-row">
+                                <span class="notification-preview-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.CalendarViewWeek" />
+                                </span>
+                                <div class="notification-preview-copy">
+                                    <MudText Typo="Typo.body2" Class="notification-title">Weekly digest</MudText>
+                                    <MudText Typo="Typo.caption" Class="notification-description">
+                                        A summary of your weekly activity
+                                    </MudText>
                                 </div>
-                                <MudSwitch T="bool" Checked="false" Disabled="true" Color="Color.Warning" Class="notification-toggle" />
                             </div>
                         </div>
-                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="notification-note">
-                            Notification preferences will be enabled when XQARE's notification delivery is available.
-                        </MudAlert>
                     </MudPaper>
                 </MudItem>
             </MudGrid>
@@ -246,10 +308,14 @@
     {
         get
         {
-            if (_profile == null) return "XQARE member";
+            if (_profile is null) return "XQARE member";
+
             var name = string.Join(" ", new[] { _profile.FirstName, _profile.LastName }
-                .Where(x => !string.IsNullOrWhiteSpace(x)));
-            return string.IsNullOrWhiteSpace(name) ? (_profile.DisplayName ?? "XQARE member") : name;
+                .Where(value => !string.IsNullOrWhiteSpace(value)));
+
+            return string.IsNullOrWhiteSpace(name)
+                ? (_profile.DisplayName ?? "XQARE member")
+                : name;
         }
     }
 
@@ -258,7 +324,9 @@
         get
         {
             var names = DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (names.Length > 1) return string.Concat(names[0][0], names[^1][0]).ToUpperInvariant();
+            if (names.Length > 1)
+                return string.Concat(names[0][0], names[^1][0]).ToUpperInvariant();
+
             return names.Length == 1 ? names[0][..1].ToUpperInvariant() : "X";
         }
     }
@@ -268,52 +336,100 @@
     private async Task LoadProfileAsync()
     {
         _loading = true;
+
         try
         {
             _profile = await ProfileService.GetMyProfileAsync();
-            if (_profile.IsSuccess) CopyProfileToEdit();
-            else Snackbar.Add(_profile.Message, Severity.Error);
+            if (_profile.IsSuccess)
+                CopyProfileToEdit();
+            else
+                Snackbar.Add(_profile.Message, Severity.Error);
         }
         catch
         {
             _profile = null;
             Snackbar.Add("Your profile could not be loaded. Please retry.", Severity.Error);
         }
-        finally { _loading = false; }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private void CopyProfileToEdit()
     {
-        if (_profile == null) return;
+        if (_profile is null) return;
+
         _edit = new UpdateMyProfileRequest
         {
-            FirstName = _profile.FirstName, LastName = _profile.LastName,
-            PhoneNumber = _profile.PhoneNumber, Bio = _profile.Bio
+            FirstName = _profile.FirstName,
+            LastName = _profile.LastName,
+            PhoneNumber = _profile.PhoneNumber,
+            Bio = _profile.Bio
         };
     }
 
-    private void BeginEdit() { CopyProfileToEdit(); _editing = true; }
-    private void CancelEdit() { CopyProfileToEdit(); _editing = false; }
+    private void BeginEdit()
+    {
+        if (_saving) return;
+
+        CopyProfileToEdit();
+        _editing = true;
+    }
+
+    private void CancelEdit()
+    {
+        if (_saving) return;
+
+        CopyProfileToEdit();
+        _editing = false;
+    }
 
     private async Task SaveProfileAsync()
     {
-        if (_form != null)
-        {
-            await _form.ValidateAsync();
-            if (!_form.IsValid) return;
-        }
+        if (_saving || !_editing) return;
+
         _saving = true;
+
         try
         {
+            if (_form is not null)
+            {
+                await _form.ValidateAsync();
+                if (!_form.IsValid) return;
+            }
+
+            // Normalize values before sending so the API receives the same trimmed values
+            // that the UI validator accepts.
+            _edit.FirstName = _edit.FirstName.Trim();
+            _edit.LastName = _edit.LastName.Trim();
+            _edit.PhoneNumber = string.IsNullOrWhiteSpace(_edit.PhoneNumber)
+                ? null
+                : _edit.PhoneNumber.Trim();
+            _edit.Bio = string.IsNullOrWhiteSpace(_edit.Bio)
+                ? null
+                : _edit.Bio.Trim();
+
             var response = await ProfileService.UpdateMyProfileAsync(_edit);
-            if (!response.IsSuccess) { Snackbar.Add(response.Message, Severity.Error); return; }
+            if (!response.IsSuccess)
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
+            }
+
             _profile = response;
             CopyProfileToEdit();
             _editing = false;
             Snackbar.Add(response.Message, Severity.Success);
         }
-        catch { Snackbar.Add("Your profile could not be saved. Please try again.", Severity.Error); }
-        finally { _saving = false; }
+        catch
+        {
+            Snackbar.Add("Your profile could not be saved. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
     }
 
     private static string ValueOrFallback(string? value, string fallback = "Not added yet")
