@@ -18,6 +18,8 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
         Task<TotpEnrollmentConfirmResponse> RegenerateTotpRecoveryCodesAsync(TotpRecoveryCodesRegenerateRequest request);
         Task<OtpOperationResponse> DisableTotpAsync(TotpDisableRequest request);
         Task<OtpOperationResponse> ChangePasswordAsync(ChangePasswordRequest request);
+        Task<ConnectedAccountsResponse> GetConnectedAccountsAsync();
+        Task<OtpOperationResponse> ConnectExternalAccountAsync(string provider);
         Task<ActiveSessionsResponse> GetActiveSessionsAsync();
         Task<SessionActionResponse> RevokeSessionAsync(Guid sessionId);
         Task<SessionActionResponse> RevokeOtherSessionsAsync();
