@@ -356,6 +356,31 @@ namespace Xqare.BusinessLayer.Classes.Auth
             _nav.NavigateTo($"{apiBaseUrl}/api/auth/{route}-link", forceLoad: true);
             return response.Data;
         }
+        public async Task<OtpOperationResponse> DisconnectExternalAccountAsync(
+            string provider, DisconnectExternalLoginRequest request)
+        {
+            var route = provider?.Trim().ToLowerInvariant() switch
+            {
+                "google" => "google",
+                "github" => "github",
+                "linkedin" => "linkedin",
+                "twitter" => "twitter",
+                _ => null
+            };
+
+            if (route == null)
+                return new OtpOperationResponse { IsSuccess = false, Message = "This sign-in provider is not supported." };
+
+            var response = await _api.PostAsync<DisconnectExternalLoginRequest, OtpOperationResponse>(
+                $"api/auth/external-links/{route}/disconnect", request);
+
+            return response.Data ?? new OtpOperationResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to disconnect this provider."
+            };
+        }
+
         public async Task<OtpOperationResponse> ChangePasswordAsync(ChangePasswordRequest request)
         {
             var response = await _api.PostAsync<ChangePasswordRequest, OtpOperationResponse>(
