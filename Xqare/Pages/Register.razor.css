@@ -214,3 +214,10 @@
     font-weight: 700;
     color: #fbbf24;
 }
+
+::deep .signup-link {
+    color: var(--xq-primary-hover);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}

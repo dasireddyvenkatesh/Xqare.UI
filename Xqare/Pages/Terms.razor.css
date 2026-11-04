@@ -1,6 +1,6 @@
 ﻿::deep .legal-hero {
     background: #1A3754;
-    padding: 80px 0;
+    padding: var(--xq-padding-legal-hero-block) 0;
     color: white;
 }
 
@@ -14,8 +14,8 @@
 }
 
 ::deep .legal-card {
-    padding: 40px;
-    border-radius: 10px;
+    padding: var(--xq-padding-card);
+    border-radius: var(--xq-card-radius);
 }
 
 ::deep .section-title {

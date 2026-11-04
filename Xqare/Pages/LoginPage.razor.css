@@ -6,8 +6,8 @@
     background: linear-gradient(135deg, #1e3a5f, #0f2a44);
     color: white;
     display: flex;
-    padding: 80px;
-    padding-top:200px;
+    padding: var(--xq-padding-auth-hero);
+    padding-top: var(--xq-padding-auth-hero-top);
 }
 
 ::deep .left-content {
@@ -55,7 +55,7 @@
     justify-content: center;
     min-width: 0;
     box-sizing: border-box;
-    padding: clamp(24px, 6vh, 80px) 20px;
+    padding: var(--xq-padding-auth-panel-block) var(--xq-padding-auth-panel-inline);
 }
 
 ::deep .mud-grid-item-md-6.right-panel {
