@@ -133,6 +133,7 @@
                                       Immediate="true" />
 
                         <MudTextField Label="Password"
+                                      MaxLength="1024"
                                       Variant="Variant.Outlined"
                                       @bind-Value="loginRequest.Password"
                                       For="@(() => loginRequest.Password)"
