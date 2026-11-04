@@ -1,5 +1,5 @@
 .settings-page {
-    min-height: 100vh;
+    min-height: 100%;
     width: 100%;
     padding: clamp(12px, 1.5vw, 20px);
     background: #f5f7fb;
