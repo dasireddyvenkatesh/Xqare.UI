@@ -171,7 +171,7 @@
                                 }
                                 else if (isRegistrationRetryDisabled)
                                 {
-                                    <MudText>Try again in @secondsRemaining s</MudText>
+                                    <MudText>Try again in @FormatCountdown(secondsRemaining)</MudText>
                                 }
                                 else
                                 {
@@ -245,12 +245,16 @@
                                       OnAdornmentClick="ToggleConfirmPassword" />
 
                         <MudButton Variant="Variant.Text"
-                                   Disabled="@isResendDisabled"
+                                   Disabled="@(_processing || _resending || isResendDisabled)"
                                    OnClick="ResendOtp"
                                    Class="resend-btn">
-                            @if (isResendDisabled)
+                            @if (_resending)
                             {
-                                <span>Resend in @secondsRemaining s</span>
+                                <span>Sending...</span>
+                            }
+                            else if (isResendDisabled)
+                            {
+                                <span>Resend in @FormatCountdown(secondsRemaining)</span>
                             }
                             else
                             {
@@ -306,6 +310,7 @@
     bool showConfirmPassword;
     bool isResendDisabled = true;
     bool isRegistrationRetryDisabled;
+    bool _resending;
     int secondsRemaining = 60;
     Timer timer = new();
 
@@ -408,27 +413,54 @@
 
     async Task ResendOtp()
     {
-        if (_processing || isResendDisabled)
+        if (_processing || _resending || isResendDisabled)
             return;
 
-        var response = await AuthService.ResendOtpAsync(registerRequest.Email);
-        Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
-
-        if (response.CanVerifyExistingOtp)
+        _resending = true;
+        try
         {
-            StartTimer(response.RetryAfterSeconds ?? 60);
-            return;
-        }
+            var response = await AuthService.ResendOtpAsync(registerRequest.Email);
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
 
-        // No usable OTP remains (for example, delivery failed or the address is
-        // temporarily locked). Return to the registration step and retry only after
-        // the API's cooldown has elapsed.
-        if (response.RetryAfterSeconds is > 0)
-        {
-            isOtpStep = false;
-            otpRequest = new VerifyRegisterEmailOtpRequest();
-            StartTimer(response.RetryAfterSeconds.Value);
+            if (response.CanVerifyExistingOtp)
+            {
+                StartTimer(response.RetryAfterSeconds ?? 60);
+                return;
+            }
+
+            // No usable OTP remains (for example, delivery failed or the address is
+            // temporarily locked). Return to the registration step and retry only after
+            // the API's cooldown has elapsed.
+            if (response.RetryAfterSeconds is > 0)
+            {
+                isOtpStep = false;
+                otpRequest = new VerifyRegisterEmailOtpRequest();
+                StartTimer(response.RetryAfterSeconds.Value);
+            }
         }
+        catch
+        {
+            Snackbar.Add("We couldn't request another verification code. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _resending = false;
+        }
+    }
+
+    private static string FormatCountdown(int totalSeconds)
+    {
+        var hours = totalSeconds / 3600;
+        var minutes = (totalSeconds % 3600) / 60;
+        var seconds = totalSeconds % 60;
+
+        if (hours > 0)
+            return $"{hours}h {minutes:D2}m";
+
+        if (minutes > 0)
+            return $"{minutes}m {seconds:D2}s";
+
+        return $"{seconds}s";
     }
 
     void StartTimer(int durationSeconds = 60)
