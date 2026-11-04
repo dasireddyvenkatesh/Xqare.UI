@@ -61,14 +61,49 @@
                                 {
                                     var isConnected = _connectedAccounts.ConnectedProviders.Any(x =>
                                         string.Equals(x, provider, StringComparison.OrdinalIgnoreCase));
-                                    <MudButton Variant="Variant.Outlined"
-                                               Color="@(isConnected ? Color.Success : Color.Primary)"
-                                               Disabled="@(_busy || isConnected)"
-                                               OnClick="@(() => ConnectProviderAsync(provider))">
-                                        @(isConnected ? $"{provider} connected" : $"Connect {provider}")
-                                    </MudButton>
+                                    @if (isConnected)
+                                    {
+                                        <MudChip T="string" Color="Color.Success" Variant="Variant.Outlined">@provider connected</MudChip>
+                                        <MudButton Variant="Variant.Outlined" Color="Color.Error"
+                                                   Disabled="@(_busy || !_connectedAccounts.HasPassword)"
+                                                   OnClick="@(() => BeginDisconnect(provider))">
+                                            Disconnect
+                                        </MudButton>
+                                    }
+                                    else
+                                    {
+                                        <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                                   Disabled="_busy"
+                                                   OnClick="@(() => ConnectProviderAsync(provider))">
+                                            Connect @provider
+                                        </MudButton>
+                                    }
                                 }
                             </div>
+                            @if (!string.IsNullOrWhiteSpace(_disconnectProvider))
+                            {
+                                <MudPaper Outlined="true" Class="settings-action-panel mt-3">
+                                    <MudText Typo="Typo.subtitle1" Class="settings-panel-title">Disconnect @_disconnectProvider</MudText>
+                                    <MudText Typo="Typo.caption" Class="settings-muted">
+                                        Confirm your XQARE password. The provider will no longer be able to sign in to this account.
+                                    </MudText>
+                                    <MudTextField T="string" Label="Current XQARE password"
+                                                  @bind-Value="_disconnectPassword"
+                                                  InputType="InputType.Password"
+                                                  Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                  MaxLength="128" FullWidth="true" />
+                                    <div class="settings-form-actions">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Error"
+                                                   Disabled="@(_busy || string.IsNullOrWhiteSpace(_disconnectPassword))"
+                                                   OnClick="DisconnectProviderAsync">
+                                            Confirm disconnect
+                                        </MudButton>
+                                        <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="CancelDisconnect">
+                                            Cancel
+                                        </MudButton>
+                                    </div>
+                                </MudPaper>
+                            }
                             @if (!_connectedAccounts.HasPassword)
                             {
                                 <MudDivider Class="settings-divider" />
@@ -411,6 +446,8 @@
     private bool _sessionsLoading;
     private ConnectedAccountsResponse? _connectedAccounts;
     private string? _connectedAccountsError;
+    private string? _disconnectProvider;
+    private string _disconnectPassword = string.Empty;
     private static readonly string[] SupportedProviders = { "Google", "GitHub", "LinkedIn", "Twitter" };
     private bool _confirmLogout;
     private string? _totpError;
@@ -504,6 +541,51 @@
         catch
         {
             Snackbar.Add("Unable to start provider connection. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void BeginDisconnect(string provider)
+    {
+        _disconnectProvider = provider;
+        _disconnectPassword = string.Empty;
+    }
+
+    private void CancelDisconnect()
+    {
+        _disconnectProvider = null;
+        _disconnectPassword = string.Empty;
+    }
+
+    private async Task DisconnectProviderAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_disconnectProvider) ||
+            string.IsNullOrWhiteSpace(_disconnectPassword))
+        {
+            Snackbar.Add("Enter your current XQARE password to disconnect this provider.", Severity.Warning);
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            var response = await AuthService.DisconnectExternalAccountAsync(
+                _disconnectProvider,
+                new DisconnectExternalLoginRequest { CurrentPassword = _disconnectPassword });
+
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+            if (response.IsSuccess)
+            {
+                CancelDisconnect();
+                await LoadConnectedAccountsAsync();
+            }
+        }
+        catch
+        {
+            Snackbar.Add("Unable to disconnect this provider. Please try again.", Severity.Error);
         }
         finally
         {
