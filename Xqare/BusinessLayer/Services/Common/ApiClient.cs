@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
+using Microsoft.JSInterop;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -15,14 +16,20 @@ namespace Xqare.BusinessLayer.Services.Common
         private readonly HttpClient _http;
         private readonly ITokenService _tokenService;
         private readonly JwtAuthStateProvider _authStateProvider;
+        private readonly IJSRuntime _jsRuntime;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
         private volatile bool _refreshSessionRejected;
 
-        public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider)
+        public ApiClient(
+            HttpClient http,
+            ITokenService tokenService,
+            JwtAuthStateProvider authStateProvider,
+            IJSRuntime jsRuntime)
         {
             _http = http;
             _tokenService = tokenService;
             _authStateProvider = authStateProvider;
+            _jsRuntime = jsRuntime;
         }
 
         private async Task<string?> AttachTokenAsync(HttpRequestMessage request)
@@ -44,6 +51,37 @@ namespace Xqare.BusinessLayer.Services.Common
         }
 
         private async Task<SessionRestoreOutcome> TryRefreshTokenAsync(string? accessTokenUsed)
+        {
+            // Web Locks are shared by same-origin tabs. Keep the browser lock around
+            // the complete refresh operation so the next tab sends the cookie only
+            // after the previous response's Set-Cookie has been processed.
+            using var dotNetReference = DotNetObjectReference.Create(this);
+
+            try
+            {
+                var outcome = await _jsRuntime.InvokeAsync<int>(
+                    "xqareSession.withRefreshLock",
+                    dotNetReference,
+                    accessTokenUsed);
+
+                return Enum.IsDefined(typeof(SessionRestoreOutcome), outcome)
+                    ? (SessionRestoreOutcome)outcome
+                    : SessionRestoreOutcome.Unavailable;
+            }
+            catch (JSException)
+            {
+                // Gracefully retain the per-tab semaphore if the JS helper is
+                // unavailable. The browser helper itself also falls back when
+                // Web Locks are not supported.
+                return await TryRefreshTokenLocallyAsync(accessTokenUsed);
+            }
+        }
+
+        [JSInvokable("RefreshTokenUnderBrowserLock")]
+        public async Task<int> RefreshTokenUnderBrowserLockAsync(string? accessTokenUsed)
+            => (int)await TryRefreshTokenLocallyAsync(accessTokenUsed);
+
+        private async Task<SessionRestoreOutcome> TryRefreshTokenLocallyAsync(string? accessTokenUsed)
         {
             await _refreshLock.WaitAsync();
             try
@@ -118,7 +156,7 @@ namespace Xqare.BusinessLayer.Services.Common
         }
 
         // Startup session restoration and 401 recovery use this exact same
-        // serialized refresh operation.
+        // browser-wide (when supported) and per-tab serialized refresh operation.
         public Task<SessionRestoreOutcome> RestoreSessionAsync()
             => TryRefreshTokenAsync(accessTokenUsed: null);
 
