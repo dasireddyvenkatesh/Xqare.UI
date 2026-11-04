@@ -3,7 +3,7 @@ using Xqare.BusinessLayer.DTO;
 
 namespace Xqare.BusinessLayer.Validators
 {
-    public class RegistrationOtpRequestValidator : AbstractValidator<VerifyEmailOtpRequest>
+    public class RegistrationOtpRequestValidator : AbstractValidator<VerifyRegisterEmailOtpRequest>
     {
         public RegistrationOtpRequestValidator()
         {
