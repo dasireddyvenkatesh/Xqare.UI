@@ -27,8 +27,6 @@
 .xq-app-layout ::deep .mud-main-content {
     min-width: 0;
     width: 100%;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
     background: #f5f7fb;
 }
 .xq-route-content {

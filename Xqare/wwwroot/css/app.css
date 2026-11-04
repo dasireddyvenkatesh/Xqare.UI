@@ -53,7 +53,6 @@
     --xq-padding-card-compact: var(--xq-space-5);
     --xq-padding-legal-hero-block: clamp(var(--xq-space-10), 6vw, var(--xq-space-20));
     --xq-padding-control-inline: 0.625rem;
-    --xq-padding-authenticated-page-top: var(--xq-space-2);
 
     /* Reusable palette details and alpha variants */
     --xq-primary-rgb: 245, 166, 35;
@@ -391,16 +390,13 @@ code {
     padding-left: var(--xq-padding-control-inline) !important;
 }
 
-/* Apply one compact top offset to every authenticated workspace page. */
-.xq-route-content > :is(.dashboard-page, .profile-page, .settings-page) {
-    padding-block-start: var(--xq-padding-authenticated-page-top) !important;
-}
-
-/* Page-specific MudBlazor main-content spacing overrides. */
-@media (max-width: 959.98px) {
-    .xq-app-layout .mud-main-content:has(.dashboard-page) {
-        padding-top: 0 !important;
-    }
+/* Authenticated workspace: this layout has its own mobile top bar,
+   so MudMainContent must not reserve space for a MudBlazor AppBar. */
+.mud-layout.xq-app-layout .mud-main-content.xq-app-main {
+    margin: 0 !important;
+    margin-block-start: 0 !important;
+    padding-top: 0 !important;
+    padding-block-start: 0 !important;
 }
 
 /* Keep the 24px top offset on the Login page only. */
