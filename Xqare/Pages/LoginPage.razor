@@ -127,6 +127,8 @@
 
                         <MudTextField Label="Email Address"
                                       MaxLength="256"
+                                      InputType="InputType.Email"
+                                      AutoComplete="username"
                                       Variant="Variant.Outlined"
                                       @bind-Value="loginRequest.Email"
                                       For="@(() => loginRequest.Email)"
@@ -134,6 +136,7 @@
 
                         <MudTextField Label="Password"
                                       MaxLength="1024"
+                                      AutoComplete="current-password"
                                       Variant="Variant.Outlined"
                                       @bind-Value="loginRequest.Password"
                                       For="@(() => loginRequest.Password)"
@@ -199,6 +202,7 @@
                                       @bind-Value="mfaRequest.Code"
                                       For="@(() => mfaRequest.Code)"
                                       MaxLength="@(isRecoveryCodeStep ? 36 : 6)"
+                                      AutoComplete="one-time-code"
                                       Immediate="true"
                                       InputMode="@(isRecoveryCodeStep ? InputMode.text : InputMode.numeric)" />
                         <MudButton Variant="Variant.Text" Color="Color.Primary"
@@ -264,7 +268,7 @@
 
                 if (!response.IsSuccess)
                 {
-                    Snackbar.Add(response.Message!, Severity.Error);
+                    Snackbar.Add(response.Message ?? "Invalid email or password. Please try again.", Severity.Error);
                     return;
                 }
 

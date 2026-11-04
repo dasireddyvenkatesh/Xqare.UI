@@ -76,7 +76,7 @@
 
                 <MudText Class="auth-subtitle">
                     Already have an account?
-                    <MudButton Href="/Login">Sign in</MudButton>
+                    <MudButton Href="/login">Sign in</MudButton>
                 </MudText>
 
                 @if (!isOtpStep)
@@ -141,6 +141,7 @@
 
                         <MudTextField Label="Full Name"
                                       MaxLength="100"
+                                      AutoComplete="name"
                                       Variant="Variant.Outlined"
                                       @bind-Value="registerRequest.FullName"
                                       For="@(() => registerRequest.FullName)"
@@ -150,6 +151,8 @@
 
                         <MudTextField Label="Email Address"
                                       MaxLength="256"
+                                      AutoComplete="email"
+                                      Immediate="true"
                                       InputType="InputType.Email"
                                       Variant="Variant.Outlined"
                                       @bind-Value="registerRequest.Email"
@@ -220,11 +223,13 @@
                                       @bind-Value="otpRequest.OtpCode"
                                       For="@(() => otpRequest.OtpCode)"
                                       MaxLength="6"
+                                      AutoComplete="one-time-code"
                                       Immediate="true"
                                       InputMode="InputMode.numeric" />
 
                         <MudTextField Label="Set Password"
                                       MaxLength="128"
+                                      AutoComplete="new-password"
                                       Variant="Variant.Outlined"
                                       InputType="@(showPassword ? InputType.Text : InputType.Password)"
                                       @bind-Value="otpRequest.Password"
@@ -236,6 +241,7 @@
 
                         <MudTextField Label="Confirm Password"
                                       MaxLength="128"
+                                      AutoComplete="new-password"
                                       Variant="Variant.Outlined"
                                       InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
                                       @bind-Value="otpRequest.ConfirmPassword"
@@ -396,9 +402,8 @@
 
                 if (otpResponse.RequiresMfa)
                 {
-                    var email = Uri.EscapeDataString(otpResponse.Email ?? otpRequest.Email);
                     var message = Uri.EscapeDataString(otpResponse.Message ?? string.Empty);
-                    Nav.NavigateTo($"/login?mfa=required&email={email}&message={message}");
+                    Nav.NavigateTo($"/login?mfa=required&message={message}");
                     return;
                 }
 

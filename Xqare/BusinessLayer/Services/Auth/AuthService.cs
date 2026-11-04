@@ -134,7 +134,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             var response = await _api.PostAnonymousAsync<LoginRequest, LoginResponse>("api/auth/login", request);
 
             if (!response.IsSuccess || response.Data == null)
-                return new LoginResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
+                return new LoginResponse { IsSuccess = false, Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage) ?? "The request could not be completed. Please try again." };
 
             if (!response.Data.IsSuccess)
                 return response.Data;
@@ -162,7 +162,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             var response = await _api.PostAnonymousAsync<RegisterRequest, RegisterResponse>("api/auth/register", request);
 
             if (!response.IsSuccess || response.Data == null)
-                return response.Data ?? new RegisterResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
+                return response.Data ?? new RegisterResponse { IsSuccess = false, Message = ExtractBackendMessage(response.ErrorMessage) ?? "The request could not be completed. Please try again." };
 
             return response.Data;
 
@@ -225,7 +225,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
             var response = await _api.PostAnonymousAsync<TRequest, LoginResponse>(endpoint, request);
             if (!response.IsSuccess || response.Data == null)
-                return response.Data ?? new LoginResponse { IsSuccess = false, Message = response.ErrorMessage ?? "The request could not be completed. Please try again." };
+                return response.Data ?? new LoginResponse { IsSuccess = false, Message = ExtractBackendMessage(response.ErrorMessage) ?? "The request could not be completed. Please try again." };
 
             await ApplySessionAsync(response.Data);
             return response.Data;
