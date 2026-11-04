@@ -11,7 +11,8 @@ namespace Xqare.BusinessLayer.Validators
                 .NotEmpty().EmailAddress().MaximumLength(256);
 
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Password is required.");
+                .NotEmpty().WithMessage("Password is required.")
+                .MaximumLength(1024).WithMessage("Password input is too long.");
         }
     }
 }
