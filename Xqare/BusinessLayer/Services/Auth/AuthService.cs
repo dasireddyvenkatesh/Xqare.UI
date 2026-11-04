@@ -432,8 +432,30 @@ namespace Xqare.BusinessLayer.Classes.Auth
             }
         }
 
+        private async Task PrepareForExternalSignInAsync()
+        {
+            // Social login from an already-authenticated tab is an account switch,
+            // not an account-link operation. Revoke the old refresh session and clear
+            // its tab-scoped access token before the provider callback establishes a new identity.
+            try
+            {
+                await _api.CookieCredential<string>("api/auth/logout");
+            }
+            catch
+            {
+                // Local state is cleared even if the previous refresh session is already unavailable.
+            }
+
+            _api.ResetRefreshState();
+            await _tokenService.ClearAsync();
+            if (_authStateProvider is JwtAuthStateProvider jwt)
+                jwt.NotifyUserLogout();
+        }
+
         public async Task LoginWithGoogle()
         {
+            await PrepareForExternalSignInAsync();
+
             string deviceId = await _device.GetDeviceIdAsync();
             string deviceName = await _device.GetDeviceNameAsync();
 
@@ -444,6 +466,8 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task LoginWithGitHub()
         {
+            await PrepareForExternalSignInAsync();
+
             string deviceId = await _device.GetDeviceIdAsync();
             string deviceName = await _device.GetDeviceNameAsync();
 
@@ -454,6 +478,8 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task LoginWithLinkedIn()
         {
+            await PrepareForExternalSignInAsync();
+
             string deviceId = await _device.GetDeviceIdAsync();
             string deviceName = await _device.GetDeviceNameAsync();
 
@@ -464,6 +490,8 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         public async Task LoginWithTwitter()
         {
+            await PrepareForExternalSignInAsync();
+
             string deviceId = await _device.GetDeviceIdAsync();
             string deviceName = await _device.GetDeviceNameAsync();
 
