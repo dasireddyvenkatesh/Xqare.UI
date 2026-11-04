@@ -303,6 +303,59 @@ namespace Xqare.BusinessLayer.Classes.Auth
             };
         }
 
+        public async Task<ConnectedAccountsResponse> GetConnectedAccountsAsync()
+        {
+            var response = await _api.GetAsync<ConnectedAccountsResponse>("api/auth/connected-accounts");
+            return response.Data ?? new ConnectedAccountsResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to retrieve connected sign-in methods."
+            };
+        }
+
+        public async Task<OtpOperationResponse> ConnectExternalAccountAsync(string provider)
+        {
+            var route = provider?.Trim().ToLowerInvariant() switch
+            {
+                "google" => "google",
+                "github" => "github",
+                "linkedin" => "linkedin",
+                "twitter" => "twitter",
+                _ => null
+            };
+
+            if (route == null)
+                return new OtpOperationResponse { IsSuccess = false, Message = "This sign-in provider is not supported." };
+
+            var response = await _api.PostAsync<object, OtpOperationResponse>(
+                $"api/auth/external-links/{route}/begin", new { });
+
+            if (!response.IsSuccess || response.Data == null)
+            {
+                return new OtpOperationResponse
+                {
+                    IsSuccess = false,
+                    Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
+                        ?? "Unable to start the account-linking process."
+                };
+            }
+
+            if (!response.Data.IsSuccess)
+                return response.Data;
+
+            var apiBaseUrl = _configuration["ApiSettings:BaseUrl"]?.TrimEnd('/');
+            if (string.IsNullOrWhiteSpace(apiBaseUrl))
+            {
+                return new OtpOperationResponse
+                {
+                    IsSuccess = false,
+                    Message = "The authentication service URL is not configured."
+                };
+            }
+
+            _nav.NavigateTo($"{apiBaseUrl}/api/auth/{route}-link", forceLoad: true);
+            return response.Data;
+        }
         public async Task<OtpOperationResponse> ChangePasswordAsync(ChangePasswordRequest request)
         {
             var response = await _api.PostAsync<ChangePasswordRequest, OtpOperationResponse>(
