@@ -157,7 +157,7 @@
                                       HelperText="Please enter your personal email id"
                                       HelperTextOnFocus="true" />
 
-                        <MudButton Disabled="@_processing"
+                        <MudButton Disabled="@(_processing || isRegistrationRetryDisabled)"
                                    FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
@@ -168,6 +168,10 @@
                                 {
                                     <MudProgressCircular Size="Size.Small" Indeterminate="true" />
                                     <MudText>Processing...</MudText>
+                                }
+                                else if (isRegistrationRetryDisabled)
+                                {
+                                    <MudText>Try again in @secondsRemaining s</MudText>
                                 }
                                 else
                                 {
@@ -301,6 +305,7 @@
     bool showPassword;
     bool showConfirmPassword;
     bool isResendDisabled = true;
+    bool isRegistrationRetryDisabled;
     int secondsRemaining = 60;
     Timer timer = new();
 
@@ -324,34 +329,42 @@
 
             if (!isOtpStep)
             {
-                // STEP 1: REGISTER
+                // STEP 1: Create a pending account and request email verification.
                 var response = await AuthService.RegisterAsync(registerRequest);
 
-                // A pending account may already have a valid OTP in its 60-second
-                // resend cooldown. Still show the OTP step so the user can use that code.
-                if (response.RequiresEmailVerification)
+                if (response.RequiresEmailVerification && response.CanVerifyExistingOtp)
                 {
-                    otpRequest.Email = string.IsNullOrWhiteSpace(response.Email)
-                        ? registerRequest.Email
-                        : response.Email;
-                    // Password is collected only after the OTP proves mailbox ownership.
-                    otpRequest.Password = string.Empty;
-                    otpRequest.ConfirmPassword = string.Empty;
-                    isOtpStep = true;
+                    otpRequest = new VerifyRegisterEmailOtpRequest
+                    {
+                        Email = string.IsNullOrWhiteSpace(response.Email)
+                            ? registerRequest.Email
+                            : response.Email
+                    };
 
+                    isOtpStep = true;
                     Snackbar.Add(
                         response.Message ?? "Enter the verification code sent to your email.",
                         response.IsSuccess ? Severity.Info : Severity.Warning);
 
-                    StartTimer(GetResendCooldownSeconds(response.Message));
+                    StartTimer(response.RetryAfterSeconds ?? 60);
                     return;
                 }
 
                 if (!response.IsSuccess)
                 {
-                    Snackbar.Add(response.Message, Severity.Error);
+                    Snackbar.Add(response.Message ?? "Registration could not be started.", Severity.Error);
+
+                    // If delivery failed or the OTP is locked, keep the user on the
+                    // registration step and use the server-provided retry interval.
+                    if (response.RetryAfterSeconds is > 0)
+                        StartTimer(response.RetryAfterSeconds.Value);
+
                     return;
                 }
+
+                Snackbar.Add(
+                    response.Message ?? "Registration could not be completed. Please try again.",
+                    Severity.Error);
             }
             else
             {
@@ -395,39 +408,34 @@
 
     async Task ResendOtp()
     {
+        if (_processing || isResendDisabled)
+            return;
+
         var response = await AuthService.ResendOtpAsync(registerRequest.Email);
         Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
 
-        if (response.IsSuccess)
-            StartTimer();
+        if (response.CanVerifyExistingOtp)
+        {
+            StartTimer(response.RetryAfterSeconds ?? 60);
+            return;
+        }
 
-
-    }
-
-    private static int GetResendCooldownSeconds(string? message)
-    {
-        const string prefix = "Please wait ";
-        if (string.IsNullOrWhiteSpace(message))
-            return 60;
-
-        var start = message.IndexOf(prefix, StringComparison.OrdinalIgnoreCase);
-        if (start < 0)
-            return 60;
-
-        start += prefix.Length;
-        var remaining = message[start..];
-        var separator = remaining.IndexOf(' ');
-        var number = separator >= 0 ? remaining[..separator] : remaining;
-
-        return int.TryParse(number, out var seconds)
-            ? Math.Clamp(seconds, 1, 3600)
-            : 60;
+        // No usable OTP remains (for example, delivery failed or the address is
+        // temporarily locked). Return to the registration step and retry only after
+        // the API's cooldown has elapsed.
+        if (response.RetryAfterSeconds is > 0)
+        {
+            isOtpStep = false;
+            otpRequest = new VerifyRegisterEmailOtpRequest();
+            StartTimer(response.RetryAfterSeconds.Value);
+        }
     }
 
     void StartTimer(int durationSeconds = 60)
     {
-        isResendDisabled = true;
-        secondsRemaining = Math.Clamp(durationSeconds, 1, 3600);
+        secondsRemaining = Math.Clamp(durationSeconds, 1, 86400);
+        isResendDisabled = isOtpStep;
+        isRegistrationRetryDisabled = !isOtpStep;
 
         timer?.Stop();
         timer?.Dispose();
@@ -446,6 +454,7 @@
             else
             {
                 isResendDisabled = false;
+                isRegistrationRetryDisabled = false;
                 timer.Stop();
             }
 
@@ -456,7 +465,12 @@
     void BackToRegister()
     {
         isOtpStep = false;
-        otpRequest = new();
+        otpRequest = new VerifyRegisterEmailOtpRequest();
+
+        timer?.Stop();
+        timer?.Dispose();
+        isResendDisabled = false;
+        isRegistrationRetryDisabled = false;
     }
 
     async Task RegisterWithGoogle()
