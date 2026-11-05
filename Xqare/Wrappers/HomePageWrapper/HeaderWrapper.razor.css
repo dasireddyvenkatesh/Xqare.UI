@@ -61,12 +61,12 @@
 
 /* ===== Mobile Login ===== */
 ::deep .mobile-login {
-    color: #ffffff !important;
+    color: var(--xq-text-inverse) !important;
     font-weight: 500;
 }
 
     ::deep .mobile-login:hover {
-        color: #f4b400 !important;
+        color: var(--xq-public-nav-hover) !important;
     }
     /* ===== Backdrop ===== */
     .drawer-backdrop {
@@ -83,7 +83,7 @@
     right: 0;
     width: 270px;
     height: 100vh;
-    background: linear-gradient(135deg, #0f2a44, #1b3a57);
+    background: linear-gradient(135deg, var(--xq-public-header-start), var(--xq-public-header-end));
     z-index: 1300;
     transform: translateX(100%);
     transition: transform 0.3s ease;
@@ -108,13 +108,13 @@
 .drawer-logo {
     font-size: 22px;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--xq-text-inverse);
 }
 
 .drawer-close-btn {
     background: none;
     border: none;
-    color: #ffffff;
+    color: var(--xq-text-inverse);
     font-size: 20px;
     cursor: pointer;
     padding: 4px 8px;
@@ -134,14 +134,14 @@
 }
 
     .drawer-content a {
-        color: #dbe6f1;
+        color: var(--xq-public-nav-text);
         text-decoration: none;
         font-size: 16px;
         font-weight: 500;
     }
 
         .drawer-content a:hover {
-            color: #f4b400 !important;
+            color: var(--xq-public-nav-hover) !important;
         }
 ::deep .drawer-signup {
     margin-top: 8px !important;
@@ -149,14 +149,14 @@
 }
 
 ::deep .drawer-content .mud-typography.mud-link {
-    color: #dbe6f1 !important;
+    color: var(--xq-public-nav-text) !important;
     text-decoration: none;
     font-size: 16px;
     font-weight: 500;
 }
 
     ::deep .drawer-content .mud-typography.mud-link:hover {
-        color: #f4b400 !important;
+        color: var(--xq-public-nav-hover) !important;
     }
 
 
