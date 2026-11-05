@@ -81,6 +81,14 @@
     --xq-sidebar-divider: rgba(255, 255, 255, 0.09);
     --xq-sidebar-outline: rgba(255, 255, 255, 0.06);
 
+    /* Legal pages: preserve the established page-specific navy and text shades. */
+    --xq-legal-hero-bg: #1A3754;
+    --xq-privacy-hero-bg: #1f3f5b;
+    --xq-legal-heading: #1A3754;
+    --xq-legal-accent: #F5B400;
+    --xq-legal-text-terms: #444;
+    --xq-legal-text: #555;
+
     /* Loading screen: retain the established navy/gold appearance. */
     --xq-loader-navy-start: #102E49;
     --xq-loader-navy-mid: #0B2035;
@@ -421,13 +429,13 @@ h1:focus {
 
 /* Shared legal structure; no page-specific wrapper class is required. */
 .legal-hero {
-    background: #1A3754;
+    background: var(--xq-legal-hero-bg);
     padding-block: var(--xq-padding-legal-hero-block);
     color: var(--xq-text-inverse);
 }
 
 .privacy-hero {
-    background: #1f3f5b;
+    background: var(--xq-privacy-hero-bg);
     padding-block: var(--xq-padding-legal-hero-block);
     color: var(--xq-text-inverse);
 }
