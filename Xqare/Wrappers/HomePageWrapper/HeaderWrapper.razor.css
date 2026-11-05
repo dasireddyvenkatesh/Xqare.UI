@@ -1,12 +1,12 @@
 ﻿/* ===== AppBar ===== */
 ::deep .mud-appbar.header {
-    background: linear-gradient(135deg, #0f2a44, #1b3a57) !important;
+    background: linear-gradient(135deg, var(--xq-public-header-start), var(--xq-public-header-end)) !important;
     box-shadow: none !important;
     padding: 6px 0;
 }
 
 ::deep .header.scrolled {
-    background: #1a3856 !important;
+    background: var(--xq-public-header-scrolled) !important;
 }
 
 /* ===== Container ===== */
@@ -20,7 +20,7 @@
 ::deep .logo {
     font-size: 26px;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--xq-text-inverse);
     white-space: nowrap;
 }
 
@@ -39,19 +39,19 @@
 
     ::deep .nav-links a,
     ::deep .nav-links .mud-typography {
-        color: #dbe6f1 !important;
+        color: var(--xq-public-nav-text) !important;
         font-weight: 500;
         text-decoration: none;
     }
 
         ::deep .nav-links a:hover {
-            color: #f4b400 !important;
+            color: var(--xq-public-nav-hover) !important;
         }
 
 /* ===== Sign Up Button ===== */
 ::deep .signup-btn {
-    background-color: #f5b400 !important;
-    color: #000000 !important;
+    background-color: var(--xq-public-cta-bg) !important;
+    color: var(--xq-public-cta-text) !important;
     border-radius: 24px;
     padding: 6px 20px;
     font-weight: 600;
@@ -72,7 +72,7 @@
     .drawer-backdrop {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--xq-public-backdrop);
         z-index: 1200;
     }
 
@@ -89,7 +89,7 @@
     transition: transform 0.3s ease;
     display: flex;
     flex-direction: column;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+    box-shadow: -4px 0 24px var(--xq-public-drawer-shadow);
 }
 
     .custom-drawer.drawer-open {
@@ -102,7 +102,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--xq-public-drawer-border);
 }
 
 .drawer-logo {
@@ -122,7 +122,7 @@
 }
 
     .drawer-close-btn:hover {
-        color: #f5b400;
+        color: var(--xq-brand-gold);
     }
 
 /* ===== Drawer Content ===== */
