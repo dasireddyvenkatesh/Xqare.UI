@@ -9,86 +9,135 @@
 
 <PageTitle>Administration | XQARE</PageTitle>
 
-<section class="admin-page">
-    <MudContainer MaxWidth="MaxWidth.False" Class="admin-content">
+<section class="admin-page" aria-labelledby="admin-page-title">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-container">
         <div class="admin-heading">
-            <div>
-                <MudText Typo="Typo.h4" Class="admin-title">Administration</MudText>
-                <MudText Typo="Typo.body2" Class="admin-subtitle">Manage platform accounts and monitor the XQARE workspace.</MudText>
+            <div class="admin-heading-copy">
+                <MudText Typo="Typo.h4" Class="admin-page-title" id="admin-page-title">Administration</MudText>
+                <MudText Typo="Typo.body2" Class="admin-page-subtitle">
+                    Manage platform accounts and monitor the XQARE workspace.
+                </MudText>
             </div>
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
-                       OnClick="LoadAsync" Disabled="_loading">Refresh</MudButton>
+            <div class="admin-heading-actions">
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadAsync"
+                           Disabled="_loading" Class="admin-refresh-button">
+                    Refresh
+                </MudButton>
+            </div>
         </div>
 
         @if (_loading)
         {
             <MudPaper Class="admin-state-card" Elevation="0">
-                <MudProgressLinear Indeterminate="true" />
-                <MudText Typo="Typo.body2" Color="Color.Secondary">Loading platform overview…</MudText>
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                <MudText Typo="Typo.subtitle1" Class="admin-state-title">Loading administration overview</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Platform account information will appear here shortly.</MudText>
             </MudPaper>
         }
         else if (_overview is null || !_overview.IsSuccess)
         {
-            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
-                @(_overview?.Message ?? "The platform overview could not be loaded.")
-                <MudButton Variant="Variant.Text" OnClick="LoadAsync">Try again</MudButton>
-            </MudAlert>
+            <MudPaper Class="admin-state-card" Elevation="0">
+                <MudIcon Icon="@Icons.Material.Filled.Assessment" Class="admin-state-icon" />
+                <MudText Typo="Typo.h6" Class="admin-state-title">We couldn't load the overview</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @(_overview?.Message ?? "Check your connection and try again.")
+                </MudText>
+                <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadAsync"
+                           Class="admin-primary-button">Try again</MudButton>
+            </MudPaper>
         }
         else
         {
-            <MudGrid Spacing="3" Class="admin-metrics">
+            <MudGrid Spacing="4" Class="admin-overview-grid">
                 <MudItem xs="12" sm="6" lg="3">
-                    <MudPaper Class="admin-metric-card" Elevation="0">
-                        <div class="admin-metric-icon"><MudIcon Icon="@Icons.Material.Filled.PeopleAlt" /></div>
-                        <MudText Typo="Typo.caption" Class="admin-metric-label">Total users</MudText>
+                    <MudPaper Class="admin-card admin-metric-card" Elevation="0">
+                        <div class="admin-card-heading">
+                            <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.PeopleAlt" /></span>
+                            <div class="admin-card-heading-copy">
+                                <MudText Typo="Typo.subtitle2" Class="admin-card-title">Total users</MudText>
+                                <MudText Typo="Typo.caption" Class="admin-card-subtitle">Registered accounts</MudText>
+                            </div>
+                        </div>
                         <MudText Typo="Typo.h4" Class="admin-metric-value">@_overview.TotalUsers.ToString("N0")</MudText>
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" sm="6" lg="3">
-                    <MudPaper Class="admin-metric-card" Elevation="0">
-                        <div class="admin-metric-icon admin-metric-success"><MudIcon Icon="@Icons.Material.Filled.Person" /></div>
-                        <MudText Typo="Typo.caption" Class="admin-metric-label">Enabled accounts</MudText>
+                    <MudPaper Class="admin-card admin-metric-card" Elevation="0">
+                        <div class="admin-card-heading">
+                            <span class="admin-card-icon admin-card-icon-success"><MudIcon Icon="@Icons.Material.Filled.Person" /></span>
+                            <div class="admin-card-heading-copy">
+                                <MudText Typo="Typo.subtitle2" Class="admin-card-title">Enabled accounts</MudText>
+                                <MudText Typo="Typo.caption" Class="admin-card-subtitle">Accounts with access</MudText>
+                            </div>
+                        </div>
                         <MudText Typo="Typo.h4" Class="admin-metric-value">@_overview.ActiveUsers.ToString("N0")</MudText>
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" sm="6" lg="3">
-                    <MudPaper Class="admin-metric-card" Elevation="0">
-                        <div class="admin-metric-icon admin-metric-warning"><MudIcon Icon="@Icons.Material.Filled.PersonOff" /></div>
-                        <MudText Typo="Typo.caption" Class="admin-metric-label">Disabled accounts</MudText>
+                    <MudPaper Class="admin-card admin-metric-card" Elevation="0">
+                        <div class="admin-card-heading">
+                            <span class="admin-card-icon admin-card-icon-warning"><MudIcon Icon="@Icons.Material.Filled.PersonOff" /></span>
+                            <div class="admin-card-heading-copy">
+                                <MudText Typo="Typo.subtitle2" Class="admin-card-title">Disabled accounts</MudText>
+                                <MudText Typo="Typo.caption" Class="admin-card-subtitle">Access currently blocked</MudText>
+                            </div>
+                        </div>
                         <MudText Typo="Typo.h4" Class="admin-metric-value">@_overview.DisabledUsers.ToString("N0")</MudText>
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" sm="6" lg="3">
-                    <MudPaper Class="admin-metric-card" Elevation="0">
-                        <div class="admin-metric-icon"><MudIcon Icon="@Icons.Material.Filled.Devices" /></div>
-                        <MudText Typo="Typo.caption" Class="admin-metric-label">Active sessions</MudText>
+                    <MudPaper Class="admin-card admin-metric-card" Elevation="0">
+                        <div class="admin-card-heading">
+                            <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Devices" /></span>
+                            <div class="admin-card-heading-copy">
+                                <MudText Typo="Typo.subtitle2" Class="admin-card-title">Active sessions</MudText>
+                                <MudText Typo="Typo.caption" Class="admin-card-subtitle">Current signed-in sessions</MudText>
+                            </div>
+                        </div>
                         <MudText Typo="Typo.h4" Class="admin-metric-value">@_overview.ActiveSessions.ToString("N0")</MudText>
                     </MudPaper>
                 </MudItem>
+
                 <MudItem xs="12" md="7">
-                    <MudPaper Class="admin-panel" Elevation="0">
-                        <div class="admin-panel-heading">
-                            <div>
-                                <MudText Typo="Typo.h6">Registration activity</MudText>
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">New accounts created in the last 30 days</MudText>
+                    <MudPaper Class="admin-card admin-activity-card" Elevation="0">
+                        <div class="admin-section-heading">
+                            <div class="admin-section-heading-left">
+                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.TrendingUp" /></span>
+                                <div>
+                                    <MudText Typo="Typo.h6" Class="admin-card-title">Registration activity</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">New accounts created in the last 30 days</MudText>
+                                </div>
                             </div>
-                            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Primary" />
                         </div>
-                        <MudText Typo="Typo.h3" Class="admin-registration-count">@_overview.NewRegistrationsLast30Days.ToString("N0")</MudText>
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">New registrations</MudText>
+                        <div class="admin-activity-summary">
+                            <MudText Typo="Typo.h3" Class="admin-activity-value">@_overview.NewRegistrationsLast30Days.ToString("N0")</MudText>
+                            <MudText Typo="Typo.body2" Class="admin-activity-label">New registrations</MudText>
+                        </div>
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" md="5">
-                    <MudPaper Class="admin-panel admin-shortcut-panel" Elevation="0">
-                        <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" Size="Size.Large" Color="Color.Primary" />
-                        <MudText Typo="Typo.h6">User management</MudText>
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">Search accounts, review account details and manage access.</MudText>
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.ArrowForward"
-                                   Href="/admin/users" Class="admin-primary-button">Manage users</MudButton>
+                    <MudPaper Class="admin-card admin-shortcut-card" Elevation="0">
+                        <div class="admin-section-heading-left">
+                            <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.ManageAccounts" /></span>
+                            <div>
+                                <MudText Typo="Typo.h6" Class="admin-card-title">User management</MudText>
+                                <MudText Typo="Typo.caption" Class="admin-card-subtitle">Account administration</MudText>
+                            </div>
+                        </div>
+                        <MudText Typo="Typo.body2" Class="admin-shortcut-description">
+                            Search accounts, review user details and manage platform access from one place.
+                        </MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                   EndIcon="@Icons.Material.Filled.ArrowForward"
+                                   Href="/admin/users" Class="admin-primary-button">
+                            Manage users
+                        </MudButton>
                     </MudPaper>
                 </MudItem>
             </MudGrid>
-            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="admin-updated">
+            <MudText Typo="Typo.caption" Class="admin-updated">
                 Data refreshed @_overview.GeneratedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
             </MudText>
         }
