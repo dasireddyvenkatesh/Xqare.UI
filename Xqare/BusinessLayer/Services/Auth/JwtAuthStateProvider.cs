@@ -42,7 +42,10 @@ namespace Xqare.BusinessLayer.Classes.Auth
                     return Anonymous();
                 }
 
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(jwt.Claims, "jwt", "name", "role")));
+                // The API emits role claims using the standard ClaimTypes.Role URI.
+                // Use the same claim type so AuthorizeView Roles="SUPERADMIN" can match them.
+                return new AuthenticationState(new ClaimsPrincipal(
+                    new ClaimsIdentity(jwt.Claims, "jwt", "name", ClaimTypes.Role)));
             }
             catch
             {
