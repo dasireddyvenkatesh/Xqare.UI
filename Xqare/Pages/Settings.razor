@@ -312,10 +312,16 @@
                                 <MudText Typo="Typo.h6" Class="settings-card-title">Active sessions</MudText>
                                 <MudText Typo="Typo.caption" Class="settings-muted">Manage up to two devices signed in to your account.</MudText>
                             </div>
-                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined" Class="settings-device-count">
-                                @Math.Min(_sessions.Count, 2) of 2 devices
-                            </MudChip>
-                            <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small" StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadSessionsAsync">Refresh</MudButton>
+                            <div class="settings-session-heading-actions">
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined" Class="settings-device-count">
+                                    @Math.Min(_sessions.Count, 2) of 2 devices
+                                </MudChip>
+                                <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small"
+                                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadSessionsAsync"
+                                           Disabled="_sessionsLoading">
+                                    Refresh
+                                </MudButton>
+                            </div>
                         </div>
                         <MudDivider Class="settings-divider" />
                         @if (_sessionsLoading)
