@@ -312,8 +312,10 @@
 }
 
 .settings-page ::deep .settings-device-count {
+    flex: 0 0 auto;
     margin-left: auto;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .settings-page ::deep .settings-logout-card {
@@ -362,7 +364,9 @@
 }
 
 .settings-page ::deep .settings-session-heading-actions .settings-device-count {
+    flex: 0 0 auto;
     margin-left: 0;
+    white-space: nowrap;
 }
 
 .settings-page ::deep .settings-session-heading-actions .mud-button-root {
