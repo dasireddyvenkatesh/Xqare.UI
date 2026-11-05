@@ -57,7 +57,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--xq-text-inverse);
     background: linear-gradient(135deg, var(--xq-navy-deep), var(--xq-marketing-highlight));
     transition: transform .35s ease;
 }
