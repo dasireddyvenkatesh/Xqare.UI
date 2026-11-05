@@ -104,6 +104,37 @@
     --xq-footer-link: rgba(255, 255, 255, 0.7);
     --xq-footer-divider: rgba(255, 255, 255, 0.1);
 
+    /* Auth pages: preserve the existing split-panel palette. */
+    --xq-auth-hero-start: #1e3a5f;
+    --xq-auth-hero-end: #0f2a44;
+    --xq-auth-highlight: #fbbf24;
+    --xq-auth-panel-bg: #f9fafb;
+    --xq-auth-accent: #f59e0b;
+    --xq-auth-accent-hover: #d97706;
+    --xq-auth-input-border: #e2e8f0;
+    --xq-auth-muted: #94a3b8;
+
+    /* Public marketing sections: retain established component-specific colors. */
+    --xq-marketing-cta-start: #1e3a56;
+    --xq-marketing-cta-end: #243f5e;
+    --xq-marketing-cta-glow-strong: rgba(244, 180, 0, 0.4);
+    --xq-marketing-cta-glow-soft: rgba(244, 180, 0, 0.3);
+    --xq-promo-bg: #da9b2f;
+    --xq-promo-register-bg: #0f2a44;
+    --xq-promo-register-hover: #0b1f33;
+    --xq-mentors-section-bg: #f9f8f6;
+    --xq-mentors-card-border: #e2e8f0;
+    --xq-mentors-avatar-border: #fbbf24;
+    --xq-mentors-cta-hover: #f59e0b;
+    --xq-how-section-bg: #f8fafc;
+    --xq-marketing-subtitle: #6b7a90;
+    --xq-marketing-card-border: #eef2f7;
+    --xq-marketing-highlight: #f59e0b;
+    --xq-offer-section-warm: rgba(218, 155, 47, 0.12);
+    --xq-offer-section-cool: rgba(23, 51, 79, 0.08);
+    --xq-offer-timer-bg: #1e3a5f;
+    --xq-offer-timer-hover: #16304d;
+
     /* Loading screen: retain the established navy/gold appearance. */
     --xq-loader-navy-start: #102E49;
     --xq-loader-navy-mid: #0B2035;
