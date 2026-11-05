@@ -1,6 +1,6 @@
 ﻿.site-footer {
-    background: #132f4c;
-    color: white;
+    background: var(--xq-footer-bg);
+    color: var(--xq-text-inverse);
     padding: 80px 20px 30px;
 }
 
@@ -38,19 +38,19 @@
 
 /* LINKS */
 ::deep .footer-column a {
-    color: rgba(255,255,255,0.7) !important;
+    color: var(--xq-footer-link) !important;
     text-decoration: none;
 }
 
     ::deep .footer-column a:hover {
-        color: #f4b400 !important;
+        color: var(--xq-public-nav-hover) !important;
     }
 
 
 /* DIVIDER */
 ::deep .footer-divider {
     height: 1px;
-    background: rgba(255,255,255,0.1);
+    background: var(--xq-footer-divider);
     margin: 30px 0;
 }
 
@@ -76,11 +76,11 @@
 }
 
     ::deep .footer-social .mud-icon-button {
-        color: rgba(255,255,255,0.7);
+        color: var(--xq-footer-link);
         transition: all .2s ease;
     }
 
         ::deep .footer-social .mud-icon-button:hover {
-            color: white;
+            color: var(--xq-text-inverse);
             transform: translateY(-2px);
         }
