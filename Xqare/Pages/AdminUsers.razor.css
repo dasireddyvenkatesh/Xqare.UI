@@ -1,16 +1,133 @@
-.admin-users-page { min-height: 100%; width: 100%; background: var(--xq-page-bg); }
-.admin-users-page ::deep .admin-users-content { width: 100%; max-width: none; margin: 0; padding: clamp(14px, 1.7vw, 28px); padding-bottom: 40px; }
-.admin-users-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
-.admin-users-panel { padding: clamp(13px, 2vw, 20px); border: 1px solid var(--xq-border); border-radius: 16px; background: var(--xq-surface); }
-.admin-users-filters { margin-bottom: 12px; }
-.admin-result-count { text-align: left; }
-.admin-user-list { display: flex; flex-direction: column; }
-.admin-user-row { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 10px; padding: 17px 4px; border-top: 1px solid var(--xq-border); }
-.admin-user-identity { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.admin-users-page {
+    min-height: 100%;
+    width: 100%;
+    padding: clamp(8px, 1.5vw, 16px);
+    padding-block-end: max(var(--xq-space-8), env(safe-area-inset-bottom));
+    background: var(--xq-page-bg);
+    color: var(--xq-text-primary);
+}
+
+.admin-users-page ::deep .admin-users-content {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-users-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--xq-space-4);
+    margin-inline: 16px;
+    margin-block-end: var(--xq-space-6);
+}
+
+.admin-users-heading .admin-title {
+    color: var(--xq-navy) !important;
+    font-weight: 800 !important;
+    letter-spacing: -.035em;
+    line-height: 1.15;
+}
+
+.admin-users-heading .admin-subtitle {
+    margin-block-start: var(--xq-space-2);
+    color: var(--xq-text-secondary) !important;
+}
+
+.admin-users-panel {
+    min-width: 0;
+    padding: clamp(13px, 1.6vw, 20px);
+    border: 1px solid var(--xq-border);
+    border-radius: var(--xq-card-radius);
+    background: var(--xq-surface);
+    box-shadow: 0 5px 18px rgba(15, 42, 68, 0.045);
+}
+
+.admin-users-filters {
+    align-items: center;
+    margin-block-end: var(--xq-space-3);
+}
+
+.admin-result-count {
+    text-align: start;
+    color: var(--xq-text-secondary);
+}
+
+.admin-user-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-user-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--xq-space-4);
+    min-width: 0;
+    padding: var(--xq-space-4) var(--xq-space-1);
+    border-block-start: 1px solid var(--xq-border);
+}
+
+.admin-user-identity {
+    display: flex;
+    align-items: center;
+    flex: 1 1 250px;
+    gap: var(--xq-space-3);
+    min-width: 0;
+}
+
 .admin-user-copy { min-width: 0; }
-.admin-user-name { color: var(--xq-text-primary); font-weight: 700 !important; }
-.admin-user-email { display: block; overflow-wrap: anywhere; color: var(--xq-text-secondary); }
-.admin-user-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
-.admin-user-meta { display: flex; flex-direction: column; gap: 3px; padding-left: 52px; min-width: 0; }
-.admin-user-actions { display: flex; align-items: center; justify-content: flex-start; gap: 4px; padding-left: 52px; flex-wrap: wrap; }
-.admin-pagination { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--xq-border); }
+
+.admin-users-page ::deep .admin-user-name {
+    color: var(--xq-navy) !important;
+    font-weight: 750 !important;
+}
+
+.admin-user-email {
+    display: block;
+    overflow-wrap: anywhere;
+    color: var(--xq-text-secondary);
+}
+
+.admin-user-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--xq-space-1);
+    margin-block-start: var(--xq-space-2);
+}
+
+.admin-user-meta {
+    display: flex;
+    flex: 0 1 145px;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.admin-user-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    gap: var(--xq-space-1);
+    margin-inline-start: auto;
+}
+
+.admin-user-actions ::deep .mud-button-root {
+    min-height: 2.25rem;
+    border-radius: .65rem;
+    font-weight: 700;
+    text-transform: none;
+}
+
+.admin-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--xq-space-3);
+    padding-block-start: var(--xq-space-3);
+    border-block-start: 1px solid var(--xq-border);
+}
