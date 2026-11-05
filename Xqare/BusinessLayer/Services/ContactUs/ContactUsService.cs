@@ -15,11 +15,13 @@ namespace Xqare.BusinessLayer.Classes.ContactUs
 
         public async Task<ContactUsResponse> SendContactUsMessageAsync(ContactUsRequest request)
         {
-
-            var response = await _api.PostAsync<ContactUsRequest, ContactUsResponse>("api/contactus", request);
+            // Contact is a public endpoint. Do not attach a stale bearer token
+            // or let a previously rejected refresh state block anonymous submissions.
+            var response = await _api.PostAnonymousAsync<ContactUsRequest, ContactUsResponse>(
+                "api/contactus",
+                request);
 
             return response.Data;
-
         }
     }
 }
