@@ -18,8 +18,13 @@
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.settings-heading > div {
+    flex: 1 1 18rem;
+    min-width: 0;
 }
 
 .settings-page ::deep .settings-title {
@@ -59,7 +64,8 @@
 .settings-card-heading {
     display: flex;
     align-items: center;
-    gap: 7px;
+    flex-wrap: wrap;
+    gap: 8px;
     min-width: 0;
 }
 
@@ -80,7 +86,7 @@
 }
 
 .settings-card-heading-copy {
-    flex: 1 1 auto;
+    flex: 1 1 12rem;
     min-width: 0;
 }
 
@@ -160,7 +166,7 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 9px;
+    gap: 7px;
     margin-top: 11px;
 }
 
@@ -255,7 +261,7 @@
     align-items: center;
     gap: 11px;
     min-width: 0;
-    padding: 9px 0;
+    padding: 7px 0;
 }
 
 .settings-session-icon {
@@ -336,15 +342,7 @@
 }
 
 
-/* Compact card layout: keep each card at its natural content height. */
-.settings-page ::deep .settings-grid {
-    align-items: flex-start !important;
-    row-gap: 8px !important;
-}
-.settings-page ::deep .settings-grid > .mud-grid-item {
-    align-self: flex-start !important;
-    display: block !important;
-}
+/* Keep cards content-sized and aligned independently of their neighbours. */
 .settings-page ::deep .settings-grid > .mud-grid-item > .settings-card {
     width: 100%;
     height: auto !important;
@@ -352,22 +350,17 @@
     align-self: flex-start !important;
 }
 .settings-page ::deep .settings-logout-card {
-    height: auto !important;
-    min-height: 0 !important;
+    min-height: 0;
 }
-.settings-heading { gap: 8px; margin-bottom: 10px; }
-.settings-card-heading { gap: 8px; }
-.settings-session-row { padding: 7px 0; }
-.settings-form-actions { gap: 7px; }
-.settings-device-count { margin-left: auto; }
 
 .settings-session-heading-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
     flex-wrap: wrap;
     gap: 4px;
+    max-width: 100%;
     margin-left: auto;
 }
 
