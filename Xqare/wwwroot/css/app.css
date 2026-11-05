@@ -4,6 +4,9 @@
    Keep the matching values in Theme/XqareTheme.cs aligned.
    ========================================================= */
 :root {
+    /* Typography */
+    --xq-font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+
     /* Brand */
     --xq-primary: #F5A623;
     --xq-primary-hover: #E99A12;
@@ -63,12 +66,22 @@
     --xq-navy-gradient-deep: #223A5F;
     --xq-border-subtle: #F1F3F7;
     --xq-surface-hover: #F9FAFB;
+
+    /* Loading screen: retain the established navy/gold appearance. */
+    --xq-loader-navy-start: #102E49;
+    --xq-loader-navy-mid: #0B2035;
+    --xq-loader-navy-end: #091827;
+    --xq-loader-glow: rgba(42, 76, 101, 0.55);
+    --xq-loader-gold: #f5b400;
+    --xq-loader-subtitle: #c3d3e1;
+    --xq-loader-track: rgba(255, 255, 255, 0.15);
+    --xq-loader-gold-glow: rgba(245, 180, 0, 0.25);
 }
 
 
 html,
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--xq-font-family);
 }
 
 h1:focus {
@@ -161,7 +174,7 @@ a,
     overflow: hidden;
     padding: 24px;
     color: #fff;
-    background: radial-gradient( circle at 50% 42%, rgba(42, 76, 101, 0.55), transparent 52% ), linear-gradient( 145deg, #102E49 0%, #0B2035 60%, #091827 100% );
+    background: radial-gradient(circle at 50% 42%, var(--xq-loader-glow), transparent 52%), linear-gradient(145deg, var(--xq-loader-navy-start) 0%, var(--xq-loader-navy-mid) 60%, var(--xq-loader-navy-end) 100%);
 }
 
 .xqare-loader-content {
@@ -177,7 +190,7 @@ a,
 
 .xqare-brand {
     color: #fff;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--xq-font-family);
     font-size: clamp(2rem, 7vw, 2.6rem);
     font-weight: 800;
     line-height: 1.15;
@@ -186,7 +199,7 @@ a,
 
 .xqare-brand-subtitle {
     margin-top: 9px;
-    color: #c3d3e1;
+    color: var(--xq-loader-subtitle);
     font-size: 0.9rem;
     letter-spacing: 0.06em;
 }
@@ -218,15 +231,15 @@ a,
         }
 
             .xqare-progress-wrap .loading-progress circle:first-child {
-                stroke: rgba(255, 255, 255, 0.15);
+                stroke: var(--xq-loader-track);
             }
 
             .xqare-progress-wrap .loading-progress circle:last-child {
-                stroke: #f5b400;
+                stroke: var(--xq-loader-gold);
                 stroke-linecap: round;
                 stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
                 transition: stroke-dasharray 100ms linear;
-                filter: drop-shadow(0 0 4px rgba(245, 180, 0, 0.25));
+                filter: drop-shadow(0 0 4px var(--xq-loader-gold-glow));
             }
 
     /* Actual Blazor percentage */
@@ -263,7 +276,7 @@ a,
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: #f5b400;
+        background: var(--xq-loader-gold);
         opacity: 0.3;
         animation: xqare-dot-pulse 1.1s ease-in-out infinite;
     }
