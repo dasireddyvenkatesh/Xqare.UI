@@ -360,7 +360,7 @@
 .settings-session-row { padding: 7px 0; }
 .settings-form-actions { gap: 7px; }
 @media (max-width: 600px) {
-    .settings-page { padding: 8px; }
+    .settings-page { padding: 12px; }
     .settings-card { padding: 13px; }
     .settings-card-heading { gap: 7px; }
     .settings-device-count { margin-left: auto; }
