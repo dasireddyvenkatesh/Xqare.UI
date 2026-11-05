@@ -2,27 +2,27 @@
     display: flex;
     width: 100%;
     min-height: 100vh;
-    background: #f5f7fb;
+    background: var(--xq-page-bg);
 }
 .xq-app-layout ::deep .xq-desktop-drawer {
     flex: 0 0 auto;
-    background: #1a2540;
+    background: var(--xq-navy);
     border-right: 1px solid rgba(255,255,255,.06);
     transition: width .24s cubic-bezier(.4,0,.2,1);
 }
 .xq-app-layout ::deep .xq-desktop-drawer .mud-drawer-content {
     overflow-x: hidden;
-    background: #1a2540;
+    background: var(--xq-navy);
 }
 .xq-app-layout ::deep .xq-desktop-drawer-collapsed { width: 64px !important; }
 .xq-app-layout ::deep .xq-mobile-drawer {
     width: 280px !important;
     max-width: min(86vw, 320px);
-    background: #1a2540;
+    background: var(--xq-navy);
 }
 .xq-app-layout ::deep .xq-mobile-drawer .mud-drawer-content {
     overflow-x: hidden;
-    background: #1a2540;
+    background: var(--xq-navy);
 }
 .xq-app-layout ::deep .mud-main-content {
     display: flex;
@@ -31,7 +31,7 @@
     min-width: 0;
     width: auto;
     min-height: 100vh;
-    background: #f5f7fb;
+    background: var(--xq-page-bg);
 }
 .xq-route-content {
     flex: 1 0 auto;
@@ -49,25 +49,25 @@
     width: 100%;
     min-height: 54px;
     padding: 4px clamp(9px, 2.5vw, 15px);
-    border-bottom: 1px solid #e6ebf1;
+    border-bottom: 1px solid var(--xq-shell-border);
     background: rgba(255,255,255,.97);
-    box-shadow: 0 3px 14px rgba(26,37,64,.05);
+    box-shadow: 0 3px 14px var(--xq-shell-shadow);
     backdrop-filter: blur(12px);
 }
 .xq-mobile-brand {
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--xq-font-family);
     font-size: 19px;
     font-weight: 850;
     letter-spacing: .035em;
     line-height: 1;
 }
-.xq-mobile-brand .xq-brand-x { color: #f5b400; }
-.xq-mobile-brand .xq-brand-rest { color: #1a2540; }
-.xq-mobile-menu-button { color: #1a2540 !important; }
-.xq-mobile-action-button { color: #52647a !important; }
+.xq-mobile-brand .xq-brand-x { color: var(--xq-brand-gold); }
+.xq-mobile-brand .xq-brand-rest { color: var(--xq-navy); }
+.xq-mobile-menu-button { color: var(--xq-navy) !important; }
+.xq-mobile-action-button { color: var(--xq-mobile-action) !important; }
 .xq-mobile-action-button:disabled { opacity: .42; }
 
 
