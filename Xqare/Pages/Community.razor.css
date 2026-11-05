@@ -12,7 +12,7 @@
     width: 100%;
     max-width: 1440px;
     margin-inline: auto;
-    padding: clamp(16px, 3vw, 36px);
+    padding: clamp(14px, 3vw, 36px);
     box-sizing: border-box;
 }
 
@@ -62,7 +62,7 @@
     max-width: 1000px;
     margin: 0;
     color: #FFFFFF;
-    font-size: clamp(2.15rem, 5.2vw, 4.5rem);
+    font-size: clamp(2rem, 5.2vw, 4.5rem);
     font-weight: 800;
     letter-spacing: -0.045em;
     line-height: 1.08;
@@ -103,46 +103,4 @@
     border-radius: 50%;
     background: #F5B400;
     box-shadow: 0 0 0 4px rgba(245, 180, 0, 0.13);
-}
-
-@media (max-width: 600px) {
-    .community-page {
-        min-height: calc(100dvh - 64px);
-    }
-
-    .community-content {
-        padding: 14px;
-    }
-
-    .community-hero {
-        min-height: clamp(430px, calc(100dvh - 100px), 600px);
-        padding: 42px 22px;
-        border-radius: 20px;
-    }
-
-    .community-eyebrow {
-        letter-spacing: 0.16em;
-    }
-
-    .community-title {
-        letter-spacing: -0.035em;
-    }
-
-    .community-description {
-        line-height: 1.7;
-    }
-
-    .community-coming-soon {
-        margin-top: 30px;
-        padding: 12px 18px;
-        font-size: 0.8rem;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .community-hero,
-    .community-coming-soon {
-        scroll-behavior: auto;
-        transition: none;
-    }
 }
