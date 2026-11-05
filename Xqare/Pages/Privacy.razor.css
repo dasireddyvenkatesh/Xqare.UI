@@ -14,5 +14,5 @@
 
 ::deep .section-text {
     margin-top: 10px;
-    color: #555;
+    color: var(--xq-legal-text);
 }
