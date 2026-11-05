@@ -67,6 +67,20 @@
     --xq-border-subtle: #F1F3F7;
     --xq-surface-hover: #F9FAFB;
 
+    /* Shared authenticated navigation and shell */
+    --xq-brand-gold: #f5b400;
+    --xq-sidebar-text: #aab6ca;
+    --xq-sidebar-muted: #71809d;
+    --xq-sidebar-subtle: #8796ae;
+    --xq-sidebar-strong: #e6edf6;
+    --xq-mobile-action: #52647a;
+    --xq-shell-border: #e6ebf1;
+    --xq-shell-shadow: rgba(26, 37, 64, 0.05);
+    --xq-sidebar-hover: rgba(255, 255, 255, 0.07);
+    --xq-sidebar-active-shadow: rgba(245, 166, 35, 0.16);
+    --xq-sidebar-divider: rgba(255, 255, 255, 0.09);
+    --xq-sidebar-outline: rgba(255, 255, 255, 0.06);
+
     /* Loading screen: retain the established navy/gold appearance. */
     --xq-loader-navy-start: #102E49;
     --xq-loader-navy-mid: #0B2035;
