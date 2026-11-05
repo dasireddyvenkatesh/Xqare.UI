@@ -5,12 +5,12 @@
 ::deep .section-title {
     margin-top: 30px;
     font-weight: 600;
-    color: #1A3754;
-    border-left: 4px solid #F5B400;
+    color: var(--xq-legal-heading);
+    border-left: 4px solid var(--xq-legal-accent);
     padding-left: 10px;
 }
 
 ::deep .section-text {
     margin-top: 10px;
-    color: #444;
+    color: var(--xq-legal-text-terms);
 }
