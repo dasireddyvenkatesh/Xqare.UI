@@ -91,7 +91,7 @@
 ::deep .social-grid .mud-button-root {
     border-radius: 10px;
     border: 1px solid var(--xq-auth-input-border);
-    background: white;
+    background: var(--xq-surface);
     text-transform: none;
     font-weight: 600;
     height: 44px;
