@@ -6,7 +6,7 @@
 @attribute [Authorize(Roles = "SUPERADMIN")]
 @inject IAdminService AdminService
 @inject ISnackbar Snackbar
-@inject IDialogService DialogService
+@inject IJSRuntime JS
 @inject NavigationManager Navigation
 
 <PageTitle>User Management | XQARE</PageTitle>
@@ -23,7 +23,7 @@
         </div>
 
         <MudPaper Class="admin-users-panel" Elevation="0">
-            <MudGrid Spacing="2" AlignItems="AlignItems.Center" Class="admin-users-filters">
+            <MudGrid Spacing="2" Class="admin-users-filters">
                 <MudItem xs="12" md="7">
                     <MudTextField T="string" Value="_search" ValueChanged="OnSearchChanged"
                                   Placeholder="Search name, username or email" Variant="Variant.Outlined"
@@ -193,13 +193,10 @@
     private async Task ChangeStatusAsync(AdminUserListItemResponse user)
     {
         var action = user.IsActive ? "disable" : "enable";
-        var confirmed = await DialogService.ShowMessageBox(
-            $"{(user.IsActive ? "Disable" : "Enable")} account",
-            $"Are you sure you want to {action} {user.Email}?{(user.IsActive ? " All active sessions will be revoked." : string.Empty)}",
-            yesText: user.IsActive ? "Disable account" : "Enable account",
-            cancelText: "Cancel");
+        var confirmed = await JS.InvokeAsync<bool>("confirm",
+            $"Are you sure you want to {action} {user.Email}?{(user.IsActive ? " All active sessions will be revoked." : string.Empty)}");
 
-        if (confirmed != true)
+        if (!confirmed)
             return;
 
         _busyUsers.Add(user.UserId);
