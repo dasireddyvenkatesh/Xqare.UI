@@ -96,11 +96,11 @@
 .xq-nav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .xq-nav-root ::deep .xq-nav-link:hover { background: var(--xq-sidebar-hover); color: var(--xq-text-inverse) !important; }
 .xq-nav-root ::deep .xq-nav-link-active {
-    background: var(--xq-primary) !important;
-    color: var(--xq-navy) !important;
-    box-shadow: 0 5px 14px var(--xq-sidebar-active-shadow);
+    background: rgba(var(--xq-primary-rgb), 0.13) !important;
+    color: var(--xq-brand-gold) !important;
+    box-shadow: inset 3px 0 0 var(--xq-brand-gold);
 }
-.xq-nav-root ::deep .xq-nav-link-active .mud-icon-root { color: var(--xq-navy) !important; }
+.xq-nav-root ::deep .xq-nav-link-active .mud-icon-root { color: var(--xq-brand-gold) !important; }
 .xq-nav-footer {
     display: flex;
     align-items: center;
