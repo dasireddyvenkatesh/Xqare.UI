@@ -15,22 +15,28 @@
     <MudContainer MaxWidth="MaxWidth.False" Class="profile-container">
         <div class="profile-heading">
             <div class="profile-heading-copy">
-                <MudText Typo="Typo.overline" Class="profile-eyebrow">ACCOUNT</MudText>
                 <MudText Typo="Typo.h4" Class="profile-page-title" id="profile-page-title">Profile</MudText>
                 <MudText Typo="Typo.body2" Class="profile-page-subtitle">
                     Manage your personal information and keep your account details up to date.
                 </MudText>
             </div>
 
-            @if (_profile is { IsSuccess: true })
-            {
-                <MudChip T="string" Variant="Variant.Outlined"
-                         Color="@(_profile.IsActive ? Color.Success : Color.Warning)"
-                         Class="profile-status-chip">
-                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Class="mr-2" />
-                    @(_profile.IsActive ? "Account active" : "Account inactive")
-                </MudChip>
-            }
+            <div class="profile-heading-actions">
+                @if (_profile is { IsSuccess: true })
+                {
+                    <MudChip T="string" Variant="Variant.Outlined"
+                             Color="@(_profile.IsActive ? Color.Success : Color.Warning)"
+                             Class="profile-status-chip">
+                        <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Class="mr-2" />
+                        @(_profile.IsActive ? "Account active" : "Account inactive")
+                    </MudChip>
+                }
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadProfileAsync"
+                           Disabled="_loading || _saving" Class="profile-refresh-button">
+                    Refresh
+                </MudButton>
+            </div>
         </div>
 
         @if (_loading)
