@@ -19,6 +19,7 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 8px;
+    margin-inline: 8px;
     margin-bottom: 10px;
 }
 
@@ -365,7 +366,12 @@
 
 .settings-page ::deep .settings-session-heading-actions .settings-device-count {
     flex: 0 0 auto;
+    min-width: max-content;
     margin-left: 0;
+    white-space: nowrap;
+}
+
+.settings-page ::deep .settings-session-heading-actions .settings-device-count .mud-chip-content {
     white-space: nowrap;
 }
 
