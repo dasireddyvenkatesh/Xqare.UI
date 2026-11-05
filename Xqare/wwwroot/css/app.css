@@ -89,6 +89,21 @@
     --xq-legal-text-terms: #444;
     --xq-legal-text: #555;
 
+    /* Public shared shell: preserve the existing header and footer palette. */
+    --xq-public-header-start: #0f2a44;
+    --xq-public-header-end: #1b3a57;
+    --xq-public-header-scrolled: #1a3856;
+    --xq-public-nav-text: #dbe6f1;
+    --xq-public-nav-hover: #f4b400;
+    --xq-public-cta-bg: #f5b400;
+    --xq-public-cta-text: #000000;
+    --xq-public-backdrop: rgba(0, 0, 0, 0.5);
+    --xq-public-drawer-shadow: rgba(0, 0, 0, 0.4);
+    --xq-public-drawer-border: rgba(255, 255, 255, 0.1);
+    --xq-footer-bg: #132f4c;
+    --xq-footer-link: rgba(255, 255, 255, 0.7);
+    --xq-footer-divider: rgba(255, 255, 255, 0.1);
+
     /* Loading screen: retain the established navy/gold appearance. */
     --xq-loader-navy-start: #102E49;
     --xq-loader-navy-mid: #0B2035;
