@@ -360,3 +360,22 @@
 .settings-session-row { padding: 7px 0; }
 .settings-form-actions { gap: 7px; }
 .settings-device-count { margin-left: auto; }
+
+.settings-session-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.settings-page ::deep .settings-session-heading-actions .settings-device-count {
+    margin-left: 0;
+}
+
+.settings-page ::deep .settings-session-heading-actions .mud-button-root {
+    min-width: 0;
+    white-space: nowrap;
+}
