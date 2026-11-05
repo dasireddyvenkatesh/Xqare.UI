@@ -420,7 +420,6 @@ code {
 /* Authenticated pages use a custom mobile top bar. */
 .mud-layout.xq-app-layout .mud-main-content.xq-app-main {
     min-width: 0;
-    margin: 0 !important;
     padding: 0 !important;
 }
 
