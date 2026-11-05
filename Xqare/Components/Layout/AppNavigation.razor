@@ -1,5 +1,6 @@
 @using MudBlazor
 @using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Authorization
 @implements IDisposable
 @inject NavigationManager Navigation
 
@@ -51,6 +52,27 @@
             </MudButton>
         </MudTooltip>
     </MudNavMenu>
+
+    <AuthorizeView Roles="SUPERADMIN">
+        @if (!IsCollapsed)
+        {
+            <div class="xq-nav-section-label xq-nav-section-account">ADMINISTRATION</div>
+        }
+        <MudNavMenu Class="xq-nav-menu">
+            <MudTooltip Text="Administration overview" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin")" OnClick='@(() => NavigateAsync("/admin"))'>
+                    <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" />
+                    @if (!IsCollapsed) { <span class="xq-nav-label">Overview</span> }
+                </MudButton>
+            </MudTooltip>
+            <MudTooltip Text="User management" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin/users")" OnClick='@(() => NavigateAsync("/admin/users"))'>
+                    <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" />
+                    @if (!IsCollapsed) { <span class="xq-nav-label">User Management</span> }
+                </MudButton>
+            </MudTooltip>
+        </MudNavMenu>
+    </AuthorizeView>
 
     @if (!IsCollapsed)
     {

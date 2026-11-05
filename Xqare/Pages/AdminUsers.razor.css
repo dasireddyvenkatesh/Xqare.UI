@@ -1,0 +1,16 @@
+.admin-users-page { min-height: 100%; width: 100%; background: var(--xq-page-bg); }
+.admin-users-page ::deep .admin-users-content { width: 100%; max-width: none; margin: 0; padding: clamp(14px, 1.7vw, 28px); padding-bottom: 40px; }
+.admin-users-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+.admin-users-panel { padding: clamp(13px, 2vw, 20px); border: 1px solid var(--xq-border); border-radius: 16px; background: var(--xq-surface); }
+.admin-users-filters { margin-bottom: 12px; }
+.admin-result-count { text-align: left; }
+.admin-user-list { display: flex; flex-direction: column; }
+.admin-user-row { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 10px; padding: 17px 4px; border-top: 1px solid var(--xq-border); }
+.admin-user-identity { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.admin-user-copy { min-width: 0; }
+.admin-user-name { color: var(--xq-text-primary); font-weight: 700 !important; }
+.admin-user-email { display: block; overflow-wrap: anywhere; color: var(--xq-text-secondary); }
+.admin-user-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.admin-user-meta { display: flex; flex-direction: column; gap: 3px; padding-left: 52px; min-width: 0; }
+.admin-user-actions { display: flex; align-items: center; justify-content: flex-start; gap: 4px; padding-left: 52px; flex-wrap: wrap; }
+.admin-pagination { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--xq-border); }

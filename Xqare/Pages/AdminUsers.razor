@@ -1,0 +1,236 @@
+@page "/admin/users"
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.DTO.Admin
+@using Xqare.BusinessLayer.Interfaces.Admin
+@attribute [Authorize(Roles = "SUPERADMIN")]
+@inject IAdminService AdminService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager Navigation
+
+<PageTitle>User Management | XQARE</PageTitle>
+
+<section class="admin-users-page">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-users-content">
+        <div class="admin-users-heading">
+            <div>
+                <MudText Typo="Typo.h4" Class="admin-title">User Management</MudText>
+                <MudText Typo="Typo.body2" Class="admin-subtitle">Review registered accounts and manage platform access.</MudText>
+            </div>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
+                       OnClick="LoadUsersAsync" Disabled="_loading">Refresh</MudButton>
+        </div>
+
+        <MudPaper Class="admin-users-panel" Elevation="0">
+            <MudGrid Spacing="2" AlignItems="AlignItems.Center" Class="admin-users-filters">
+                <MudItem xs="12" md="7">
+                    <MudTextField T="string" Value="_search" ValueChanged="OnSearchChanged"
+                                  Placeholder="Search name, username or email" Variant="Variant.Outlined"
+                                  Margin="Margin.Dense" Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true"
+                                  Clearable="true" FullWidth="true" />
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudSelect T="string" Value="_status" ValueChanged="OnStatusChanged"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Label="Account status" FullWidth="true">
+                        <MudSelectItem Value="@("all")">All accounts</MudSelectItem>
+                        <MudSelectItem Value="@("active")">Enabled</MudSelectItem>
+                        <MudSelectItem Value="@("disabled")">Disabled</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="2">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="admin-result-count">
+                        @_totalCount.ToString("N0") accounts
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+
+            @if (_loading)
+            {
+                <MudProgressLinear Indeterminate="true" />
+            }
+            else if (_error)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                    Users could not be loaded.
+                    <MudButton Variant="Variant.Text" OnClick="LoadUsersAsync">Retry</MudButton>
+                </MudAlert>
+            }
+            else if (_users.Count == 0)
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">No accounts match your search.</MudAlert>
+            }
+            else
+            {
+                <div class="admin-user-list">
+                    @foreach (var user in _users)
+                    {
+                        <div class="admin-user-row" @key="user.UserId">
+                            <div class="admin-user-identity">
+                                <MudAvatar Image="@user.ProfileImageUrl" Color="Color.Primary" Size="Size.Medium">
+                                    @Initials(user)
+                                </MudAvatar>
+                                <div class="admin-user-copy">
+                                    <MudText Typo="Typo.subtitle2" Class="admin-user-name">@DisplayName(user)</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-user-email">@user.Email</MudText>
+                                    <div class="admin-user-tags">
+                                        @foreach (var role in user.Roles)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">@role</MudChip>
+                                        }
+                                        <MudChip T="string" Size="Size.Small" Color="@(user.IsActive ? Color.Success : Color.Warning)"
+                                                 Variant="Variant.Outlined">@((user.IsActive) ? "Enabled" : "Disabled")</MudChip>
+                                        @if (!user.IsEmailConfirmed)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">Email pending</MudChip>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-user-meta">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Registered</MudText>
+                                <MudText Typo="Typo.body2">@user.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</MudText>
+                            </div>
+                            <div class="admin-user-meta">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Last login</MudText>
+                                <MudText Typo="Typo.body2">@(user.LastLoginAt.HasValue ? user.LastLoginAt.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") : "Never")</MudText>
+                            </div>
+                            <div class="admin-user-actions">
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                           StartIcon="@Icons.Material.Filled.Visibility" OnClick="@(() => OpenUser(user.UserId))">
+                                    View
+                                </MudButton>
+                                <MudButton Variant="Variant.Text" Color="@(user.IsActive ? Color.Warning : Color.Success)"
+                                           Size="Size.Small" Disabled="@_busyUsers.Contains(user.UserId)"
+                                           OnClick="@(() => ChangeStatusAsync(user))">
+                                    @(user.IsActive ? "Disable" : "Enable")
+                                </MudButton>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="admin-pagination">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Page @_page of @Math.Max(1, _totalPages)</MudText>
+                    <div>
+                        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" Disabled="@(_page <= 1 || _loading)"
+                                       OnClick="@(() => ChangePageAsync(_page - 1))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" Disabled="@(_page >= _totalPages || _loading)"
+                                       OnClick="@(() => ChangePageAsync(_page + 1))" />
+                    </div>
+                </div>
+            }
+        </MudPaper>
+    </MudContainer>
+</section>
+
+@code {
+    private List<AdminUserListItemResponse> _users = new();
+    private readonly HashSet<Guid> _busyUsers = new();
+    private string _search = string.Empty;
+    private string _status = "all";
+    private int _page = 1;
+    private const int PageSize = 20;
+    private int _totalCount;
+    private int _totalPages;
+    private bool _loading = true;
+    private bool _error;
+
+    protected override Task OnInitializedAsync() => LoadUsersAsync();
+
+    private async Task LoadUsersAsync()
+    {
+        _loading = true;
+        _error = false;
+        try
+        {
+            var response = await AdminService.GetUsersAsync(
+                _search, _status switch { "active" => true, "disabled" => false, _ => null }, _page, PageSize);
+            if (!response.IsSuccess)
+            {
+                _error = true;
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
+            }
+
+            _users = response.Items;
+            _totalCount = response.TotalCount;
+            _totalPages = response.TotalPages;
+        }
+        catch
+        {
+            _error = true;
+            Snackbar.Add("Users could not be loaded. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OnSearchChanged(string value)
+    {
+        _search = value ?? string.Empty;
+        _page = 1;
+        await LoadUsersAsync();
+    }
+
+    private async Task OnStatusChanged(string value)
+    {
+        _status = value;
+        _page = 1;
+        await LoadUsersAsync();
+    }
+
+    private async Task ChangePageAsync(int page)
+    {
+        _page = page;
+        await LoadUsersAsync();
+    }
+
+    private void OpenUser(Guid userId) => Navigation.NavigateTo($"/admin/users/{userId:D}");
+
+    private async Task ChangeStatusAsync(AdminUserListItemResponse user)
+    {
+        var action = user.IsActive ? "disable" : "enable";
+        var confirmed = await DialogService.ShowMessageBox(
+            $"{(user.IsActive ? "Disable" : "Enable")} account",
+            $"Are you sure you want to {action} {user.Email}?{(user.IsActive ? " All active sessions will be revoked." : string.Empty)}",
+            yesText: user.IsActive ? "Disable account" : "Enable account",
+            cancelText: "Cancel");
+
+        if (confirmed != true)
+            return;
+
+        _busyUsers.Add(user.UserId);
+        try
+        {
+            var result = await AdminService.UpdateUserStatusAsync(user.UserId, !user.IsActive);
+            Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
+            if (result.IsSuccess)
+                await LoadUsersAsync();
+        }
+        catch
+        {
+            Snackbar.Add("The account status could not be updated. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _busyUsers.Remove(user.UserId);
+        }
+    }
+
+    private static string DisplayName(AdminUserListItemResponse user)
+    {
+        var name = $"{user.FirstName} {user.LastName}".Trim();
+        return string.IsNullOrWhiteSpace(name) ? user.Username : name;
+    }
+
+    private static string Initials(AdminUserListItemResponse user)
+    {
+        var name = DisplayName(user);
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length > 1 ? $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant()
+            : parts.Length == 1 ? parts[0][..1].ToUpperInvariant() : "U";
+    }
+}

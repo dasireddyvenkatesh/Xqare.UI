@@ -42,7 +42,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
                     return Anonymous();
                 }
 
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(jwt.Claims, "jwt")));
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(jwt.Claims, "jwt", "name", "role")));
             }
             catch
             {

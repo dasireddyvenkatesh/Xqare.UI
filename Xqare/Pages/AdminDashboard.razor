@@ -1,0 +1,123 @@
+@page "/admin"
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.DTO.Admin
+@using Xqare.BusinessLayer.Interfaces.Admin
+@attribute [Authorize(Roles = "SUPERADMIN")]
+@inject IAdminService AdminService
+@inject ISnackbar Snackbar
+
+<PageTitle>Administration | XQARE</PageTitle>
+
+<section class="admin-page">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-content">
+        <div class="admin-heading">
+            <div>
+                <MudText Typo="Typo.h4" Class="admin-title">Administration</MudText>
+                <MudText Typo="Typo.body2" Class="admin-subtitle">Manage platform accounts and monitor the XQARE workspace.</MudText>
+            </div>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
+                       OnClick="LoadAsync" Disabled="_loading">Refresh</MudButton>
+        </div>
+
+        @if (_loading)
+        {
+            <MudPaper Class="admin-state-card" Elevation="0">
+                <MudProgressLinear Indeterminate="true" />
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Loading platform overview…</MudText>
+            </MudPaper>
+        }
+        else if (_overview is null || !_overview.IsSuccess)
+        {
+            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                @(_overview?.Message ?? "The platform overview could not be loaded.")
+                <MudButton Variant="Variant.Text" OnClick="LoadAsync">Try again</MudButton>
+            </MudAlert>
+        }
+        else
+        {
+            <MudGrid Spacing="3" Class="admin-metrics">
+                <MudItem xs="12" sm="6" lg="3">
+                    <MudPaper Class="admin-metric-card" Elevation="0">
+                        <div class="admin-metric-icon"><MudIcon Icon="@Icons.Material.Filled.PeopleAlt" /></div>
+                        <MudText Typo="Typo.caption" Class="admin-metric-label">Total users</MudText>
+                        <MudText Typo="Typo.h4" Class="admin-metric-value">@_overview.TotalUsers.ToString("N0")</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" lg="3">
+                    <MudPaper Class="admin-metric-card" Elevation="0">
+                        <div class="admin-metric-icon admin-metric-success"><MudIcon Icon="@Icons.Material.Filled.PersonCheck" /></div>
+                        <MudText Typo="Typo.caption" Class="admin-metric-label">Enabled accounts</MudText>
+                        <MudText Typo="Typo.h4" Class="admin-metric-value">@_overview.ActiveUsers.ToString("N0")</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" lg="3">
+                    <MudPaper Class="admin-metric-card" Elevation="0">
+                        <div class="admin-metric-icon admin-metric-warning"><MudIcon Icon="@Icons.Material.Filled.PersonOff" /></div>
+                        <MudText Typo="Typo.caption" Class="admin-metric-label">Disabled accounts</MudText>
+                        <MudText Typo="Typo.h4" Class="admin-metric-value">@_overview.DisabledUsers.ToString("N0")</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" lg="3">
+                    <MudPaper Class="admin-metric-card" Elevation="0">
+                        <div class="admin-metric-icon"><MudIcon Icon="@Icons.Material.Filled.Devices" /></div>
+                        <MudText Typo="Typo.caption" Class="admin-metric-label">Active sessions</MudText>
+                        <MudText Typo="Typo.h4" Class="admin-metric-value">@_overview.ActiveSessions.ToString("N0")</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" md="7">
+                    <MudPaper Class="admin-panel" Elevation="0">
+                        <div class="admin-panel-heading">
+                            <div>
+                                <MudText Typo="Typo.h6">Registration activity</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">New accounts created in the last 30 days</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Primary" />
+                        </div>
+                        <MudText Typo="Typo.h3" Class="admin-registration-count">@_overview.NewRegistrationsLast30Days.ToString("N0")</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">New registrations</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" md="5">
+                    <MudPaper Class="admin-panel admin-shortcut-panel" Elevation="0">
+                        <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" Size="Size.Large" Color="Color.Primary" />
+                        <MudText Typo="Typo.h6">User management</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Search accounts, review account details and manage access.</MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.ArrowForward"
+                                   Href="/admin/users" Class="admin-primary-button">Manage users</MudButton>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="admin-updated">
+                Data refreshed @ _overview.GeneratedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+            </MudText>
+        }
+    </MudContainer>
+</section>
+
+@code {
+    private bool _loading = true;
+    private AdminOverviewResponse? _overview;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        try
+        {
+            _overview = await AdminService.GetOverviewAsync();
+            if (!_overview.IsSuccess)
+                Snackbar.Add(_overview.Message, Severity.Error);
+        }
+        catch
+        {
+            _overview = null;
+            Snackbar.Add("The administration overview could not be loaded. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

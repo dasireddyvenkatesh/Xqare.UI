@@ -1,0 +1,18 @@
+.admin-page { min-height: 100%; width: 100%; background: var(--xq-page-bg); }
+.admin-page ::deep .admin-content { width: 100%; max-width: none; margin: 0; padding: clamp(14px, 1.7vw, 28px); padding-bottom: 40px; }
+.admin-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+.admin-title { color: var(--xq-text-primary); font-weight: 750 !important; letter-spacing: -.025em; }
+.admin-subtitle { color: var(--xq-text-secondary); margin-top: 5px; }
+.admin-metric-card, .admin-panel, .admin-state-card { height: 100%; padding: 20px; border: 1px solid var(--xq-border); border-radius: 16px; background: var(--xq-surface); }
+.admin-metric-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-bottom: 17px; border-radius: 12px; color: var(--xq-primary); background: var(--xq-primary-soft); }
+.admin-metric-success { color: var(--xq-success); }
+.admin-metric-warning { color: var(--xq-warning); }
+.admin-metric-label { color: var(--xq-text-secondary); }
+.admin-metric-value { margin-top: 5px; color: var(--xq-text-primary); font-weight: 750 !important; }
+.admin-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.admin-registration-count { margin-top: 22px; color: var(--xq-text-primary); font-weight: 750 !important; }
+.admin-shortcut-panel { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.admin-primary-button { margin-top: 4px; }
+.admin-updated { display: block; margin-top: 16px; text-align: right; }
+.admin-state-card { display: flex; flex-direction: column; gap: 16px; }
+@supports (padding: max(0px)) { .admin-page ::deep .admin-content { padding-bottom: max(32px, env(safe-area-inset-bottom)); } }

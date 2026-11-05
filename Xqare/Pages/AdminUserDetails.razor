@@ -1,0 +1,92 @@
+@page "/admin/users/{UserId:guid}"
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.DTO.Admin
+@using Xqare.BusinessLayer.Interfaces.Admin
+@attribute [Authorize(Roles = "SUPERADMIN")]
+@inject IAdminService AdminService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>User details | XQARE</PageTitle>
+
+<section class="admin-detail-page">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-detail-content">
+        <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack"
+                   OnClick="@(() => Navigation.NavigateTo("/admin/users"))">Back to users</MudButton>
+        @if (_loading)
+        {
+            <MudProgressLinear Indeterminate="true" />
+        }
+        else if (_user is null)
+        {
+            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">The requested account could not be loaded.</MudAlert>
+        }
+        else
+        {
+            <MudPaper Class="admin-detail-card" Elevation="0">
+                <div class="admin-detail-header">
+                    <MudAvatar Image="@_user.ProfileImageUrl" Color="Color.Primary" Size="Size.Large">@Initials</MudAvatar>
+                    <div class="admin-detail-identity">
+                        <MudText Typo="Typo.h5">@DisplayName</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@_user.Email</MudText>
+                        <div class="admin-detail-tags">
+                            <MudChip T="string" Color="@(_user.IsActive ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
+                                @(_user.IsActive ? "Enabled" : "Disabled")
+                            </MudChip>
+                            @foreach (var role in _user.Roles)
+                            {
+                                <MudChip T="string" Variant="Variant.Outlined">@role</MudChip>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <MudDivider Class="my-4" />
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Username</MudText><MudText Typo="Typo.body1">@_user.Username</MudText></MudItem>
+                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Email verification</MudText><MudText Typo="Typo.body1">@(_user.IsEmailConfirmed ? "Verified" : "Pending")</MudText></MudItem>
+                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Registered</MudText><MudText Typo="Typo.body1">@_user.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</MudText></MudItem>
+                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Last login</MudText><MudText Typo="Typo.body1">@(_user.LastLoginAt?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") ?? "Never")</MudText></MudItem>
+                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Active sessions</MudText><MudText Typo="Typo.body1">@_user.ActiveSessionCount</MudText></MudItem>
+                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Recorded sessions</MudText><MudText Typo="Typo.body1">@_user.TotalSessionCount</MudText></MudItem>
+                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Phone</MudText><MudText Typo="Typo.body1">@(_user.PhoneNumber ?? "Not provided")</MudText></MudItem>
+                </MudGrid>
+                @if (!string.IsNullOrWhiteSpace(_user.Bio))
+                {
+                    <MudDivider Class="my-4" />
+                    <MudText Typo="Typo.subtitle2">About</MudText>
+                    <MudText Typo="Typo.body2">@_user.Bio</MudText>
+                }
+            </MudPaper>
+        }
+    </MudContainer>
+</section>
+
+@code {
+    [Parameter] public Guid UserId { get; set; }
+    private AdminUserDetailsResponse? _user;
+    private bool _loading = true;
+
+    private string DisplayName => _user is null
+        ? string.Empty
+        : string.Join(" ", new[] { _user.FirstName, _user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x))) is { Length: > 0 } name
+            ? name : _user.Username;
+
+    private string Initials
+    {
+        get
+        {
+            var parts = DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length > 1 ? $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant()
+                : parts.Length == 1 ? parts[0][..1].ToUpperInvariant() : "U";
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        try { _user = await AdminService.GetUserDetailsAsync(UserId); }
+        catch { _user = null; }
+        finally { _loading = false; }
+    }
+}

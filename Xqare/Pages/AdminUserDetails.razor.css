@@ -1,0 +1,6 @@
+.admin-detail-page { min-height: 100%; width: 100%; background: var(--xq-page-bg); }
+.admin-detail-page ::deep .admin-detail-content { width: 100%; max-width: none; margin: 0; padding: clamp(14px, 1.7vw, 28px); }
+.admin-detail-card { margin-top: 16px; padding: clamp(18px, 3vw, 30px); border: 1px solid var(--xq-border); border-radius: 16px; background: var(--xq-surface); }
+.admin-detail-header { display: flex; align-items: center; gap: 16px; }
+.admin-detail-identity { min-width: 0; }
+.admin-detail-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
