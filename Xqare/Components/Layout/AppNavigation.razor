@@ -134,8 +134,11 @@
 
         var current = "/" + relative.Trim('/');
         var normalized = path.TrimEnd('/');
+        // The Administration overview must only be active on /admin.
+        // Otherwise /admin/users incorrectly highlights both Overview and User Management.
         var active = string.Equals(current, normalized, StringComparison.OrdinalIgnoreCase) ||
-                     current.StartsWith(normalized + "/", StringComparison.OrdinalIgnoreCase);
+                     (!string.Equals(normalized, "/admin", StringComparison.OrdinalIgnoreCase) &&
+                      current.StartsWith(normalized + "/", StringComparison.OrdinalIgnoreCase));
         return active ? "xq-nav-link xq-nav-link-active" : "xq-nav-link";
     }
 
