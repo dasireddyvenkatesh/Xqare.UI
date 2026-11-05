@@ -11,19 +11,41 @@
 
 <PageTitle>User Management | XQARE</PageTitle>
 
-<section class="admin-users-page">
-    <MudContainer MaxWidth="MaxWidth.False" Class="admin-users-content">
+<section class="admin-users-page" aria-labelledby="admin-users-title">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-users-container">
         <div class="admin-users-heading">
-            <div>
-                <MudText Typo="Typo.h4" Class="admin-title">User Management</MudText>
-                <MudText Typo="Typo.body2" Class="admin-subtitle">Review registered accounts and manage platform access.</MudText>
+            <div class="admin-users-heading-copy">
+                <MudText Typo="Typo.h4" Class="admin-page-title" id="admin-users-title">User Management</MudText>
+                <MudText Typo="Typo.body2" Class="admin-page-subtitle">
+                    Review registered accounts and manage access to the XQARE platform.
+                </MudText>
             </div>
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh"
-                       OnClick="LoadUsersAsync" Disabled="_loading">Refresh</MudButton>
+            <div class="admin-users-heading-actions">
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadUsersAsync"
+                           Disabled="_loading" Class="admin-refresh-button">
+                    Refresh
+                </MudButton>
+            </div>
         </div>
 
-        <MudPaper Class="admin-users-panel" Elevation="0">
-            <MudGrid Spacing="2" Class="admin-users-filters">
+        <MudPaper Class="admin-users-card" Elevation="0">
+            <div class="admin-section-heading">
+                <div class="admin-section-heading-left">
+                    <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.PeopleAlt" /></span>
+                    <div>
+                        <MudText Typo="Typo.h6" Class="admin-card-title">Platform accounts</MudText>
+                        <MudText Typo="Typo.caption" Class="admin-card-subtitle">Search, filter and manage registered users</MudText>
+                    </div>
+                </div>
+                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default" Class="admin-count-chip">
+                    @_totalCount.ToString("N0") accounts
+                </MudChip>
+            </div>
+
+            <MudDivider Class="admin-divider" />
+
+            <MudGrid Spacing="3" Class="admin-users-filters">
                 <MudItem xs="12" md="7">
                     <MudTextField T="string" Value="_search" ValueChanged="OnSearchChanged"
                                   Placeholder="Search name, username or email" Variant="Variant.Outlined"
@@ -31,7 +53,7 @@
                                   AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true"
                                   Clearable="true" FullWidth="true" />
                 </MudItem>
-                <MudItem xs="12" sm="6" md="3">
+                <MudItem xs="12" sm="6" md="5">
                     <MudSelect T="string" Value="_status" ValueChanged="OnStatusChanged"
                                Variant="Variant.Outlined" Margin="Margin.Dense" Label="Account status" FullWidth="true">
                         <MudSelectItem Value="@("all")">All accounts</MudSelectItem>
@@ -39,27 +61,26 @@
                         <MudSelectItem Value="@("disabled")">Disabled</MudSelectItem>
                     </MudSelect>
                 </MudItem>
-                <MudItem xs="12" sm="6" md="2">
-                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="admin-result-count">
-                        @_totalCount.ToString("N0") accounts
-                    </MudText>
-                </MudItem>
             </MudGrid>
 
             @if (_loading)
             {
-                <MudProgressLinear Indeterminate="true" />
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
             }
             else if (_error)
             {
-                <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
                     Users could not be loaded.
                     <MudButton Variant="Variant.Text" OnClick="LoadUsersAsync">Retry</MudButton>
                 </MudAlert>
             }
             else if (_users.Count == 0)
             {
-                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">No accounts match your search.</MudAlert>
+                <MudPaper Class="admin-empty-state" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.PersonSearch" Class="admin-empty-icon" />
+                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">No users found</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">No accounts match the current search or status filter.</MudText>
+                </MudPaper>
             }
             else
             {
@@ -68,12 +89,13 @@
                     {
                         <div class="admin-user-row" @key="user.UserId">
                             <div class="admin-user-identity">
-                                <MudAvatar Image="@user.ProfileImageUrl" Color="Color.Primary" Size="Size.Medium">
+                                <MudAvatar Image="@user.ProfileImageUrl" Class="admin-user-avatar"
+                                           Color="Color.Primary" Size="Size.Large">
                                     @Initials(user)
                                 </MudAvatar>
                                 <div class="admin-user-copy">
-                                    <MudText Typo="Typo.subtitle2" Class="admin-user-name">@DisplayName(user)</MudText>
-                                    <MudText Typo="Typo.caption" Class="admin-user-email">@user.Email</MudText>
+                                    <MudText Typo="Typo.subtitle1" Class="admin-user-name">@DisplayName(user)</MudText>
+                                    <MudText Typo="Typo.body2" Class="admin-user-email">@user.Email</MudText>
                                     <div class="admin-user-tags">
                                         @foreach (var role in user.Roles)
                                         {
@@ -88,18 +110,19 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="admin-user-meta">
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">Registered</MudText>
-                                <MudText Typo="Typo.body2">@user.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</MudText>
+                                <MudText Typo="Typo.caption" Class="admin-field-label">Registered</MudText>
+                                <MudText Typo="Typo.body2" Class="admin-field-value">@user.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</MudText>
                             </div>
                             <div class="admin-user-meta">
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">Last login</MudText>
-                                <MudText Typo="Typo.body2">@(user.LastLoginAt.HasValue ? user.LastLoginAt.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") : "Never")</MudText>
+                                <MudText Typo="Typo.caption" Class="admin-field-label">Last login</MudText>
+                                <MudText Typo="Typo.body2" Class="admin-field-value">@(user.LastLoginAt.HasValue ? user.LastLoginAt.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") : "Never")</MudText>
                             </div>
                             <div class="admin-user-actions">
                                 <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
                                            StartIcon="@Icons.Material.Filled.Visibility" OnClick="@(() => OpenUser(user.UserId))">
-                                    View
+                                    View details
                                 </MudButton>
                                 <MudButton Variant="Variant.Text" Color="@(user.IsActive ? Color.Warning : Color.Success)"
                                            Size="Size.Small" Disabled="@_busyUsers.Contains(user.UserId)"
@@ -111,12 +134,17 @@
                     }
                 </div>
                 <div class="admin-pagination">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Page @_page of @Math.Max(1, _totalPages)</MudText>
-                    <div>
-                        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" Disabled="@(_page <= 1 || _loading)"
-                                       OnClick="@(() => ChangePageAsync(_page - 1))" />
-                        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" Disabled="@(_page >= _totalPages || _loading)"
-                                       OnClick="@(() => ChangePageAsync(_page + 1))" />
+                    <MudText Typo="Typo.caption" Class="admin-page-indicator">
+                        Showing @((_page - 1) * PageSize + 1)–@Math.Min(_page * PageSize, _totalCount) of @_totalCount.ToString("N0")
+                    </MudText>
+                    <div class="admin-pagination-controls">
+                        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" Color="Color.Primary"
+                                       Disabled="@(_page <= 1 || _loading)" OnClick="@(() => ChangePageAsync(_page - 1))"
+                                       AriaLabel="Previous page" />
+                        <MudText Typo="Typo.caption" Class="admin-page-indicator">Page @_page of @Math.Max(1, _totalPages)</MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" Color="Color.Primary"
+                                       Disabled="@(_page >= _totalPages || _loading)" OnClick="@(() => ChangePageAsync(_page + 1))"
+                                       AriaLabel="Next page" />
                     </div>
                 </div>
             }
