@@ -3,8 +3,8 @@
 }
 
 ::deep .left-panel {
-    background: linear-gradient(135deg, #1e3a5f, #0f2a44);
-    color: white;
+    background: linear-gradient(135deg, var(--xq-auth-hero-start), var(--xq-auth-hero-end));
+    color: var(--xq-text-inverse);
     display: flex;
     padding: var(--xq-padding-auth-hero);
     padding-top: var(--xq-padding-auth-hero-top);
@@ -21,7 +21,7 @@
 }
 
     ::deep .logo-text span {
-        color: #fbbf24;
+        color: var(--xq-auth-highlight);
     }
 
 ::deep .hero-title {
@@ -31,7 +31,7 @@
 }
 
     ::deep .hero-title span {
-        color: #fbbf24;
+        color: var(--xq-auth-highlight);
     }
 
 ::deep .hero-sub {
@@ -41,7 +41,7 @@
 ::deep .stat-number {
     font-size: 20px;
     font-weight: 800;
-    color: #fbbf24;
+    color: var(--xq-auth-highlight);
 }
 
 ::deep .stat-label {
@@ -50,7 +50,7 @@
 }
 
 ::deep .right-panel {
-    background: #f9fafb;
+    background: var(--xq-auth-panel-bg);
     display: flex;
     justify-content: center;
     min-width: 0;
@@ -73,24 +73,24 @@
 ::deep .auth-title {
     font-size: 24px;
     font-weight: 800;
-    color: #0f2a44;
+    color: var(--xq-navy-deep);
     text-align: center;
 }
 
 ::deep .auth-subtitle {
     font-size: 14px;
-    color: #64748b;
+    color: var(--xq-text-secondary);
     text-align: center;
 }
 
     ::deep .auth-subtitle span {
-        color: #f59e0b;
+        color: var(--xq-auth-accent);
         font-weight: 600;
     }
 
 ::deep .social-grid .mud-button-root {
     border-radius: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--xq-auth-input-border);
     background: white;
     text-transform: none;
     font-weight: 600;
@@ -104,7 +104,7 @@
 
 ::deep .divider-text {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--xq-auth-muted);
     font-weight: 600;
     white-space: nowrap;
 }
@@ -124,41 +124,41 @@
 }
 
 ::deep .mud-input-outlined-border {
-    border-color: #e2e8f0 !important;
+    border-color: var(--xq-auth-input-border) !important;
 }
 
 ::deep .mud-input-root:hover .mud-input-outlined-border {
-    border-color: #f59e0b !important;
+    border-color: var(--xq-auth-accent) !important;
 }
 
 ::deep .login-btn {
     margin-top: 20px;
     height: 48px;
     border-radius: 10px;
-    background: #f59e0b;
-    color: white;
+    background: var(--xq-auth-accent);
+    color: var(--xq-text-inverse);
     font-weight: 700;
     text-transform: none;
 }
 
     ::deep .login-btn:hover {
-        background: #d97706;
+        background: var(--xq-auth-accent-hover);
     }
 
 ::deep .resend-btn {
-    color: #f59e0b;
+    color: var(--xq-auth-accent);
     font-weight: 600;
 }
 
 ::deep .back-btn {
-    color: #64748b;
+    color: var(--xq-text-secondary);
     font-weight: 600;
 }
 
 ::deep .security-text {
     margin-top: 18px;
     font-size: 13px;
-    color: #64748b;
+    color: var(--xq-text-secondary);
     text-align: center;
 }
 
@@ -170,7 +170,7 @@
 }
 
 ::deep .mobile-logo span {
-    color: #f59e0b;
+    color: var(--xq-auth-accent);
 }
 ::deep .forgot-password-row {
     display: flex;
@@ -179,7 +179,7 @@
 }
 
 ::deep .forgot-password-link {
-    color: #d97706;
+    color: var(--xq-auth-accent-hover);
     font-size: 13px;
     font-weight: 600;
     text-transform: none;
