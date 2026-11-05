@@ -1,6 +1,85 @@
-.admin-detail-page { min-height: 100%; width: 100%; background: var(--xq-page-bg); }
-.admin-detail-page ::deep .admin-detail-content { width: 100%; max-width: none; margin: 0; padding: clamp(14px, 1.7vw, 28px); }
-.admin-detail-card { margin-top: 16px; padding: clamp(18px, 3vw, 30px); border: 1px solid var(--xq-border); border-radius: 16px; background: var(--xq-surface); }
-.admin-detail-header { display: flex; align-items: center; gap: 16px; }
+.admin-detail-page {
+    min-height: 100%;
+    width: 100%;
+    padding: clamp(8px, 1.5vw, 16px);
+    padding-block-end: max(var(--xq-space-8), env(safe-area-inset-bottom));
+    background: var(--xq-page-bg);
+    color: var(--xq-text-primary);
+}
+
+.admin-detail-page ::deep .admin-detail-content {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-detail-page ::deep .mud-button-root {
+    min-height: 2.35rem;
+    border-radius: .65rem;
+    font-weight: 700;
+    text-transform: none;
+}
+
+.admin-detail-card {
+    margin-block-start: var(--xq-space-4);
+    padding: clamp(16px, 2.5vw, 28px);
+    border: 1px solid var(--xq-border);
+    border-radius: var(--xq-card-radius);
+    background: var(--xq-surface);
+    box-shadow: 0 5px 18px rgba(15, 42, 68, 0.045);
+}
+
+.admin-detail-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--xq-space-4);
+    min-width: 0;
+}
+
 .admin-detail-identity { min-width: 0; }
-.admin-detail-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+.admin-detail-page ::deep .admin-detail-identity .mud-typography-h5 {
+    color: var(--xq-navy);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.admin-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--xq-space-2);
+    margin-block-start: var(--xq-space-3);
+}
+
+.admin-detail-page ::deep .mud-divider {
+    border-color: var(--xq-border);
+}
+
+.admin-detail-page ::deep .mud-grid {
+    row-gap: var(--xq-space-3);
+}
+
+.admin-detail-page ::deep .mud-grid .mud-typography-body1 {
+    margin-block-start: var(--xq-space-1);
+    color: var(--xq-navy);
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.admin-detail-page ::deep .mud-grid .mud-typography-caption {
+    color: var(--xq-text-secondary);
+    font-weight: 700;
+}
+
+.admin-detail-page ::deep .admin-detail-card .mud-typography-subtitle2 {
+    color: var(--xq-navy);
+    font-weight: 750;
+}
+
+.admin-detail-page ::deep .admin-detail-card .mud-typography-body2 {
+    color: var(--xq-text-secondary);
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
