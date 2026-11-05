@@ -12,9 +12,21 @@ namespace Xqare.Theme
         public const string NavyAlt = "#243B5B";
         public const string PageBackground = "#F5F7FB";
         public const string Surface = "#FFFFFF";
+        public const string SurfaceMuted = "#F8FAFC";
         public const string Border = "#E5EAF0";
+        public const string BorderSubtle = "#F1F3F7";
         public const string TextPrimary = "#1F2937";
         public const string TextSecondary = "#64748B";
+        public const string TextInverse = "#FFFFFF";
+        public const string DrawerText = "#E7EDF5";
+
+        public static readonly string[] FontFamily =
+        {
+            "Roboto",
+            "Helvetica Neue",
+            "Arial",
+            "sans-serif"
+        };
         public const string Success = "#16A34A";
         public const string Warning = "#F5A623";
         public const string Error = "#DC2626";
@@ -29,9 +41,9 @@ namespace Xqare.Theme
                 Background = PageBackground,
                 Surface = Surface,
                 AppbarBackground = Navy,
-                AppbarText = "#FFFFFF",
+                AppbarText = TextInverse,
                 DrawerBackground = Navy,
-                DrawerText = "#E7EDF5",
+                DrawerText = DrawerText,
                 TextPrimary = TextPrimary,
                 TextSecondary = TextSecondary,
                 Divider = Border,
@@ -39,6 +51,13 @@ namespace Xqare.Theme
                 Warning = Warning,
                 Error = Error,
                 Info = Info
+            },
+            Typography = new Typography
+            {
+                Default = new DefaultTypography
+                {
+                    FontFamily = FontFamily
+                }
             }
         };
     }
