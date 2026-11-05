@@ -27,12 +27,20 @@
     min-width: 0;
 }
 
-.profile-page ::deep .profile-eyebrow {
-    color: var(--xq-primary-hover) !important;
-    font-size: 0.7rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.12em;
-    line-height: 1.4;
+.profile-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    gap: var(--xq-space-2);
+    margin-left: auto;
+}
+
+.profile-page ::deep .profile-refresh-button {
+    min-width: 0;
+    white-space: nowrap;
+    text-transform: none;
 }
 
 .profile-page ::deep .profile-page-title {
@@ -52,6 +60,7 @@
 .profile-page ::deep .profile-status-chip {
     flex: 0 0 auto;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .profile-page ::deep .profile-cards-grid {
