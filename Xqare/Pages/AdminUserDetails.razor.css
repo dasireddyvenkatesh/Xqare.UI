@@ -16,7 +16,7 @@
 .admin-detail-heading {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: var(--xq-space-4);
     margin: 0 16px var(--xq-space-6);
@@ -44,7 +44,8 @@
 
 .admin-detail-page ::deep .admin-back-button {
     flex: 0 0 auto;
-    margin-inline-start: auto;
+    margin-inline-start: 0;
+    order: -1;
     white-space: nowrap;
     text-transform: none;
 }
