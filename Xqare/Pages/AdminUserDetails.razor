@@ -10,54 +10,144 @@
 
 <PageTitle>User details | XQARE</PageTitle>
 
-<section class="admin-detail-page">
-    <MudContainer MaxWidth="MaxWidth.False" Class="admin-detail-content">
-        <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack"
-                   OnClick="@(() => Navigation.NavigateTo("/admin/users"))">Back to users</MudButton>
+<section class="admin-detail-page" aria-labelledby="admin-detail-title">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-detail-container">
+        <div class="admin-detail-heading">
+            <div class="admin-detail-heading-copy">
+                <MudText Typo="Typo.h4" Class="admin-page-title" id="admin-detail-title">User details</MudText>
+                <MudText Typo="Typo.body2" Class="admin-page-subtitle">
+                    Review account information, access status and session summary.
+                </MudText>
+            </div>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.ArrowBack"
+                       OnClick="@(() => Navigation.NavigateTo("/admin/users"))"
+                       Class="admin-back-button">
+                Back to users
+            </MudButton>
+        </div>
+
         @if (_loading)
         {
-            <MudProgressLinear Indeterminate="true" />
+            <MudPaper Class="admin-state-card" Elevation="0">
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                <MudText Typo="Typo.subtitle1" Class="admin-state-title">Loading user details</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Account information will appear here shortly.</MudText>
+            </MudPaper>
         }
         else if (_user is null)
         {
-            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">The requested account could not be loaded.</MudAlert>
+            <MudPaper Class="admin-state-card" Elevation="0">
+                <MudIcon Icon="@Icons.Material.Filled.PersonOff" Class="admin-state-icon" />
+                <MudText Typo="Typo.h6" Class="admin-state-title">We couldn't load this account</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">The account may no longer be available. Return to User Management and try again.</MudText>
+                <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           OnClick="@(() => Navigation.NavigateTo("/admin/users"))"
+                           Class="admin-primary-button">Back to users</MudButton>
+            </MudPaper>
         }
         else
         {
-            <MudPaper Class="admin-detail-card" Elevation="0">
-                <div class="admin-detail-header">
-                    <MudAvatar Image="@_user.ProfileImageUrl" Color="Color.Primary" Size="Size.Large">@Initials</MudAvatar>
-                    <div class="admin-detail-identity">
-                        <MudText Typo="Typo.h5">@DisplayName</MudText>
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">@_user.Email</MudText>
-                        <div class="admin-detail-tags">
-                            <MudChip T="string" Color="@(_user.IsActive ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
-                                @(_user.IsActive ? "Enabled" : "Disabled")
-                            </MudChip>
-                            @foreach (var role in _user.Roles)
-                            {
-                                <MudChip T="string" Variant="Variant.Outlined">@role</MudChip>
-                            }
+            <MudGrid Spacing="4" Class="admin-detail-grid">
+                <MudItem xs="12">
+                    <MudPaper Class="admin-card admin-detail-profile-card" Elevation="0">
+                        <div class="admin-detail-profile">
+                            <MudAvatar Image="@_user.ProfileImageUrl" Class="admin-detail-avatar"
+                                       Color="Color.Primary" Size="Size.Large">@Initials</MudAvatar>
+                            <div class="admin-detail-identity">
+                                <MudText Typo="Typo.h5" Class="admin-detail-name">@DisplayName</MudText>
+                                <MudText Typo="Typo.body2" Class="admin-detail-email">@_user.Email</MudText>
+                                <div class="admin-detail-tags">
+                                    <MudChip T="string" Color="@(_user.IsActive ? Color.Success : Color.Warning)"
+                                             Variant="Variant.Outlined">
+                                        @(_user.IsActive ? "Enabled" : "Disabled")
+                                    </MudChip>
+                                    <MudChip T="string" Color="@(_user.IsEmailConfirmed ? Color.Success : Color.Warning)"
+                                             Variant="Variant.Outlined">
+                                        @(_user.IsEmailConfirmed ? "Email verified" : "Email pending")
+                                    </MudChip>
+                                    @foreach (var role in _user.Roles)
+                                    {
+                                        <MudChip T="string" Variant="Variant.Outlined">@role</MudChip>
+                                    }
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <MudDivider Class="my-4" />
-                <MudGrid Spacing="3">
-                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Username</MudText><MudText Typo="Typo.body1">@_user.Username</MudText></MudItem>
-                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Email verification</MudText><MudText Typo="Typo.body1">@(_user.IsEmailConfirmed ? "Verified" : "Pending")</MudText></MudItem>
-                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Registered</MudText><MudText Typo="Typo.body1">@_user.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</MudText></MudItem>
-                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Last login</MudText><MudText Typo="Typo.body1">@(_user.LastLoginAt?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") ?? "Never")</MudText></MudItem>
-                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Active sessions</MudText><MudText Typo="Typo.body1">@_user.ActiveSessionCount</MudText></MudItem>
-                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Recorded sessions</MudText><MudText Typo="Typo.body1">@_user.TotalSessionCount</MudText></MudItem>
-                    <MudItem xs="12" sm="6" lg="3"><MudText Typo="Typo.caption" Color="Color.Secondary">Phone</MudText><MudText Typo="Typo.body1">@(_user.PhoneNumber ?? "Not provided")</MudText></MudItem>
-                </MudGrid>
-                @if (!string.IsNullOrWhiteSpace(_user.Bio))
-                {
-                    <MudDivider Class="my-4" />
-                    <MudText Typo="Typo.subtitle2">About</MudText>
-                    <MudText Typo="Typo.body2">@_user.Bio</MudText>
-                }
-            </MudPaper>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" lg="8">
+                    <MudPaper Class="admin-card admin-detail-section" Elevation="0">
+                        <div class="admin-section-heading">
+                            <div class="admin-section-heading-left">
+                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Badge" /></span>
+                                <div>
+                                    <MudText Typo="Typo.h6" Class="admin-card-title">Account information</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">Personal and registration details</MudText>
+                                </div>
+                            </div>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+                        <MudGrid Spacing="3" Class="admin-detail-fields">
+                            <MudItem xs="12" sm="6">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Username</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@_user.Username</MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Phone number</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@(_user.PhoneNumber ?? "Not provided")</MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Registered</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@_user.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Last login</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@(_user.LastLoginAt?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") ?? "Never")</MudText>
+                                </div>
+                            </MudItem>
+                        </MudGrid>
+                        @if (!string.IsNullOrWhiteSpace(_user.Bio))
+                        {
+                            <MudDivider Class="admin-divider" />
+                            <MudText Typo="Typo.subtitle2" Class="admin-section-subtitle">About</MudText>
+                            <MudText Typo="Typo.body2" Class="admin-detail-bio">@_user.Bio</MudText>
+                        }
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" lg="4">
+                    <MudPaper Class="admin-card admin-detail-section" Elevation="0">
+                        <div class="admin-section-heading">
+                            <div class="admin-section-heading-left">
+                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Security" /></span>
+                                <div>
+                                    <MudText Typo="Typo.h6" Class="admin-card-title">Session summary</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">Current account sessions</MudText>
+                                </div>
+                            </div>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+                        <div class="admin-session-stat">
+                            <MudText Typo="Typo.caption" Class="admin-field-label">Active sessions</MudText>
+                            <MudText Typo="Typo.h4" Class="admin-session-value">@_user.ActiveSessionCount</MudText>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+                        <div class="admin-session-stat">
+                            <MudText Typo="Typo.caption" Class="admin-field-label">Recorded sessions</MudText>
+                            <MudText Typo="Typo.h4" Class="admin-session-value">@_user.TotalSessionCount</MudText>
+                        </div>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
         }
     </MudContainer>
 </section>
