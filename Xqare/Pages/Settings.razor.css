@@ -49,7 +49,7 @@
     display: block;
     height: auto;
     min-width: 0;
-    padding: clamp(14px, 1.6vw, 19px);
+    padding: clamp(13px, 1.6vw, 19px);
     border: 1px solid #e7ebf1;
     border-radius: 14px;
     background: #ffffff;
@@ -59,7 +59,7 @@
 .settings-card-heading {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 7px;
     min-width: 0;
 }
 
@@ -359,9 +359,4 @@
 .settings-card-heading { gap: 8px; }
 .settings-session-row { padding: 7px 0; }
 .settings-form-actions { gap: 7px; }
-@media (max-width: 600px) {
-    .settings-page { padding: 12px; }
-    .settings-card { padding: 13px; }
-    .settings-card-heading { gap: 7px; }
-    .settings-device-count { margin-left: auto; }
-}
+.settings-device-count { margin-left: auto; }
