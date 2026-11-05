@@ -7,13 +7,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FluentValidation" Version="12.1.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.3" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.5" />
+		<PackageReference Include="FluentValidation" Version="12.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.14" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.14" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.14" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.14" />
 		<PackageReference Include="MudBlazor" Version="9.12.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
 	</ItemGroup>
 
 
