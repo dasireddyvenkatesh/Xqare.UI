@@ -19,6 +19,7 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: var(--xq-space-4);
+    margin-inline: 16px;
     margin-block-end: var(--xq-space-6);
 }
 
