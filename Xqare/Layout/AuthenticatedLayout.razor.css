@@ -78,6 +78,3 @@
 }
 .xq-app-layout ::deep .xq-mobile-menu-button,
 .xq-app-layout ::deep .xq-mobile-action-button { padding: 6px; }
-@media (min-width: 960px) {
-    .xq-app-layout ::deep .xq-desktop-drawer { max-width: 240px; }
-}
