@@ -1,9 +1,10 @@
 @page "/admin/users/{UserId:guid}"
 @layout AuthenticatedLayout
 @using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.Classes.Authorization
 @using Xqare.BusinessLayer.DTO.Admin
 @using Xqare.BusinessLayer.Interfaces.Admin
-@attribute [Authorize(Roles = "SUPERADMIN")]
+@attribute [Authorize(Policy = PermissionPolicies.AdminUsersView)]
 @inject IAdminService AdminService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
