@@ -7,7 +7,7 @@
     <MudContainer MaxWidth="MaxWidth.False" Class="access-denied-container">
         <MudPaper Class="access-denied-card" Elevation="0">
             <div class="access-denied-icon">
-                <MudIcon Icon="@Icons.Material.Filled.LockPerson" />
+                <MudIcon Icon="@Icons.Material.Filled.Lock" />
             </div>
             <MudText Typo="Typo.overline" Class="access-denied-eyebrow">403 · FORBIDDEN</MudText>
             <MudText Typo="Typo.h4" Class="access-denied-title" id="access-denied-title">
@@ -23,11 +23,6 @@
                            Class="access-denied-primary">
                     Return to home
                 </MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Inherit"
-                           StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="GoBack"
-                           Class="access-denied-secondary">
-                    Go back
-                </MudButton>
             </div>
         </MudPaper>
     </MudContainer>
@@ -37,10 +32,4 @@
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     private void GoHome() => Navigation.NavigateTo("/");
-
-    private void GoBack()
-    {
-        // Avoid navigating back to the same protected URL or leaving the app origin.
-        Navigation.NavigateTo("/");
-    }
 }
