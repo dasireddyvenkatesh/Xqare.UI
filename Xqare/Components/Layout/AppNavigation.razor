@@ -1,6 +1,7 @@
 @using MudBlazor
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Authorization
+@using Xqare.BusinessLayer.Classes.Authorization
 @implements IDisposable
 @inject NavigationManager Navigation
 
@@ -53,25 +54,40 @@
         </MudTooltip>
     </MudNavMenu>
 
-    <AuthorizeView Roles="SUPERADMIN">
-        @if (!IsCollapsed)
-        {
-            <div class="xq-nav-section-label xq-nav-section-account">ADMINISTRATION</div>
-        }
-        <MudNavMenu Class="xq-nav-menu">
-            <MudTooltip Text="Administration overview" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
-                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin")" OnClick='@(() => NavigateAsync("/admin"))'>
-                    <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" />
-                    @if (!IsCollapsed) { <span class="xq-nav-label">Overview</span> }
-                </MudButton>
-            </MudTooltip>
-            <MudTooltip Text="User management" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
-                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin/users")" OnClick='@(() => NavigateAsync("/admin/users"))'>
-                    <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" />
-                    @if (!IsCollapsed) { <span class="xq-nav-label">User Management</span> }
-                </MudButton>
-            </MudTooltip>
-        </MudNavMenu>
+    <AuthorizeView>
+        <Authorized Context="adminNavigationContext">
+            @if (adminNavigationContext.User.IsInRole("SUPERADMIN") ||
+                 adminNavigationContext.User.HasClaim("permission", "ADMIN_OVERVIEW_VIEW") ||
+                 adminNavigationContext.User.HasClaim("permission", "ADMIN_USERS_VIEW"))
+            {
+                @if (!IsCollapsed)
+                {
+                    <div class="xq-nav-section-label xq-nav-section-account">ADMINISTRATION</div>
+                }
+                <MudNavMenu Class="xq-nav-menu">
+                    <AuthorizeView Policy="@PermissionPolicies.AdminOverviewView">
+                        <Authorized Context="overviewContext">
+                            <MudTooltip Text="Administration overview" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+                                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin")" OnClick='@(() => NavigateAsync("/admin"))'>
+                                    <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" />
+                                    @if (!IsCollapsed) { <span class="xq-nav-label">Overview</span> }
+                                </MudButton>
+                            </MudTooltip>
+                        </Authorized>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="@PermissionPolicies.AdminUsersView">
+                        <Authorized Context="usersContext">
+                            <MudTooltip Text="User management" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+                                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin/users")" OnClick='@(() => NavigateAsync("/admin/users"))'>
+                                    <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" />
+                                    @if (!IsCollapsed) { <span class="xq-nav-label">User Management</span> }
+                                </MudButton>
+                            </MudTooltip>
+                        </Authorized>
+                    </AuthorizeView>
+                </MudNavMenu>
+            }
+        </Authorized>
     </AuthorizeView>
 
     @if (!IsCollapsed)
