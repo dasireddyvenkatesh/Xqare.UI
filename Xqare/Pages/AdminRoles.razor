@@ -244,7 +244,8 @@
         get
         {
             var code = new string(_roleName.Trim().ToUpperInvariant()
-                .Select(character => char.IsLetterOrDigit(character) ? character : '_')
+                .Select(character =>
+                    character is >= 'A' and <= 'Z' or >= '0' and <= '9' ? character : '_')
                 .ToArray());
             while (code.Contains("__", StringComparison.Ordinal))
                 code = code.Replace("__", "_", StringComparison.Ordinal);
@@ -254,7 +255,7 @@
 
     private bool CanSave => _roleName.Trim().Length is >= 2 and <= 80 &&
                             (_editingRoleId.HasValue || GeneratedRoleCode.Length is >= 2 and <= 50 &&
-                             char.IsLetter(GeneratedRoleCode[0]));
+                             GeneratedRoleCode[0] is >= 'A' and <= 'Z');
 
     protected override Task OnInitializedAsync() => LoadRolesAsync();
 
