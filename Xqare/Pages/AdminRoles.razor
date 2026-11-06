@@ -1,0 +1,300 @@
+@page "/admin/roles"
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.Classes.Authorization
+@using Xqare.BusinessLayer.DTO.Rbac
+@using Xqare.BusinessLayer.Interfaces.Rbac
+@attribute [Authorize(Policy = PermissionPolicies.RbacRolesView)]
+@inject IRbacService RbacService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+
+<PageTitle>Role Management | XQARE</PageTitle>
+
+<section class="admin-users-page" aria-labelledby="admin-roles-title">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-users-container">
+        <div class="admin-users-heading">
+            <div class="admin-users-heading-copy">
+                <MudText Typo="Typo.h4" Class="admin-page-title" id="admin-roles-title">Role Management</MudText>
+                <MudText Typo="Typo.body2" Class="admin-page-subtitle">
+                    Review platform roles and manage custom role definitions.
+                </MudText>
+            </div>
+            <div class="admin-users-heading-actions">
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadRolesAsync"
+                           Disabled="_loading" Class="admin-refresh-button">
+                    Refresh
+                </MudButton>
+                <AuthorizeView Policy="@PermissionPolicies.RbacRolesManage">
+                    <Authorized>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Add" OnClick="BeginCreate"
+                                   Disabled="_saving">
+                            Add role
+                        </MudButton>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </div>
+
+        @if (_formVisible)
+        {
+            <MudPaper Class="admin-users-card mb-4" Elevation="0">
+                <MudText Typo="Typo.h6" Class="admin-card-title">@(_editingRoleId.HasValue ? "Rename role" : "Create role")</MudText>
+                <MudGrid Spacing="3" Class="mt-2">
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string" @bind-Value="_roleName" Label="Role name"
+                                      Variant="Variant.Outlined" Margin="Margin.Dense"
+                                      MaxLength="80" Immediate="true" Required="true" />
+                    </MudItem>
+                    @if (!_editingRoleId.HasValue)
+                    {
+                        <MudItem xs="12" md="6">
+                            <MudTextField T="string" Value="@GeneratedRoleCode" Label="Role code"
+                                          Variant="Variant.Outlined" Margin="Margin.Dense"
+                                          ReadOnly="true" HelperText="Generated from the role name." />
+                        </MudItem>
+                    }
+                </MudGrid>
+                <div class="admin-user-actions mt-3">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveRoleAsync"
+                               Disabled="@(_saving || !CanSave)">
+                        @(_saving ? "Saving..." : "Save")
+                    </MudButton>
+                    <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="CancelForm"
+                               Disabled="_saving">
+                        Cancel
+                    </MudButton>
+                </div>
+            </MudPaper>
+        }
+
+        <MudPaper Class="admin-users-card" Elevation="0">
+            <div class="admin-section-heading">
+                <div class="admin-section-heading-left">
+                    <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Badge" /></span>
+                    <div>
+                        <MudText Typo="Typo.h6" Class="admin-card-title">Platform roles</MudText>
+                        <MudText Typo="Typo.caption" Class="admin-card-subtitle">System and custom roles</MudText>
+                    </div>
+                </div>
+                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default" Class="admin-count-chip">
+                    @_roles.Count roles
+                </MudChip>
+            </div>
+
+            <MudDivider Class="admin-divider" />
+
+            @if (_loading)
+            {
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+            }
+            else if (_error)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
+                    Roles could not be loaded.
+                    <MudButton Variant="Variant.Text" OnClick="LoadRolesAsync">Retry</MudButton>
+                </MudAlert>
+            }
+            else if (_roles.Count == 0)
+            {
+                <MudPaper Class="admin-empty-state" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.Badge" Class="admin-empty-icon" />
+                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">No roles found</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">There are no roles to display.</MudText>
+                </MudPaper>
+            }
+            else
+            {
+                <div class="admin-user-list">
+                    @foreach (var role in _roles)
+                    {
+                        <div class="admin-user-row" @key="role.Id">
+                            <div class="admin-user-identity">
+                                <MudAvatar Class="admin-user-avatar" Color="Color.Primary" Size="Size.Large">
+                                    <MudIcon Icon="@(role.IsSystem ? Icons.Material.Filled.Security : Icons.Material.Filled.Badge)" />
+                                </MudAvatar>
+                                <div class="admin-user-copy">
+                                    <MudText Typo="Typo.subtitle1" Class="admin-user-name">@role.Name</MudText>
+                                    <MudText Typo="Typo.body2" Class="admin-user-email">@role.Code</MudText>
+                                    <div class="admin-user-tags">
+                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                                                 Color="@(role.IsSystem ? Color.Info : Color.Default)">
+                                            @(role.IsSystem ? "System role" : "Custom role")
+                                        </MudChip>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-user-meta">
+                                <MudText Typo="Typo.caption" Class="admin-field-label">Assigned users</MudText>
+                                <MudText Typo="Typo.body2" Class="admin-field-value">@role.AssignedUsers</MudText>
+                            </div>
+                            <div class="admin-user-meta">
+                                <MudText Typo="Typo.caption" Class="admin-field-label">Permissions</MudText>
+                                <MudText Typo="Typo.body2" Class="admin-field-value">@role.PermissionCount</MudText>
+                            </div>
+                            <div class="admin-user-actions">
+                                <AuthorizeView Policy="@PermissionPolicies.RbacRolesManage">
+                                    <Authorized>
+                                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                                   StartIcon="@Icons.Material.Filled.Edit"
+                                                   Disabled="@(role.IsSystem || _saving)"
+                                                   OnClick="@(() => BeginRename(role))">
+                                            Rename
+                                        </MudButton>
+                                        <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
+                                                   StartIcon="@Icons.Material.Filled.Delete"
+                                                   Disabled="@(role.IsSystem || role.AssignedUsers > 0 || _saving)"
+                                                   OnClick="@(() => DeleteRoleAsync(role))">
+                                            Delete
+                                        </MudButton>
+                                    </Authorized>
+                                </AuthorizeView>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </MudPaper>
+    </MudContainer>
+</section>
+
+@code {
+    private List<RoleResponse> _roles = new();
+    private bool _loading = true;
+    private bool _error;
+    private bool _saving;
+    private bool _formVisible;
+    private Guid? _editingRoleId;
+    private string _roleName = string.Empty;
+
+    private string GeneratedRoleCode
+    {
+        get
+        {
+            var code = new string(_roleName.Trim().ToUpperInvariant()
+                .Select(character => char.IsLetterOrDigit(character) ? character : '_')
+                .ToArray());
+            while (code.Contains("__", StringComparison.Ordinal))
+                code = code.Replace("__", "_", StringComparison.Ordinal);
+            return code.Trim('_');
+        }
+    }
+
+    private bool CanSave => _roleName.Trim().Length is >= 2 and <= 80 &&
+                            (_editingRoleId.HasValue || GeneratedRoleCode.Length is >= 2 and <= 50 &&
+                             char.IsLetter(GeneratedRoleCode[0]));
+
+    protected override Task OnInitializedAsync() => LoadRolesAsync();
+
+    private async Task LoadRolesAsync()
+    {
+        _loading = true;
+        _error = false;
+        try
+        {
+            var response = await RbacService.GetRolesAsync();
+            if (!response.IsSuccess)
+            {
+                _error = true;
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
+            }
+
+            _roles = response.Roles;
+        }
+        catch
+        {
+            _error = true;
+            Snackbar.Add("Roles could not be loaded. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void BeginCreate()
+    {
+        _editingRoleId = null;
+        _roleName = string.Empty;
+        _formVisible = true;
+    }
+
+    private void BeginRename(RoleResponse role)
+    {
+        _editingRoleId = role.Id;
+        _roleName = role.Name;
+        _formVisible = true;
+    }
+
+    private void CancelForm()
+    {
+        _formVisible = false;
+        _editingRoleId = null;
+        _roleName = string.Empty;
+    }
+
+    private async Task SaveRoleAsync()
+    {
+        if (!CanSave || _saving)
+            return;
+
+        _saving = true;
+        try
+        {
+            var result = _editingRoleId.HasValue
+                ? await RbacService.UpdateRoleAsync(_editingRoleId.Value,
+                    new UpdateRoleRequest { Name = _roleName.Trim() })
+                : await RbacService.CreateRoleAsync(new CreateRoleRequest
+                    {
+                        Name = _roleName.Trim(),
+                        Code = GeneratedRoleCode
+                    });
+
+            Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
+            if (result.IsSuccess)
+            {
+                CancelForm();
+                await LoadRolesAsync();
+            }
+        }
+        catch
+        {
+            Snackbar.Add("The role could not be saved. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task DeleteRoleAsync(RoleResponse role)
+    {
+        if (role.IsSystem || role.AssignedUsers > 0 || _saving)
+            return;
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm",
+            $"Are you sure you want to delete the role '{role.Name}'? This action cannot be undone.");
+        if (!confirmed)
+            return;
+
+        _saving = true;
+        try
+        {
+            var result = await RbacService.DeleteRoleAsync(role.Id);
+            Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
+            if (result.IsSuccess)
+                await LoadRolesAsync();
+        }
+        catch
+        {
+            Snackbar.Add("The role could not be deleted. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}
