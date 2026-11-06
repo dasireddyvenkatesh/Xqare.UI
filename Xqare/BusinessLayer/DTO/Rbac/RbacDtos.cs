@@ -57,4 +57,11 @@ namespace Xqare.BusinessLayer.DTO.Rbac
         public RolePermissionsResponse? Role { get; set; }
     }
 
+    public sealed class PermissionsResult
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public List<PermissionResponse> Permissions { get; set; } = new();
+    }
+
 }
