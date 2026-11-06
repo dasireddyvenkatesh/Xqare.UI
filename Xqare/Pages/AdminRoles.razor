@@ -291,19 +291,47 @@
                                                     </MudButton>
                                                 </span>
                                             </MudTooltip>
-                                            <MudTooltip Text="@DeleteDisabledReason(role)">
-                                                <span>
-                                                    <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
-                                                               StartIcon="@Icons.Material.Filled.Delete"
-                                                               Disabled="@(IsProtectedRole(role) || role.AssignedUsers > 0 || _saving || _editingRoleId.HasValue)"
-                                                               OnClick="@(() => DeleteRoleAsync(role))">
-                                                        Delete
-                                                    </MudButton>
-                                                </span>
-                                            </MudTooltip>
+                                            @if (_confirmDeleteRoleId == role.Id)
+                                            {
+                                                <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                           Disabled="_saving" OnClick="CancelDeleteRole">
+                                                    Cancel
+                                                </MudButton>
+                                            }
+                                            else
+                                            {
+                                                <MudTooltip Text="@DeleteDisabledReason(role)">
+                                                    <span>
+                                                        <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
+                                                                   StartIcon="@Icons.Material.Filled.Delete"
+                                                                   Disabled="@(IsProtectedRole(role) || role.AssignedUsers > 0 || _saving || _editingRoleId.HasValue || _confirmDeleteRoleId.HasValue)"
+                                                                   OnClick="@(() => BeginDeleteRole(role))">
+                                                            Delete
+                                                        </MudButton>
+                                                    </span>
+                                                </MudTooltip>
+                                            }
                                         </Authorized>
                                     </AuthorizeView>
                                 </div>
+
+                                @if (_confirmDeleteRoleId == role.Id)
+                                {
+                                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true"
+                                              Class="admin-role-delete-confirm mt-3">
+                                        Delete the <strong>@role.Name</strong> role? This action cannot be undone.
+                                        <div class="admin-role-form-actions">
+                                            <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                                                       Disabled="_saving" OnClick="@(() => DeleteRoleAsync(role))">
+                                                @(_saving ? "Deleting..." : "Confirm delete")
+                                            </MudButton>
+                                            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                       Disabled="_saving" OnClick="CancelDeleteRole">
+                                                Cancel
+                                            </MudButton>
+                                        </div>
+                                    </MudAlert>
+                                }
 
                                 @if (_managingPermissionsRoleId == role.Id)
                                 {
@@ -484,6 +512,7 @@
     private bool _loading = true;
     private bool _error;
     private bool _saving;
+    private Guid? _confirmDeleteRoleId;
     private bool _formVisible;
     private Guid? _editingRoleId;
     private string _roleName = string.Empty;
@@ -829,14 +858,24 @@
     }
 
 
-    private async Task DeleteRoleAsync(RoleResponse role)
+    private void BeginDeleteRole(RoleResponse role)
     {
         if (IsProtectedRole(role) || role.AssignedUsers > 0 || _saving)
             return;
 
-        var confirmed = await JS.InvokeAsync<bool>("confirm",
-            $"Are you sure you want to delete the role '{role.Name}'? This action cannot be undone.");
-        if (!confirmed)
+        _confirmDeleteRoleId = role.Id;
+    }
+
+    private void CancelDeleteRole()
+    {
+        if (!_saving)
+            _confirmDeleteRoleId = null;
+    }
+
+    private async Task DeleteRoleAsync(RoleResponse role)
+    {
+        if (IsProtectedRole(role) || role.AssignedUsers > 0 ||
+            _saving || _confirmDeleteRoleId != role.Id)
             return;
 
         _saving = true;
@@ -845,7 +884,10 @@
             var result = await RbacService.DeleteRoleAsync(role.Id);
             Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
             if (result.IsSuccess)
+            {
+                _confirmDeleteRoleId = null;
                 await LoadRolesAsync();
+            }
         }
         catch
         {
