@@ -263,7 +263,9 @@
     private string? _selectedRoleId;
 
     private IEnumerable<RoleResponse> AvailableRoles =>
-        _roles.Where(role => _user is not null &&
+        _roles.Where(role =>
+            !string.Equals(role.Code, "SUPERADMIN", StringComparison.OrdinalIgnoreCase) &&
+            _user is not null &&
             !_user.RoleAssignments.Any(assignment => assignment.RoleId == role.Id));
 
     private async Task LoadAssignableRolesAsync()
