@@ -73,6 +73,20 @@ namespace Xqare.BusinessLayer.Services.Rbac
             return response.Data ?? Failure(response.ErrorMessage, "The role could not be deleted.");
         }
 
+        public async Task<RbacOperationResponse> AssignRoleAsync(RoleAssignmentRequest request)
+        {
+            var response = await _api.PostAsync<RoleAssignmentRequest, RbacOperationResponse>(
+                "api/admin/rbac/assignments", request);
+            return response.Data ?? Failure(response.ErrorMessage, "The role could not be assigned.");
+        }
+
+        public async Task<RbacOperationResponse> RemoveRoleAsync(RoleAssignmentRequest request)
+        {
+            var response = await _api.DeleteAsync<RoleAssignmentRequest, RbacOperationResponse>(
+                "api/admin/rbac/assignments", request);
+            return response.Data ?? Failure(response.ErrorMessage, "The role assignment could not be removed.");
+        }
+
         private static RbacOperationResponse Failure(string? payload, string fallback)
             => new()
             {
