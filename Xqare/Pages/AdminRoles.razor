@@ -409,7 +409,8 @@
 
     private bool CanSave => _roleName.Trim().Length is >= 2 and <= 80 &&
                             (_editingRoleId.HasValue || GeneratedRoleCode.Length is >= 2 and <= 50 &&
-                             GeneratedRoleCode[0] is >= 'A' and <= 'Z');
+                             GeneratedRoleCode[0] is >= 'A' and <= 'Z') &&
+                            (!_formVisible || (!_permissionsLoading && !_permissionsLoadError));
 
     protected override Task OnInitializedAsync() => LoadRolesAsync();
 
