@@ -58,7 +58,8 @@
         <Authorized Context="adminNavigationContext">
             @if (adminNavigationContext.User.IsInRole("SUPERADMIN") ||
                  adminNavigationContext.User.HasClaim("permission", "ADMIN_OVERVIEW_VIEW") ||
-                 adminNavigationContext.User.HasClaim("permission", "ADMIN_USERS_VIEW"))
+                 adminNavigationContext.User.HasClaim("permission", "ADMIN_USERS_VIEW") ||
+                 adminNavigationContext.User.HasClaim("permission", "RBAC_ROLES_VIEW"))
             {
                 @if (!IsCollapsed)
                 {
@@ -81,6 +82,16 @@
                                 <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin/users")" OnClick='@(() => NavigateAsync("/admin/users"))'>
                                     <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" />
                                     @if (!IsCollapsed) { <span class="xq-nav-label">User Management</span> }
+                                </MudButton>
+                            </MudTooltip>
+                        </Authorized>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="@PermissionPolicies.RbacRolesView">
+                        <Authorized Context="rolesContext">
+                            <MudTooltip Text="Role management" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+                                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin/roles")" OnClick='@(() => NavigateAsync("/admin/roles"))'>
+                                    <MudIcon Icon="@Icons.Material.Filled.Badge" />
+                                    @if (!IsCollapsed) { <span class="xq-nav-label">Role Management</span> }
                                 </MudButton>
                             </MudTooltip>
                         </Authorized>
