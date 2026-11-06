@@ -1,5 +1,6 @@
 @page "/admin/users"
 @layout AuthenticatedLayout
+@implements IDisposable
 @using Microsoft.AspNetCore.Authorization
 @using Xqare.BusinessLayer.Classes.Authorization
 @using Xqare.BusinessLayer.DTO.Admin
@@ -7,7 +8,6 @@
 @attribute [Authorize(Policy = PermissionPolicies.AdminUsersView)]
 @inject IAdminService AdminService
 @inject ISnackbar Snackbar
-@inject IJSRuntime JS
 @inject NavigationManager Navigation
 
 <PageTitle>User Management | XQARE</PageTitle>
@@ -47,20 +47,62 @@
             <MudDivider Class="admin-divider" />
 
             <MudGrid Spacing="3" Class="admin-users-filters">
-                <MudItem xs="12" md="7">
+                <MudItem xs="12" md="6">
                     <MudTextField T="string" Value="_search" ValueChanged="OnSearchChanged"
-                                  Placeholder="Search name, username or email" Variant="Variant.Outlined"
+                                  Placeholder="Search name, username, email or role" Variant="Variant.Outlined"
                                   Margin="Margin.Dense" Adornment="Adornment.Start"
                                   AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true"
                                   Clearable="true" FullWidth="true" />
                 </MudItem>
-                <MudItem xs="12" sm="6" md="5">
+                <MudItem xs="12" sm="6" md="3">
                     <MudSelect T="string" Value="_status" ValueChanged="OnStatusChanged"
                                Variant="Variant.Outlined" Margin="Margin.Dense" Label="Account status" FullWidth="true">
                         <MudSelectItem Value="@("all")">All accounts</MudSelectItem>
                         <MudSelectItem Value="@("active")">Enabled</MudSelectItem>
                         <MudSelectItem Value="@("disabled")">Disabled</MudSelectItem>
                     </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudSelect T="string" Value="_roleCode" ValueChanged="OnRoleChanged"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Label="Assigned role" FullWidth="true">
+                        <MudSelectItem Value="@("")">All roles</MudSelectItem>
+                        @foreach (var role in _availableRoles)
+                        {
+                            <MudSelectItem Value="@role.Code">@role.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudSelect T="string" Value="_emailVerification" ValueChanged="OnEmailVerificationChanged"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Label="Email verification" FullWidth="true">
+                        <MudSelectItem Value="@("all")">All accounts</MudSelectItem>
+                        <MudSelectItem Value="@("verified")">Verified</MudSelectItem>
+                        <MudSelectItem Value="@("pending")">Pending</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudDatePicker Label="Registered from" Date="_createdFrom" DateChanged="OnCreatedFromChanged"
+                                   Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                   MaxDate="_createdTo" />
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudDatePicker Label="Registered to" Date="_createdTo" DateChanged="OnCreatedToChanged"
+                                   Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                   MinDate="_createdFrom" MaxDate="DateTime.Today" />
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3" Class="d-flex align-center">
+                    <MudSelect T="int" Value="_pageSize" ValueChanged="OnPageSizeChanged"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Label="Rows per page" FullWidth="true">
+                        <MudSelectItem Value="20">20</MudSelectItem>
+                        <MudSelectItem Value="50">50</MudSelectItem>
+                        <MudSelectItem Value="100">100</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-end">
+                    <MudButton Variant="Variant.Text" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.FilterAltOff"
+                               Disabled="@(!HasActiveFilters)" OnClick="ClearFilters">
+                        Clear filters
+                    </MudButton>
                 </MudItem>
             </MudGrid>
 
@@ -80,7 +122,7 @@
                 <MudPaper Class="admin-empty-state" Elevation="0">
                     <MudIcon Icon="@Icons.Material.Filled.PersonSearch" Class="admin-empty-icon" />
                     <MudText Typo="Typo.subtitle1" Class="admin-card-title">No users found</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">No accounts match the current search or status filter.</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">No accounts match the current search or filters.</MudText>
                 </MudPaper>
             }
             else
@@ -104,10 +146,9 @@
                                         }
                                         <MudChip T="string" Size="Size.Small" Color="@(user.IsActive ? Color.Success : Color.Warning)"
                                                  Variant="Variant.Outlined">@((user.IsActive) ? "Enabled" : "Disabled")</MudChip>
-                                        @if (!user.IsEmailConfirmed)
-                                        {
-                                            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">Email pending</MudChip>
-                                        }
+                                        <MudChip T="string" Size="Size.Small"
+                                                 Color="@(user.IsEmailConfirmed ? Color.Success : Color.Warning)"
+                                                 Variant="Variant.Outlined">@(user.IsEmailConfirmed ? "Email verified" : "Email pending")</MudChip>
                                     </div>
                                 </div>
                             </div>
@@ -127,11 +168,32 @@
                                 </MudButton>
                                 <AuthorizeView Policy="@PermissionPolicies.AdminUsersManage">
                                     <Authorized>
-                                        <MudButton Variant="Variant.Text" Color="@(user.IsActive ? Color.Warning : Color.Success)"
-                                                   Size="Size.Small" Disabled="@_busyUsers.Contains(user.UserId)"
-                                                   OnClick="@(() => ChangeStatusAsync(user))">
-                                            @(user.IsActive ? "Disable" : "Enable")
-                                        </MudButton>
+                                        @if (_confirmStatusUserId == user.UserId)
+                                        {
+                                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mt-2">
+                                                @(user.IsActive
+                                                    ? $"Disable {user.Email}? All active sessions will be revoked."
+                                                    : $"Enable {user.Email} and allow this account to sign in again?")
+                                                <div class="admin-user-actions mt-2">
+                                                    <MudButton Color="Color.Error" Variant="Variant.Filled" Size="Size.Small"
+                                                               Disabled="@_busyUsers.Contains(user.UserId)"
+                                                               OnClick="@(() => ConfirmStatusChangeAsync(user))">
+                                                        @(user.IsActive ? "Yes, disable" : "Yes, enable")
+                                                    </MudButton>
+                                                    <MudButton Variant="Variant.Text" Size="Size.Small"
+                                                               Disabled="@_busyUsers.Contains(user.UserId)"
+                                                               OnClick="CancelStatusChange">Cancel</MudButton>
+                                                </div>
+                                            </MudAlert>
+                                        }
+                                        else
+                                        {
+                                            <MudButton Variant="Variant.Text" Color="@(user.IsActive ? Color.Warning : Color.Success)"
+                                                       Size="Size.Small" Disabled="@(_busyUsers.Contains(user.UserId) || _confirmStatusUserId.HasValue)"
+                                                       OnClick="@(() => BeginStatusChange(user.UserId))">
+                                                @(user.IsActive ? "Disable" : "Enable")
+                                            </MudButton>
+                                        }
                                     </Authorized>
                                 </AuthorizeView>
                             </div>
@@ -140,7 +202,7 @@
                 </div>
                 <div class="admin-pagination">
                     <MudText Typo="Typo.caption" Class="admin-page-indicator">
-                        Showing @((_page - 1) * PageSize + 1)–@Math.Min(_page * PageSize, _totalCount) of @_totalCount.ToString("N0")
+                        Showing @((_page - 1) * _pageSize + 1)–@Math.Min(_page * _pageSize, _totalCount) of @_totalCount.ToString("N0")
                     </MudText>
                     <div class="admin-pagination-controls">
                         <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" Color="Color.Primary"
@@ -159,26 +221,51 @@
 
 @code {
     private List<AdminUserListItemResponse> _users = new();
+    private List<AdminUserRoleFilterOption> _availableRoles = new();
     private readonly HashSet<Guid> _busyUsers = new();
+    private CancellationTokenSource? _searchCts;
     private string _search = string.Empty;
     private string _status = "all";
+    private string _roleCode = string.Empty;
+    private string _emailVerification = "all";
+    private DateTime? _createdFrom;
+    private DateTime? _createdTo;
+    private Guid? _confirmStatusUserId;
     private int _page = 1;
-    private const int PageSize = 20;
+    private int _pageSize = 20;
     private int _totalCount;
     private int _totalPages;
+    private int _requestVersion;
     private bool _loading = true;
     private bool _error;
+
+    private bool HasActiveFilters =>
+        !string.IsNullOrWhiteSpace(_search) || _status != "all" ||
+        !string.IsNullOrWhiteSpace(_roleCode) || _emailVerification != "all" ||
+        _createdFrom.HasValue || _createdTo.HasValue;
 
     protected override Task OnInitializedAsync() => LoadUsersAsync();
 
     private async Task LoadUsersAsync()
     {
+        var requestVersion = Interlocked.Increment(ref _requestVersion);
         _loading = true;
         _error = false;
         try
         {
             var response = await AdminService.GetUsersAsync(
-                _search, _status switch { "active" => true, "disabled" => false, _ => null }, _page, PageSize);
+                _search,
+                _status switch { "active" => true, "disabled" => false, _ => null },
+                _roleCode,
+                _emailVerification switch { "verified" => true, "pending" => false, _ => null },
+                ToUtcStart(_createdFrom),
+                ToUtcEnd(_createdTo),
+                _page,
+                _pageSize);
+
+            if (requestVersion != _requestVersion)
+                return;
+
             if (!response.IsSuccess)
             {
                 _error = true;
@@ -187,17 +274,22 @@
             }
 
             _users = response.Items;
+            _availableRoles = response.AvailableRoles;
             _totalCount = response.TotalCount;
             _totalPages = response.TotalPages;
         }
         catch
         {
-            _error = true;
-            Snackbar.Add("Users could not be loaded. Please try again.", Severity.Error);
+            if (requestVersion == _requestVersion)
+            {
+                _error = true;
+                Snackbar.Add("Users could not be loaded. Please try again.", Severity.Error);
+            }
         }
         finally
         {
-            _loading = false;
+            if (requestVersion == _requestVersion)
+                _loading = false;
         }
     }
 
@@ -205,12 +297,74 @@
     {
         _search = value ?? string.Empty;
         _page = 1;
-        await LoadUsersAsync();
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        try
+        {
+            await Task.Delay(350, token);
+            await LoadUsersAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            // A newer keystroke superseded this search.
+        }
     }
 
     private async Task OnStatusChanged(string value)
     {
         _status = value;
+        await ApplyFilterAsync();
+    }
+
+    private async Task OnRoleChanged(string value)
+    {
+        _roleCode = value;
+        await ApplyFilterAsync();
+    }
+
+    private async Task OnEmailVerificationChanged(string value)
+    {
+        _emailVerification = value;
+        await ApplyFilterAsync();
+    }
+
+    private async Task OnCreatedFromChanged(DateTime? value)
+    {
+        _createdFrom = value?.Date;
+        await ApplyFilterAsync();
+    }
+
+    private async Task OnCreatedToChanged(DateTime? value)
+    {
+        _createdTo = value?.Date;
+        await ApplyFilterAsync();
+    }
+
+    private async Task OnPageSizeChanged(int value)
+    {
+        _pageSize = value;
+        await ApplyFilterAsync();
+    }
+
+    private async Task ApplyFilterAsync()
+    {
+        _searchCts?.Cancel();
+        _page = 1;
+        await LoadUsersAsync();
+    }
+
+    private async Task ClearFilters()
+    {
+        _searchCts?.Cancel();
+        _search = string.Empty;
+        _status = "all";
+        _roleCode = string.Empty;
+        _emailVerification = "all";
+        _createdFrom = null;
+        _createdTo = null;
         _page = 1;
         await LoadUsersAsync();
     }
@@ -221,22 +375,20 @@
         await LoadUsersAsync();
     }
 
-    private void OpenUser(Guid userId) => Navigation.NavigateTo($"/admin/users/{userId:D}");
+    private void BeginStatusChange(Guid userId) => _confirmStatusUserId = userId;
 
-    private async Task ChangeStatusAsync(AdminUserListItemResponse user)
+    private void CancelStatusChange() => _confirmStatusUserId = null;
+
+    private async Task ConfirmStatusChangeAsync(AdminUserListItemResponse user)
     {
-        var action = user.IsActive ? "disable" : "enable";
-        var confirmed = await JS.InvokeAsync<bool>("confirm",
-            $"Are you sure you want to {action} {user.Email}?{(user.IsActive ? " All active sessions will be revoked." : string.Empty)}");
-
-        if (!confirmed)
+        if (!_busyUsers.Add(user.UserId))
             return;
 
-        _busyUsers.Add(user.UserId);
         try
         {
             var result = await AdminService.UpdateUserStatusAsync(user.UserId, !user.IsActive);
             Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
+            _confirmStatusUserId = null;
             if (result.IsSuccess)
                 await LoadUsersAsync();
         }
@@ -250,6 +402,18 @@
         }
     }
 
+    private void OpenUser(Guid userId) => Navigation.NavigateTo($"/admin/users/{userId:D}");
+
+    private static DateTime? ToUtcStart(DateTime? date)
+        => date.HasValue
+            ? DateTime.SpecifyKind(date.Value.Date, DateTimeKind.Local).ToUniversalTime()
+            : null;
+
+    private static DateTime? ToUtcEnd(DateTime? date)
+        => date.HasValue
+            ? DateTime.SpecifyKind(date.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Local).ToUniversalTime()
+            : null;
+
     private static string DisplayName(AdminUserListItemResponse user)
     {
         var name = $"{user.FirstName} {user.LastName}".Trim();
@@ -262,5 +426,11 @@
         var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         return parts.Length > 1 ? $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant()
             : parts.Length == 1 ? parts[0][..1].ToUpperInvariant() : "U";
+    }
+
+    public void Dispose()
+    {
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
     }
 }
