@@ -149,13 +149,13 @@
                                     <Authorized>
                                         <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
                                                    StartIcon="@Icons.Material.Filled.Edit"
-                                                   Disabled="@(role.IsSystem || _saving)"
+                                                   Disabled="@(IsProtectedRole(role) || _saving)"
                                                    OnClick="@(() => BeginRename(role))">
                                             Rename
                                         </MudButton>
                                         <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
                                                    StartIcon="@Icons.Material.Filled.Delete"
-                                                   Disabled="@(role.IsSystem || role.AssignedUsers > 0 || _saving)"
+                                                   Disabled="@(IsProtectedRole(role) || role.AssignedUsers > 0 || _saving)"
                                                    OnClick="@(() => DeleteRoleAsync(role))">
                                             Delete
                                         </MudButton>
@@ -293,8 +293,15 @@
         _formVisible = true;
     }
 
+    private static bool IsProtectedRole(RoleResponse role) =>
+        role.IsSystem ||
+        string.Equals(role.Code, "SUPERADMIN", StringComparison.OrdinalIgnoreCase);
+
     private void BeginRename(RoleResponse role)
     {
+        if (IsProtectedRole(role))
+            return;
+
         _editingRoleId = role.Id;
         _roleName = role.Name;
         _formVisible = true;
@@ -386,7 +393,7 @@
 
     private async Task DeleteRoleAsync(RoleResponse role)
     {
-        if (role.IsSystem || role.AssignedUsers > 0 || _saving)
+        if (IsProtectedRole(role) || role.AssignedUsers > 0 || _saving)
             return;
 
         var confirmed = await JS.InvokeAsync<bool>("confirm",
