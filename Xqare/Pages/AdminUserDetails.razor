@@ -1,0 +1,379 @@
+@page "/admin/users/{UserId:guid}"
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.Classes.Authorization
+@using Xqare.BusinessLayer.DTO.Admin
+@using Xqare.BusinessLayer.Interfaces.Admin
+@using Xqare.BusinessLayer.DTO.Rbac
+@using Xqare.BusinessLayer.Interfaces.Rbac
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Authorize(Policy = PermissionPolicies.AdminUsersView)]
+@inject IAdminService AdminService
+@inject IRbacService RbacService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>User details | XQARE</PageTitle>
+
+<section class="admin-detail-page" aria-labelledby="admin-detail-title">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-detail-container">
+        <div class="admin-detail-heading">
+            <div class="admin-detail-heading-copy">
+                <MudText Typo="Typo.h4" Class="admin-page-title" id="admin-detail-title">User details</MudText>
+                <MudText Typo="Typo.body2" Class="admin-page-subtitle">
+                    Review account information, access status and session summary.
+                </MudText>
+            </div>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.ArrowBack"
+                       OnClick="@(() => Navigation.NavigateTo("/admin/users"))"
+                       Class="admin-back-button">
+                Back to users
+            </MudButton>
+        </div>
+
+        @if (_loading)
+        {
+            <MudPaper Class="admin-state-card" Elevation="0">
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                <MudText Typo="Typo.subtitle1" Class="admin-state-title">Loading user details</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Account information will appear here shortly.</MudText>
+            </MudPaper>
+        }
+        else if (_user is null)
+        {
+            <MudPaper Class="admin-state-card" Elevation="0">
+                <MudIcon Icon="@Icons.Material.Filled.PersonOff" Class="admin-state-icon" />
+                <MudText Typo="Typo.h6" Class="admin-state-title">We couldn't load this account</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">The account may no longer be available. Return to User Management and try again.</MudText>
+                <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           OnClick="@(() => Navigation.NavigateTo("/admin/users"))"
+                           Class="admin-primary-button">Back to users</MudButton>
+            </MudPaper>
+        }
+        else
+        {
+            <MudGrid Spacing="4" Class="admin-detail-grid">
+                <MudItem xs="12">
+                    <MudPaper Class="admin-card admin-detail-profile-card" Elevation="0">
+                        <div class="admin-detail-profile">
+                            <MudAvatar Image="@_user.ProfileImageUrl" Class="admin-detail-avatar"
+                                       Color="Color.Primary" Size="Size.Large">@Initials</MudAvatar>
+                            <div class="admin-detail-identity">
+                                <MudText Typo="Typo.h5" Class="admin-detail-name">@DisplayName</MudText>
+                                <MudText Typo="Typo.body2" Class="admin-detail-email">@_user.Email</MudText>
+                                <div class="admin-detail-tags">
+                                    <MudChip T="string" Color="@(_user.IsActive ? Color.Success : Color.Warning)"
+                                             Variant="Variant.Outlined">
+                                        @(_user.IsActive ? "Enabled" : "Disabled")
+                                    </MudChip>
+                                    <MudChip T="string" Color="@(_user.IsEmailConfirmed ? Color.Success : Color.Warning)"
+                                             Variant="Variant.Outlined">
+                                        @(_user.IsEmailConfirmed ? "Email verified" : "Email pending")
+                                    </MudChip>
+                                    @foreach (var role in _user.Roles)
+                                    {
+                                        <MudChip T="string" Variant="Variant.Outlined">@role</MudChip>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" lg="8">
+                    <MudPaper Class="admin-card admin-detail-section" Elevation="0">
+                        <div class="admin-section-heading">
+                            <div class="admin-section-heading-left">
+                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Badge" /></span>
+                                <div>
+                                    <MudText Typo="Typo.h6" Class="admin-card-title">Account information</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">Personal and registration details</MudText>
+                                </div>
+                            </div>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+                        <MudGrid Spacing="3" Class="admin-detail-fields">
+                            <MudItem xs="12" sm="6">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Username</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@_user.Username</MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Phone number</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@(_user.PhoneNumber ?? "Not provided")</MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Registered</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@_user.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Last login</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@(_user.LastLoginAt?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") ?? "Never")</MudText>
+                                </div>
+                            </MudItem>
+                        </MudGrid>
+                        @if (!string.IsNullOrWhiteSpace(_user.Bio))
+                        {
+                            <MudDivider Class="admin-divider" />
+                            <MudText Typo="Typo.subtitle2" Class="admin-section-subtitle">About</MudText>
+                            <MudText Typo="Typo.body2" Class="admin-detail-bio">@_user.Bio</MudText>
+                        }
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" lg="4">
+                    <MudPaper Class="admin-card admin-detail-section" Elevation="0">
+                        <div class="admin-section-heading">
+                            <div class="admin-section-heading-left">
+                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Security" /></span>
+                                <div>
+                                    <MudText Typo="Typo.h6" Class="admin-card-title">Session summary</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">Current account sessions</MudText>
+                                </div>
+                            </div>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+                        <div class="admin-session-stat">
+                            <MudText Typo="Typo.caption" Class="admin-field-label">Active sessions</MudText>
+                            <MudText Typo="Typo.h4" Class="admin-session-value">@_user.ActiveSessionCount</MudText>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+                        <div class="admin-session-stat">
+                            <MudText Typo="Typo.caption" Class="admin-field-label">Recorded sessions</MudText>
+                            <MudText Typo="Typo.h4" Class="admin-session-value">@_user.TotalSessionCount</MudText>
+                        </div>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            <AuthorizeView Policy="@PermissionPolicies.RbacRolesView">
+                <Authorized>
+                    <MudPaper Class="admin-card admin-detail-section mt-4" Elevation="0">
+                        <div class="admin-section-heading">
+                            <div class="admin-section-heading-left">
+                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" /></span>
+                                <div>
+                                    <MudText Typo="Typo.h6" Class="admin-card-title">Role assignments</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                                        Manage the roles assigned to this account.
+                                    </MudText>
+                                </div>
+                            </div>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+
+                        @if (_rolesLoading)
+                        {
+                            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                        }
+                        else if (_roles.Count == 0)
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-4">
+                                No roles are available to assign.
+                            </MudText>
+                        }
+                        else
+                        {
+                            <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
+                                <Authorized>
+                                    <MudGrid Spacing="2" Class="pa-3">
+                                        <MudItem xs="12" sm="8" md="6">
+                                            <MudSelect T="string" @bind-Value="_selectedRoleId"
+                                                       Label="Select a role" Variant="Variant.Outlined"
+                                                       Margin="Margin.Dense" FullWidth="true">
+                                                @foreach (var role in AvailableRoles)
+                                                {
+                                                    <MudSelectItem Value="@role.Id.ToString("D")">@role.Name</MudSelectItem>
+                                                }
+                                            </MudSelect>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="4" md="3" Class="d-flex align-center">
+                                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                                                       Disabled="@(!Guid.TryParse(_selectedRoleId, out _) || _assignmentBusy)"
+                                                       OnClick="AssignSelectedRoleAsync" FullWidth="true">
+                                                Assign role
+                                            </MudButton>
+                                        </MudItem>
+                                    </MudGrid>
+                                </Authorized>
+                            </AuthorizeView>
+                        }
+
+                        @if (_user.RoleAssignments.Count == 0)
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-3">
+                                This account has no role assignments.
+                            </MudText>
+                        }
+                        else
+                        {
+                            <div class="admin-user-list">
+                                @foreach (var assignment in _user.RoleAssignments)
+                                {
+                                    <div class="admin-user-row" @key="assignment.RoleId">
+                                        <div class="admin-user-identity">
+                                            <MudAvatar Class="admin-user-avatar" Color="Color.Primary" Size="Size.Medium">
+                                                <MudIcon Icon="@Icons.Material.Filled.Badge" />
+                                            </MudAvatar>
+                                            <div class="admin-user-copy">
+                                                <MudText Typo="Typo.subtitle2" Class="admin-user-name">@assignment.RoleName</MudText>
+                                                <MudText Typo="Typo.body2" Class="admin-user-email">@assignment.RoleCode</MudText>
+                                            </div>
+                                        </div>
+                                        <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
+                                            <Authorized>
+                                                <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
+                                                           StartIcon="@Icons.Material.Filled.PersonRemove"
+                                                           Disabled="_assignmentBusy"
+                                                           OnClick="@(() => RemoveRoleAsync(assignment.RoleId, assignment.RoleName))">
+                                                    Remove
+                                                </MudButton>
+                                            </Authorized>
+                                        </AuthorizeView>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </MudPaper>
+                </Authorized>
+            </AuthorizeView>
+        }
+    </MudContainer>
+</section>
+
+@code {
+    [Parameter] public Guid UserId { get; set; }
+    private AdminUserDetailsResponse? _user;
+    private bool _loading = true;
+    private List<RoleResponse> _roles = new();
+    private bool _rolesLoading;
+    private bool _assignmentBusy;
+    private string? _selectedRoleId;
+
+    private IEnumerable<RoleResponse> AvailableRoles =>
+        _roles.Where(role => _user is not null &&
+            !_user.RoleAssignments.Any(assignment => assignment.RoleId == role.Id));
+
+    private async Task LoadAssignableRolesAsync()
+    {
+        _rolesLoading = true;
+        try
+        {
+            var result = await RbacService.GetRolesAsync();
+            if (result.IsSuccess)
+                _roles = result.Roles;
+            else
+                Snackbar.Add(result.Message, Severity.Error);
+        }
+        catch
+        {
+            Snackbar.Add("Available roles could not be loaded.", Severity.Error);
+        }
+        finally
+        {
+            _rolesLoading = false;
+        }
+    }
+
+    private async Task AssignSelectedRoleAsync()
+    {
+        if (_user is null || !Guid.TryParse(_selectedRoleId, out var roleId) || _assignmentBusy)
+            return;
+
+        _assignmentBusy = true;
+        try
+        {
+            var result = await RbacService.AssignRoleAsync(new RoleAssignmentRequest
+            {
+                UserId = _user.UserId,
+                RoleId = roleId
+            });
+            Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
+            if (result.IsSuccess)
+            {
+                _selectedRoleId = null;
+                _user = await AdminService.GetUserDetailsAsync(UserId);
+            }
+        }
+        catch
+        {
+            Snackbar.Add("The role could not be assigned. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _assignmentBusy = false;
+        }
+    }
+
+    private async Task RemoveRoleAsync(Guid roleId, string roleName)
+    {
+        if (_user is null || _assignmentBusy)
+            return;
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm",
+            $"Remove the '{roleName}' role from this account?");
+        if (!confirmed)
+            return;
+
+        _assignmentBusy = true;
+        try
+        {
+            var result = await RbacService.RemoveRoleAsync(new RoleAssignmentRequest
+            {
+                UserId = _user.UserId,
+                RoleId = roleId
+            });
+            Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
+            if (result.IsSuccess)
+                _user = await AdminService.GetUserDetailsAsync(UserId);
+        }
+        catch
+        {
+            Snackbar.Add("The role assignment could not be removed. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _assignmentBusy = false;
+        }
+    }
+
+    private string DisplayName => _user is null
+        ? string.Empty
+        : string.Join(" ", new[] { _user.FirstName, _user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x))) is { Length: > 0 } name
+            ? name : _user.Username;
+
+    private string Initials
+    {
+        get
+        {
+            var parts = DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length > 1 ? $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant()
+                : parts.Length == 1 ? parts[0][..1].ToUpperInvariant() : "U";
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        try
+        {
+            _user = await AdminService.GetUserDetailsAsync(UserId);
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.HasClaim("permission", "RBAC_ROLES_VIEW"))
+                await LoadAssignableRolesAsync();
+        }
+        catch { _user = null; }
+        finally { _loading = false; }
+    }
+}
