@@ -87,6 +87,14 @@ namespace Xqare.BusinessLayer.Services.Rbac
             return response.Data ?? Failure(response.ErrorMessage, "The role assignment could not be removed.");
         }
 
+        public async Task<RbacOperationResponse> SetRolePermissionsAsync(Guid roleId, List<string> permissionCodes)
+        {
+            var request = new { PermissionCodes = permissionCodes };
+            var response = await _api.PutAsync<object, RbacOperationResponse>(
+                $"api/admin/rbac/roles/{roleId:D}/permissions", request);
+            return response.Data ?? Failure(response.ErrorMessage, "Role permissions could not be updated.");
+        }
+
         private static RbacOperationResponse Failure(string? payload, string fallback)
             => new()
             {

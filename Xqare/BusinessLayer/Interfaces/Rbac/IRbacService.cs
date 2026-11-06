@@ -12,5 +12,6 @@ namespace Xqare.BusinessLayer.Interfaces.Rbac
         Task<RbacOperationResponse> DeleteRoleAsync(Guid roleId);
         Task<RbacOperationResponse> AssignRoleAsync(RoleAssignmentRequest request);
         Task<RbacOperationResponse> RemoveRoleAsync(RoleAssignmentRequest request);
+        Task<RbacOperationResponse> SetRolePermissionsAsync(Guid roleId, List<string> permissionCodes);
     }
 }

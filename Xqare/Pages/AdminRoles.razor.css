@@ -319,3 +319,18 @@
 .admin-roles-page ::deep .admin-create-permissions-hint {
     line-height: 1.5;
 }
+
+
+.admin-roles-page .admin-role-permission-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xq-space-3);
+    padding: var(--xq-space-3);
+    border: 1px solid var(--xq-border);
+    border-radius: .875rem;
+    background: var(--xq-surface-muted);
+}
+
+.admin-roles-page .admin-role-permission-editor .admin-create-permission-module {
+    background: var(--xq-surface);
+}
