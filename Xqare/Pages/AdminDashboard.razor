@@ -1,9 +1,10 @@
 @page "/admin"
 @layout AuthenticatedLayout
 @using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.Classes.Authorization
 @using Xqare.BusinessLayer.DTO.Admin
 @using Xqare.BusinessLayer.Interfaces.Admin
-@attribute [Authorize(Roles = "SUPERADMIN")]
+@attribute [Authorize(Policy = PermissionPolicies.AdminOverviewView)]
 @inject IAdminService AdminService
 @inject ISnackbar Snackbar
 
