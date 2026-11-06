@@ -231,32 +231,62 @@
                         }
                         else
                         {
-                            <div class="admin-user-list">
+                            <div class="admin-role-assignment-list">
                                 @foreach (var assignment in _user.RoleAssignments)
                                 {
-                                    <div class="admin-user-row" @key="assignment.RoleId">
-                                        <div class="admin-user-identity">
-                                            <MudAvatar Class="admin-user-avatar" Color="Color.Primary" Size="Size.Medium">
-                                                <MudIcon Icon="@Icons.Material.Filled.Badge" />
-                                            </MudAvatar>
-                                            <div class="admin-user-copy">
-                                                <MudText Typo="Typo.subtitle2" Class="admin-user-name">@assignment.RoleName</MudText>
-                                                <MudText Typo="Typo.body2" Class="admin-user-email">@assignment.RoleCode</MudText>
+                                    <div class="admin-role-assignment-item" @key="assignment.RoleId">
+                                        <div class="admin-role-assignment-row">
+                                            <div class="admin-role-assignment-identity">
+                                                <MudAvatar Class="admin-role-assignment-avatar" Color="Color.Primary" Size="Size.Medium">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Badge" />
+                                                </MudAvatar>
+                                                <div class="admin-role-assignment-copy">
+                                                    <MudText Typo="Typo.subtitle2" Class="admin-role-assignment-name">@assignment.RoleName</MudText>
+                                                    <MudText Typo="Typo.caption" Class="admin-role-assignment-code">@assignment.RoleCode</MudText>
+                                                </div>
                                             </div>
+                                            <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
+                                                <Authorized Context="removeRoleContext">
+                                                    @if (!string.Equals(assignment.RoleCode, "SUPERADMIN", StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        @if (_confirmRemoveRoleId == assignment.RoleId)
+                                                        {
+                                                            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                                       Disabled="_assignmentBusy" OnClick="CancelRemoveRole">
+                                                                Cancel
+                                                            </MudButton>
+                                                        }
+                                                        else
+                                                        {
+                                                            <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
+                                                                       StartIcon="@Icons.Material.Filled.PersonRemove"
+                                                                       Disabled="@(_assignmentBusy || _confirmRemoveRoleId.HasValue)"
+                                                                       OnClick="@(() => BeginRemoveRole(assignment.RoleId))">
+                                                                Remove
+                                                            </MudButton>
+                                                        }
+                                                    }
+                                                </Authorized>
+                                            </AuthorizeView>
                                         </div>
-                                        <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
-                                            <Authorized Context="removeRoleContext">
-                                                @if (!string.Equals(assignment.RoleCode, "SUPERADMIN", StringComparison.OrdinalIgnoreCase))
-                                                {
-                                                    <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
-                                                               StartIcon="@Icons.Material.Filled.PersonRemove"
+                                        @if (_confirmRemoveRoleId == assignment.RoleId)
+                                        {
+                                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true"
+                                                      Class="admin-role-assignment-confirm">
+                                                Remove the <strong>@assignment.RoleName</strong> role from this account?
+                                                <div class="admin-role-assignment-confirm-actions">
+                                                    <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
                                                                Disabled="_assignmentBusy"
                                                                OnClick="@(() => RemoveRoleAsync(assignment.RoleId, assignment.RoleName))">
-                                                        Remove
+                                                        @(_assignmentBusy ? "Removing..." : "Confirm remove")
                                                     </MudButton>
-                                                }
-                                            </Authorized>
-                                        </AuthorizeView>
+                                                    <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                               Disabled="_assignmentBusy" OnClick="CancelRemoveRole">
+                                                        Keep role
+                                                    </MudButton>
+                                                </div>
+                                            </MudAlert>
+                                        }
                                     </div>
                                 }
                             </div>
@@ -275,6 +305,7 @@
     private List<RoleResponse> _roles = new();
     private bool _rolesLoading;
     private bool _assignmentBusy;
+    private Guid? _confirmRemoveRoleId;
     private string? _selectedRoleId;
 
     private IEnumerable<RoleResponse> AvailableRoles =>
@@ -334,14 +365,23 @@
         }
     }
 
-    private async Task RemoveRoleAsync(Guid roleId, string roleName)
+    private void BeginRemoveRole(Guid roleId)
     {
-        if (_user is null || _assignmentBusy)
+        if (_assignmentBusy)
             return;
 
-        var confirmed = await JS.InvokeAsync<bool>("confirm",
-            $"Remove the '{roleName}' role from this account?");
-        if (!confirmed)
+        _confirmRemoveRoleId = roleId;
+    }
+
+    private void CancelRemoveRole()
+    {
+        if (!_assignmentBusy)
+            _confirmRemoveRoleId = null;
+    }
+
+    private async Task RemoveRoleAsync(Guid roleId, string roleName)
+    {
+        if (_user is null || _assignmentBusy || _confirmRemoveRoleId != roleId)
             return;
 
         _assignmentBusy = true;
@@ -354,7 +394,10 @@
             });
             Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
             if (result.IsSuccess)
+            {
+                _confirmRemoveRoleId = null;
                 _user = await AdminService.GetUserDetailsAsync(UserId);
+            }
         }
         catch
         {
