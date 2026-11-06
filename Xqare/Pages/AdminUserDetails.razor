@@ -157,6 +157,8 @@
                 </MudItem>
             </MudGrid>
 
+            @* Viewing role assignments and loading the role catalogue requires RBAC_ROLES_VIEW.
+               Assignment mutations are separately gated by RBAC_ASSIGNMENTS_MANAGE below. *@
             <AuthorizeView Policy="@PermissionPolicies.RbacRolesView">
                 <Authorized Context="rolesViewContext">
                     <MudPaper Class="admin-card admin-detail-section mt-4" Elevation="0">
@@ -185,6 +187,7 @@
                         }
                         else
                         {
+                            @* RBAC_ASSIGNMENTS_MANAGE grants the mutation controls only; it does not grant role-catalogue visibility. *@
                             <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
                                 <Authorized Context="assignRoleContext">
                                     @if (_user.IsActive)
