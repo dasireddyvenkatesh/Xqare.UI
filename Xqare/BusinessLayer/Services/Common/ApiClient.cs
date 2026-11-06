@@ -260,6 +260,9 @@ namespace Xqare.BusinessLayer.Services.Common
         public Task<ApiResponse<TResponse>> DeleteAsync<TResponse>(string url)
             => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Delete, url));
 
+        public Task<ApiResponse<TResponse>> DeleteAsync<TRequest, TResponse>(string url, TRequest data)
+            => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Delete, url, JsonContent.Create(data)));
+
         // Refresh and logout must not recursively trigger another refresh request.
         public Task<ApiResponse<TResponse>> CookieCredential<TResponse>(string url)
             => SendAsync<TResponse>(
