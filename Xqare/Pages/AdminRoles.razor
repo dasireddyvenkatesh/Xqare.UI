@@ -135,6 +135,16 @@
                                 <MudText Typo="Typo.body2" Class="admin-field-value">@role.PermissionCount</MudText>
                             </div>
                             <div class="admin-user-actions">
+                                <AuthorizeView Policy="@PermissionPolicies.RbacPermissionsView">
+                                    <Authorized>
+                                        <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                                                   StartIcon="@Icons.Material.Filled.Visibility"
+                                                   OnClick="@(() => ToggleRolePermissionsAsync(role))"
+                                                   Disabled="_permissionsLoading">
+                                            @( _viewingPermissionsRoleId == role.Id ? "Hide permissions" : "View permissions")
+                                        </MudButton>
+                                    </Authorized>
+                                </AuthorizeView>
                                 <AuthorizeView Policy="@PermissionPolicies.RbacRolesManage">
                                     <Authorized>
                                         <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
@@ -155,6 +165,63 @@
                         </div>
                     }
                 </div>
+                @if (_viewingPermissionsRoleId.HasValue)
+                {
+                    <MudPaper Class="admin-users-card mt-4" Elevation="0">
+                        <div class="admin-section-heading">
+                            <div>
+                                <MudText Typo="Typo.h6" Class="admin-card-title">
+                                    Permissions — @_rolePermissions?.Role?.RoleName
+                                </MudText>
+                                <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                                    Read-only view of permissions currently assigned to this role.
+                                </MudText>
+                            </div>
+                            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                       OnClick="CloseRolePermissions">Close</MudButton>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+                        @if (_permissionsLoading)
+                        {
+                            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                        }
+                        else if (_rolePermissions is null || !_rolePermissions.IsSuccess || _rolePermissions.Role is null)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                                @(_rolePermissions?.Message ?? "Role permissions could not be loaded.")
+                                <MudButton Variant="Variant.Text" OnClick="ReloadRolePermissionsAsync">Retry</MudButton>
+                            </MudAlert>
+                        }
+                        else if (_rolePermissions.Role.Permissions.Count == 0)
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-4">
+                                No permissions are currently assigned to this role.
+                            </MudText>
+                        }
+                        else
+                        {
+                            @foreach (var moduleGroup in _rolePermissions.Role.Permissions
+                                .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
+                                .OrderBy(group => group.Key))
+                            {
+                                <div class="py-3">
+                                    <MudText Typo="Typo.subtitle2" Class="admin-card-title mb-2">@moduleGroup.Key</MudText>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
+                                        {
+                                            <MudTooltip Text="@permission.Code">
+                                                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default"
+                                                         Size="Size.Small">
+                                                    @permission.Name
+                                                </MudChip>
+                                            </MudTooltip>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </MudPaper>
+                }
             }
         </MudPaper>
     </MudContainer>
@@ -168,6 +235,9 @@
     private bool _formVisible;
     private Guid? _editingRoleId;
     private string _roleName = string.Empty;
+    private Guid? _viewingPermissionsRoleId;
+    private RolePermissionsResult? _rolePermissions;
+    private bool _permissionsLoading;
 
     private string GeneratedRoleCode
     {
@@ -268,6 +338,49 @@
         {
             _saving = false;
         }
+    }
+
+    private async Task ToggleRolePermissionsAsync(RoleResponse role)
+    {
+        if (_viewingPermissionsRoleId == role.Id)
+        {
+            CloseRolePermissions();
+            return;
+        }
+
+        _viewingPermissionsRoleId = role.Id;
+        await ReloadRolePermissionsAsync();
+    }
+
+    private async Task ReloadRolePermissionsAsync()
+    {
+        if (!_viewingPermissionsRoleId.HasValue || _permissionsLoading)
+            return;
+
+        _permissionsLoading = true;
+        _rolePermissions = null;
+        try
+        {
+            _rolePermissions = await RbacService.GetRolePermissionsAsync(_viewingPermissionsRoleId.Value);
+        }
+        catch
+        {
+            _rolePermissions = new RolePermissionsResult
+            {
+                IsSuccess = false,
+                Message = "Role permissions could not be loaded. Please try again."
+            };
+        }
+        finally
+        {
+            _permissionsLoading = false;
+        }
+    }
+
+    private void CloseRolePermissions()
+    {
+        _viewingPermissionsRoleId = null;
+        _rolePermissions = null;
     }
 
     private async Task DeleteRoleAsync(RoleResponse role)
