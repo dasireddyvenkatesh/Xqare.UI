@@ -1,0 +1,157 @@
+@page "/admin/permissions"
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.Classes.Authorization
+@using Xqare.BusinessLayer.DTO.Rbac
+@using Xqare.BusinessLayer.Interfaces.Rbac
+@attribute [Authorize(Policy = PermissionPolicies.RbacPermissionsView)]
+@inject IRbacService RbacService
+@inject ISnackbar Snackbar
+
+<PageTitle>Permissions Catalogue | XQARE</PageTitle>
+
+<section class="admin-users-page" aria-labelledby="admin-permissions-title">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-users-container">
+        <div class="admin-users-heading">
+            <div class="admin-users-heading-copy">
+                <MudText Typo="Typo.h4" Class="admin-page-title" id="admin-permissions-title">Permissions Catalogue</MudText>
+                <MudText Typo="Typo.body2" Class="admin-page-subtitle">
+                    Browse the permission codes available across XQARE modules.
+                </MudText>
+            </div>
+            <div class="admin-users-heading-actions">
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadPermissionsAsync"
+                           Disabled="_loading" Class="admin-refresh-button">
+                    Refresh
+                </MudButton>
+                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default" Class="admin-count-chip">
+                    @_permissions.Count permissions
+                </MudChip>
+            </div>
+        </div>
+
+        <MudPaper Class="admin-users-card" Elevation="0">
+            <div class="admin-section-heading">
+                <div class="admin-section-heading-left">
+                    <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Key" /></span>
+                    <div>
+                        <MudText Typo="Typo.h6" Class="admin-card-title">Available permissions</MudText>
+                        <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                            Read-only catalogue · grouped by module
+                        </MudText>
+                    </div>
+                </div>
+            </div>
+            <MudDivider Class="admin-divider" />
+
+            @if (_loading)
+            {
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+            }
+            else if (_error)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
+                    Permissions could not be loaded.
+                    <MudButton Variant="Variant.Text" OnClick="LoadPermissionsAsync">Retry</MudButton>
+                </MudAlert>
+            }
+            else if (_permissions.Count == 0)
+            {
+                <MudPaper Class="admin-empty-state" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.KeyOff" Class="admin-empty-icon" />
+                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">No permissions found</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        The permissions catalogue is currently empty.
+                    </MudText>
+                </MudPaper>
+            }
+            else
+            {
+                @foreach (var moduleGroup in _permissions
+                    .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
+                    .OrderBy(group => group.Key))
+                {
+                    <div class="py-4">
+                        <div class="admin-section-heading">
+                            <MudText Typo="Typo.subtitle1" Class="admin-card-title">@moduleGroup.Key</MudText>
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Default">
+                                @moduleGroup.Count()
+                            </MudChip>
+                        </div>
+                        <div class="admin-user-list">
+                            @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
+                            {
+                                <div class="admin-user-row" @key="permission.Id">
+                                    <div class="admin-user-identity">
+                                        <MudAvatar Class="admin-user-avatar" Color="Color.Primary" Size="Size.Medium">
+                                            <MudIcon Icon="@Icons.Material.Filled.Key" />
+                                        </MudAvatar>
+                                        <div class="admin-user-copy">
+                                            <MudText Typo="Typo.subtitle2" Class="admin-user-name">@permission.Name</MudText>
+                                            <MudText Typo="Typo.body2" Class="admin-user-email">@permission.Code</MudText>
+                                        </div>
+                                    </div>
+                                    <MudTooltip Text="Copy permission code">
+                                        <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                                       Color="Color.Default" Size="Size.Small"
+                                                       AriaLabel="Copy permission code"
+                                                       OnClick="@(() => CopyPermissionCode(permission.Code))" />
+                                    </MudTooltip>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </MudPaper>
+    </MudContainer>
+</section>
+
+@code {
+    private List<PermissionResponse> _permissions = new();
+    private bool _loading = true;
+    private bool _error;
+
+    protected override Task OnInitializedAsync() => LoadPermissionsAsync();
+
+    private async Task LoadPermissionsAsync()
+    {
+        _loading = true;
+        _error = false;
+        try
+        {
+            var result = await RbacService.GetPermissionsAsync();
+            if (!result.IsSuccess)
+            {
+                _error = true;
+                Snackbar.Add(result.Message, Severity.Error);
+                return;
+            }
+
+            _permissions = result.Permissions;
+        }
+        catch
+        {
+            _error = true;
+            Snackbar.Add("Permissions could not be loaded. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task CopyPermissionCode(string code)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", code);
+            Snackbar.Add("Permission code copied.", Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Could not copy the permission code.", Severity.Warning);
+        }
+    }
+}
