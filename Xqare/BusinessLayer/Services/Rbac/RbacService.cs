@@ -26,6 +26,18 @@ namespace Xqare.BusinessLayer.Services.Rbac
                 };
         }
 
+        public async Task<PermissionsResult> GetPermissionsAsync()
+        {
+            var response = await _api.GetAsync<List<PermissionResponse>>("api/admin/rbac/permissions");
+            return response.Data is not null
+                ? new PermissionsResult { IsSuccess = true, Permissions = response.Data }
+                : new PermissionsResult
+                {
+                    IsSuccess = false,
+                    Message = ExtractMessage(response.ErrorMessage) ?? "Permissions could not be loaded."
+                };
+        }
+
         public async Task<RolePermissionsResult> GetRolePermissionsAsync(Guid roleId)
         {
             var response = await _api.GetAsync<RolePermissionsResponse>(
