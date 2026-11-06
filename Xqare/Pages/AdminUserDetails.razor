@@ -187,26 +187,35 @@
                         {
                             <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
                                 <Authorized Context="assignRoleContext">
-                                    <MudGrid Spacing="2" Class="pa-3">
-                                        <MudItem xs="12" sm="8" md="6">
-                                            <MudSelect T="string" @bind-Value="_selectedRoleId"
-                                                       Label="Select a role" Variant="Variant.Outlined"
-                                                       Margin="Margin.Dense" FullWidth="true">
-                                                @foreach (var role in AvailableRoles)
-                                                {
-                                                    <MudSelectItem Value="@role.Id.ToString("D")">@role.Name</MudSelectItem>
-                                                }
-                                            </MudSelect>
-                                        </MudItem>
-                                        <MudItem xs="12" sm="4" md="3" Class="d-flex align-center">
-                                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                                                       StartIcon="@Icons.Material.Filled.PersonAdd"
-                                                       Disabled="@(!Guid.TryParse(_selectedRoleId, out _) || _assignmentBusy)"
-                                                       OnClick="AssignSelectedRoleAsync" FullWidth="true">
-                                                Assign role
-                                            </MudButton>
-                                        </MudItem>
-                                    </MudGrid>
+                                    @if (_user.IsActive)
+                                    {
+                                        <MudGrid Spacing="2" Class="pa-3">
+                                            <MudItem xs="12" sm="8" md="6">
+                                                <MudSelect T="string" @bind-Value="_selectedRoleId"
+                                                           Label="Select a role" Variant="Variant.Outlined"
+                                                           Margin="Margin.Dense" FullWidth="true">
+                                                    @foreach (var role in AvailableRoles)
+                                                    {
+                                                        <MudSelectItem Value="@role.Id.ToString("D")">@role.Name</MudSelectItem>
+                                                    }
+                                                </MudSelect>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="4" md="3" Class="d-flex align-center">
+                                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                                                           Disabled="@(!Guid.TryParse(_selectedRoleId, out _) || _assignmentBusy)"
+                                                           OnClick="AssignSelectedRoleAsync" FullWidth="true">
+                                                    Assign role
+                                                </MudButton>
+                                            </MudItem>
+                                        </MudGrid>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-3">
+                                            Roles cannot be assigned while this account is disabled.
+                                        </MudText>
+                                    }
                                 </Authorized>
                             </AuthorizeView>
                         }
