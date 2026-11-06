@@ -38,6 +38,13 @@ namespace Xqare.BusinessLayer.DTO.Admin
         public List<AdminUserListItemResponse> Items { get; set; } = new();
     }
 
+    public sealed class AdminUserRoleAssignmentResponse
+    {
+        public Guid RoleId { get; set; }
+        public string RoleName { get; set; } = string.Empty;
+        public string RoleCode { get; set; } = string.Empty;
+    }
+
     public sealed class AdminUserDetailsResponse
     {
         public bool IsSuccess { get; set; }
@@ -56,6 +63,7 @@ namespace Xqare.BusinessLayer.DTO.Admin
         public int ActiveSessionCount { get; set; }
         public int TotalSessionCount { get; set; }
         public List<string> Roles { get; set; } = new();
+        public List<AdminUserRoleAssignmentResponse> RoleAssignments { get; set; } = new();
     }
 
     public sealed class AdminUserActionResponse
