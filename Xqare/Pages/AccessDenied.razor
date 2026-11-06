@@ -17,13 +17,15 @@
                 You're signed in, but your account doesn't have the required access.
                 If you think this is a mistake, contact your platform administrator.
             </MudText>
-            <div class="access-denied-actions">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Home" OnClick="GoHome"
-                           Class="access-denied-primary">
-                    Return to home
-                </MudButton>
-            </div>
+            <MudGrid Class="access-denied-actions" Spacing="2" Justify="Justify.Center">
+                <MudItem xs="12" sm="auto">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.Home" OnClick="GoHome"
+                               Class="access-denied-primary">
+                        Return to home
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
         </MudPaper>
     </MudContainer>
 </section>
