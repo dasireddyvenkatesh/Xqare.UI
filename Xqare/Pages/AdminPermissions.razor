@@ -9,15 +9,15 @@
 @inject ISnackbar Snackbar
 @inject IJSRuntime JS
 
-<PageTitle>Permissions Catalogue | XQARE</PageTitle>
+<PageTitle>Permissions | XQARE</PageTitle>
 
-<section class="admin-users-page" aria-labelledby="admin-permissions-title">
+<section class="admin-users-page admin-permissions-page" aria-labelledby="admin-permissions-title">
     <MudContainer MaxWidth="MaxWidth.False" Class="admin-users-container">
         <div class="admin-users-heading">
             <div class="admin-users-heading-copy">
-                <MudText Typo="Typo.h4" Class="admin-page-title" id="admin-permissions-title">Permissions Catalogue</MudText>
+                <MudText Typo="Typo.h4" Class="admin-page-title" id="admin-permissions-title">Permissions</MudText>
                 <MudText Typo="Typo.body2" Class="admin-page-subtitle">
-                    Browse the permission codes available across XQARE modules.
+                    Explore the actions available across XQARE and the modules they belong to.
                 </MudText>
             </div>
             <div class="admin-users-heading-actions">
@@ -26,29 +26,55 @@
                            Disabled="_loading" Class="admin-refresh-button">
                     Refresh
                 </MudButton>
-                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default" Class="admin-count-chip">
-                    @_permissions.Count permissions
-                </MudChip>
             </div>
         </div>
 
-        <MudPaper Class="admin-users-card" Elevation="0">
+        <MudPaper Class="admin-users-card admin-permissions-catalogue" Elevation="0">
             <div class="admin-section-heading">
                 <div class="admin-section-heading-left">
                     <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Key" /></span>
                     <div>
-                        <MudText Typo="Typo.h6" Class="admin-card-title">Available permissions</MudText>
+                        <MudText Typo="Typo.h6" Class="admin-card-title">Permission catalogue</MudText>
                         <MudText Typo="Typo.caption" Class="admin-card-subtitle">
-                            Read-only catalogue · grouped by module
+                            Read-only reference for permissions used by role assignments.
                         </MudText>
                     </div>
                 </div>
+                @if (!_loading && !_error)
+                {
+                    <div class="admin-permissions-summary">
+                        <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default" Class="admin-count-chip">
+                            @_permissions.Count permissions
+                        </MudChip>
+                        <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default" Class="admin-count-chip">
+                            @ModuleCount modules
+                        </MudChip>
+                    </div>
+                }
             </div>
+
             <MudDivider Class="admin-divider" />
+
+            <div class="admin-permissions-toolbar">
+                <MudTextField T="string" Value="_search" ValueChanged="OnSearchChanged"
+                              Placeholder="Search permission name, code or module"
+                              Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                              Immediate="true" Clearable="true" FullWidth="true" />
+                @if (!_loading && !_error)
+                {
+                    <MudText Typo="Typo.caption" Class="admin-permissions-result-count">
+                        Showing @FilteredPermissions.Count of @_permissions.Count permissions
+                    </MudText>
+                }
+            </div>
 
             @if (_loading)
             {
-                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                <div class="admin-permissions-loading">
+                    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Loading permission catalogue...</MudText>
+                </div>
             }
             else if (_error)
             {
@@ -61,50 +87,80 @@
             {
                 <MudPaper Class="admin-empty-state" Elevation="0">
                     <MudIcon Icon="@Icons.Material.Filled.KeyOff" Class="admin-empty-icon" />
-                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">No permissions found</MudText>
+                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">No permissions available</MudText>
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        The permissions catalogue is currently empty.
+                        The permission catalogue does not contain any entries yet.
                     </MudText>
+                </MudPaper>
+            }
+            else if (FilteredPermissions.Count == 0)
+            {
+                <MudPaper Class="admin-empty-state" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.SearchOff" Class="admin-empty-icon" />
+                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">No matching permissions</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Try another name, permission code or module.
+                    </MudText>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => _search = string.Empty)">
+                        Clear search
+                    </MudButton>
                 </MudPaper>
             }
             else
             {
-                @foreach (var moduleGroup in _permissions
-                    .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
-                    .OrderBy(group => group.Key))
-                {
-                    <div class="py-4">
-                        <div class="admin-section-heading">
-                            <MudText Typo="Typo.subtitle1" Class="admin-card-title">@moduleGroup.Key</MudText>
-                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Default">
-                                @moduleGroup.Count()
-                            </MudChip>
-                        </div>
-                        <div class="admin-user-list">
-                            @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
-                            {
-                                <div class="admin-user-row" @key="permission.Id">
-                                    <div class="admin-user-identity">
-                                        <MudAvatar Class="admin-user-avatar" Color="Color.Primary" Size="Size.Medium">
-                                            <MudIcon Icon="@Icons.Material.Filled.Key" />
-                                        </MudAvatar>
-                                        <div class="admin-user-copy">
-                                            <MudText Typo="Typo.subtitle2" Class="admin-user-name">@permission.Name</MudText>
-                                            <MudText Typo="Typo.body2" Class="admin-user-email">@permission.Code</MudText>
+                <MudGrid Spacing="3" Class="admin-permissions-module-grid">
+                    @foreach (var moduleGroup in FilteredPermissions
+                        .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
+                        .OrderBy(group => group.Key))
+                    {
+                        <MudItem xs="12" md="6" xl="4" @key="moduleGroup.Key">
+                            <MudPaper Class="admin-permissions-module" Elevation="0">
+                                <div class="admin-permissions-module-heading">
+                                    <div class="admin-permissions-module-title">
+                                        <span class="admin-permissions-module-icon">
+                                            <MudIcon Icon="@Icons.Material.Filled.FolderOpen" />
+                                        </span>
+                                        <div>
+                                            <MudText Typo="Typo.subtitle1" Class="admin-card-title">@moduleGroup.Key</MudText>
+                                            <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                                                @moduleGroup.Count() @(moduleGroup.Count() == 1 ? "permission" : "permissions")
+                                            </MudText>
                                         </div>
                                     </div>
-                                    <MudTooltip Text="Copy permission code">
-                                        <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
-                                                       Color="Color.Default" Size="Size.Small"
-                                                       AriaLabel="Copy permission code"
-                                                       OnClick="@(() => CopyPermissionCode(permission.Code))" />
-                                    </MudTooltip>
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Default">
+                                        @moduleGroup.Count()
+                                    </MudChip>
                                 </div>
-                            }
-                        </div>
-                    </div>
-                }
+                                <MudDivider Class="admin-divider" />
+                                <div class="admin-permissions-list">
+                                    @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
+                                    {
+                                        <div class="admin-permission-entry" @key="permission.Id">
+                                            <div class="admin-permission-copy">
+                                                <MudText Typo="Typo.body2" Class="admin-permission-name">@permission.Name</MudText>
+                                                <MudText Typo="Typo.caption" Class="admin-permission-code">@permission.Code</MudText>
+                                            </div>
+                                            <MudTooltip Text="Copy permission code">
+                                                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                                               Color="Color.Default" Size="Size.Small"
+                                                               AriaLabel="@($"Copy {permission.Code}")"
+                                                               OnClick="@(() => CopyPermissionCode(permission.Code))" />
+                                            </MudTooltip>
+                                        </div>
+                                    }
+                                </div>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
             }
+
+            <div class="admin-permissions-footnote">
+                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" />
+                <MudText Typo="Typo.caption">
+                    Permissions are defined by the application. Manage which permissions a role receives from Role Management.
+                </MudText>
+            </div>
         </MudPaper>
     </MudContainer>
 </section>
@@ -113,8 +169,32 @@
     private List<PermissionResponse> _permissions = new();
     private bool _loading = true;
     private bool _error;
+    private string _search = string.Empty;
+
+    private int ModuleCount => _permissions
+        .Select(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .Count();
+
+    private List<PermissionResponse> FilteredPermissions
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_search))
+                return _permissions;
+
+            var term = _search.Trim();
+            return _permissions.Where(permission =>
+                    permission.Name.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    permission.Code.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    permission.Module.Contains(term, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
 
     protected override Task OnInitializedAsync() => LoadPermissionsAsync();
+
+    private void OnSearchChanged(string value) => _search = value;
 
     private async Task LoadPermissionsAsync()
     {
@@ -130,7 +210,7 @@
                 return;
             }
 
-            _permissions = result.Permissions;
+            _permissions = result.Permissions ?? new List<PermissionResponse>();
         }
         catch
         {
