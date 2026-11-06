@@ -24,13 +24,29 @@ namespace Xqare.BusinessLayer.Services.Admin
             };
         }
 
-        public async Task<AdminUsersResponse> GetUsersAsync(string? search, bool? isActive, int page, int pageSize)
+        public async Task<AdminUsersResponse> GetUsersAsync(
+            string? search,
+            bool? isActive,
+            string? roleCode,
+            bool? isEmailConfirmed,
+            DateTime? createdFromUtc,
+            DateTime? createdToUtc,
+            int page,
+            int pageSize)
         {
             var query = $"api/admin/users?page={page}&pageSize={pageSize}";
             if (!string.IsNullOrWhiteSpace(search))
                 query += $"&search={Uri.EscapeDataString(search.Trim())}";
             if (isActive.HasValue)
                 query += $"&isActive={isActive.Value.ToString().ToLowerInvariant()}";
+            if (!string.IsNullOrWhiteSpace(roleCode))
+                query += $"&roleCode={Uri.EscapeDataString(roleCode.Trim())}";
+            if (isEmailConfirmed.HasValue)
+                query += $"&isEmailConfirmed={isEmailConfirmed.Value.ToString().ToLowerInvariant()}";
+            if (createdFromUtc.HasValue)
+                query += $"&createdFromUtc={Uri.EscapeDataString(createdFromUtc.Value.ToString("O"))}";
+            if (createdToUtc.HasValue)
+                query += $"&createdToUtc={Uri.EscapeDataString(createdToUtc.Value.ToString("O"))}";
 
             var response = await _api.GetAsync<AdminUsersResponse>(query);
             return response.Data ?? new AdminUsersResponse
