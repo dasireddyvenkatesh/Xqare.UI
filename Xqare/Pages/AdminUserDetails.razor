@@ -11,6 +11,7 @@
 @inject IAdminService AdminService
 @inject IRbacService RbacService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAuthorizationService AuthorizationService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 
@@ -369,7 +370,10 @@
         {
             _user = await AdminService.GetUserDetailsAsync(UserId);
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            if (authState.User.HasClaim("permission", "RBAC_ROLES_VIEW"))
+            var canViewRoles = await AuthorizationService.AuthorizeAsync(
+                authState.User, null, PermissionPolicies.RbacRolesView);
+
+            if (canViewRoles.Succeeded)
                 await LoadAssignableRolesAsync();
         }
         catch { _user = null; }
