@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        @if (_formVisible)
+        @if (_formVisible && !_editingRoleId.HasValue)
         {
             <MudPaper Class="admin-users-card admin-role-form-card mb-4" Elevation="0">
                 <div class="admin-section-heading">
@@ -147,6 +147,26 @@
                                     </MudChip>
                                 </div>
 
+                                @if (_editingRoleId == role.Id)
+                                {
+                                    <div class="admin-role-inline-editor">
+                                        <MudTextField T="string" @bind-Value="_roleName" Label="Role name"
+                                                      Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                      MaxLength="80" Immediate="true" Required="true" FullWidth="true" />
+                                        <div class="admin-role-inline-editor-actions">
+                                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                                       StartIcon="@Icons.Material.Filled.Save"
+                                                       OnClick="SaveRoleAsync" Disabled="@(_saving || !CanSave)">
+                                                @(_saving ? "Saving..." : "Save")
+                                            </MudButton>
+                                            <MudButton Variant="Variant.Text" Color="Color.Default"
+                                                       OnClick="CancelForm" Disabled="_saving">
+                                                Cancel
+                                            </MudButton>
+                                        </div>
+                                    </div>
+                                }
+
                                 <MudDivider Class="admin-divider" />
 
                                 <MudGrid Spacing="2" Class="admin-role-stats">
@@ -184,7 +204,7 @@
                                                 <span>
                                                     <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
                                                                StartIcon="@Icons.Material.Filled.Edit"
-                                                               Disabled="@(IsProtectedRole(role) || _saving)"
+                                                               Disabled="@(IsProtectedRole(role) || _saving || _editingRoleId.HasValue)"
                                                                OnClick="@(() => BeginRename(role))">
                                                         Rename
                                                     </MudButton>
@@ -194,7 +214,7 @@
                                                 <span>
                                                     <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
                                                                StartIcon="@Icons.Material.Filled.Delete"
-                                                               Disabled="@(IsProtectedRole(role) || role.AssignedUsers > 0 || _saving)"
+                                                               Disabled="@(IsProtectedRole(role) || role.AssignedUsers > 0 || _saving || _editingRoleId.HasValue)"
                                                                OnClick="@(() => DeleteRoleAsync(role))">
                                                         Delete
                                                     </MudButton>
@@ -363,14 +383,14 @@
     private static string RenameDisabledReason(RoleResponse role) =>
         IsProtectedRole(role)
             ? "System roles are protected and cannot be renamed."
-            : "Rename is temporarily unavailable.";
+            : "Rename this custom role's display name.";
 
     private static string DeleteDisabledReason(RoleResponse role) =>
         IsProtectedRole(role)
             ? "System roles are protected and cannot be deleted."
             : role.AssignedUsers > 0
                 ? "Remove all role assignments before deleting this role."
-                : "Delete is temporarily unavailable.";
+                : "Delete this custom role.";
 
     private void BeginRename(RoleResponse role)
     {
@@ -379,7 +399,7 @@
 
         _editingRoleId = role.Id;
         _roleName = role.Name;
-        _formVisible = true;
+        _formVisible = false;
     }
 
     private void CancelForm()
