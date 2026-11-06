@@ -285,7 +285,6 @@
 
 .admin-detail-page ::deep .admin-role-assignment-code {
     color: var(--xq-text-secondary) !important;
-    font-family: var(--mud-typography-default-family);
     font-weight: 650;
     letter-spacing: .035em;
     overflow-wrap: anywhere;
