@@ -136,10 +136,17 @@
                                     @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
                                     {
                                         <div class="admin-permission-entry" @key="permission.Id">
-                                            <div class="admin-permission-copy">
-                                                <MudText Typo="Typo.body2" Class="admin-permission-name">@permission.Name</MudText>
-                                                <MudText Typo="Typo.caption" Class="admin-permission-code">@permission.Code</MudText>
-                                            </div>
+                                            <MudButton Variant="Variant.Text" Color="Color.Default"
+                                                       FullWidth="true" Class="admin-permission-expand"
+                                                       OnClick="@(() => TogglePermissionDetails(permission.Id))"
+                                                       aria-expanded="@(_expandedPermissionId == permission.Id)"
+                                                       aria-controls="@($"permission-details-{permission.Id}")">
+                                                <div class="admin-permission-copy">
+                                                    <MudText Typo="Typo.body2" Class="admin-permission-name">@permission.Name</MudText>
+                                                    <MudText Typo="Typo.caption" Class="admin-permission-code">@permission.Code</MudText>
+                                                </div>
+                                                <MudIcon Icon="@(_expandedPermissionId == permission.Id ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" />
+                                            </MudButton>
                                             <MudTooltip Text="Copy permission code">
                                                 <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
                                                                Color="Color.Default" Size="Size.Small"
@@ -147,6 +154,15 @@
                                                                OnClick="@(() => CopyPermissionCode(permission.Code))" />
                                             </MudTooltip>
                                         </div>
+                                        @if (_expandedPermissionId == permission.Id)
+                                        {
+                                            <div id="@($"permission-details-{permission.Id}")" class="admin-permission-details">
+                                                <MudText Typo="Typo.overline" Class="admin-permission-details-label">What this permission does</MudText>
+                                                <MudText Typo="Typo.body2" Class="admin-permission-description">
+                                                    @permission.Description
+                                                </MudText>
+                                            </div>
+                                        }
                                     }
                                 </div>
                             </MudPaper>
@@ -170,6 +186,7 @@
     private bool _loading = true;
     private bool _error;
     private string _search = string.Empty;
+    private Guid? _expandedPermissionId;
 
     private int ModuleCount => _permissions
         .Select(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
@@ -187,7 +204,8 @@
             return _permissions.Where(permission =>
                     permission.Name.Contains(term, StringComparison.OrdinalIgnoreCase) ||
                     permission.Code.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    permission.Module.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    permission.Module.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    permission.Description.Contains(term, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
     }
@@ -195,6 +213,9 @@
     protected override Task OnInitializedAsync() => LoadPermissionsAsync();
 
     private void OnSearchChanged(string value) => _search = value;
+
+    private void TogglePermissionDetails(Guid permissionId)
+        => _expandedPermissionId = _expandedPermissionId == permissionId ? null : permissionId;
 
     private async Task LoadPermissionsAsync()
     {
