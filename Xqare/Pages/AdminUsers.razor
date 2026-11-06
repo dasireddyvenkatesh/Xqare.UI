@@ -1,9 +1,10 @@
 @page "/admin/users"
 @layout AuthenticatedLayout
 @using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.Classes.Authorization
 @using Xqare.BusinessLayer.DTO.Admin
 @using Xqare.BusinessLayer.Interfaces.Admin
-@attribute [Authorize(Roles = "SUPERADMIN")]
+@attribute [Authorize(Policy = PermissionPolicies.AdminUsersView)]
 @inject IAdminService AdminService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JS
@@ -124,11 +125,15 @@
                                            StartIcon="@Icons.Material.Filled.Visibility" OnClick="@(() => OpenUser(user.UserId))">
                                     View details
                                 </MudButton>
-                                <MudButton Variant="Variant.Text" Color="@(user.IsActive ? Color.Warning : Color.Success)"
-                                           Size="Size.Small" Disabled="@_busyUsers.Contains(user.UserId)"
-                                           OnClick="@(() => ChangeStatusAsync(user))">
-                                    @(user.IsActive ? "Disable" : "Enable")
-                                </MudButton>
+                                <AuthorizeView Policy="@PermissionPolicies.AdminUsersManage">
+                                    <Authorized>
+                                        <MudButton Variant="Variant.Text" Color="@(user.IsActive ? Color.Warning : Color.Success)"
+                                                   Size="Size.Small" Disabled="@_busyUsers.Contains(user.UserId)"
+                                                   OnClick="@(() => ChangeStatusAsync(user))">
+                                            @(user.IsActive ? "Disable" : "Enable")
+                                        </MudButton>
+                                    </Authorized>
+                                </AuthorizeView>
                             </div>
                         </div>
                     }
