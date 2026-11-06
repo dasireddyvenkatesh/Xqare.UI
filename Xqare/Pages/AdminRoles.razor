@@ -203,6 +203,83 @@
                                         </Authorized>
                                     </AuthorizeView>
                                 </div>
+
+                                @if (_viewingPermissionsRoleId == role.Id)
+                                {
+                                    <MudPaper Class="admin-role-inline-permissions mt-3" Elevation="0">
+                                        <div class="admin-section-heading">
+                                            <div class="admin-section-heading-left">
+                                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Policy" /></span>
+                                                <div>
+                                                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">
+                                                        Permissions — @role.Name
+                                                    </MudText>
+                                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                                                        Read-only permissions assigned to this role.
+                                                    </MudText>
+                                                </div>
+                                            </div>
+                                            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                       StartIcon="@Icons.Material.Filled.Close" OnClick="CloseRolePermissions">
+                                                Close
+                                            </MudButton>
+                                        </div>
+                                        <MudDivider Class="admin-divider" />
+                                        @if (_permissionsLoading)
+                                        {
+                                            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                                        }
+                                        else if (_rolePermissions is null || !_rolePermissions.IsSuccess || _rolePermissions.Role is null)
+                                        {
+                                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
+                                                @(_rolePermissions?.Message ?? "Role permissions could not be loaded.")
+                                                <MudButton Variant="Variant.Text" OnClick="ReloadRolePermissionsAsync">Retry</MudButton>
+                                            </MudAlert>
+                                        }
+                                        else if (_rolePermissions.Role.Permissions.Count == 0)
+                                        {
+                                            <MudPaper Class="admin-empty-state" Elevation="0">
+                                                <MudIcon Icon="@Icons.Material.Filled.Policy" Class="admin-empty-icon" />
+                                                <MudText Typo="Typo.subtitle1" Class="admin-card-title">No permissions assigned</MudText>
+                                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                    This role does not currently have any permission mappings.
+                                                </MudText>
+                                            </MudPaper>
+                                        }
+                                        else
+                                        {
+                                            <MudGrid Spacing="2" Class="admin-permission-groups">
+                                                @foreach (var moduleGroup in _rolePermissions.Role.Permissions
+                                                    .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
+                                                    .OrderBy(group => group.Key))
+                                                {
+                                                    <MudItem xs="12">
+                                                        <MudPaper Class="admin-permission-module" Elevation="0">
+                                                            <div class="admin-permission-module-heading">
+                                                                <MudText Typo="Typo.subtitle2" Class="admin-card-title">@moduleGroup.Key</MudText>
+                                                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
+                                                                    @moduleGroup.Count()
+                                                                </MudChip>
+                                                            </div>
+                                                            <MudDivider Class="admin-divider" />
+                                                            <div class="admin-permission-chips">
+                                                                @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
+                                                                {
+                                                                    <MudTooltip Text="@permission.Code">
+                                                                        <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default"
+                                                                                 Size="Size.Small">
+                                                                            @permission.Name
+                                                                        </MudChip>
+                                                                    </MudTooltip>
+                                                                }
+                                                            </div>
+                                                        </MudPaper>
+                                                    </MudItem>
+                                                }
+                                            </MudGrid>
+                                        }
+                                    </MudPaper>
+                                }
                             </MudPaper>
                         </MudItem>
                     }
@@ -210,82 +287,6 @@
             }
         </MudPaper>
 
-        @if (_viewingPermissionsRoleId.HasValue)
-        {
-            <MudPaper Class="admin-users-card admin-role-permissions-card mt-4" Elevation="0">
-                <div class="admin-section-heading">
-                    <div class="admin-section-heading-left">
-                        <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Policy" /></span>
-                        <div>
-                            <MudText Typo="Typo.h6" Class="admin-card-title">
-                                Permissions — @_rolePermissions?.Role?.RoleName
-                            </MudText>
-                            <MudText Typo="Typo.caption" Class="admin-card-subtitle">
-                                Read-only view of permissions currently assigned to this role.
-                            </MudText>
-                        </div>
-                    </div>
-                    <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
-                               StartIcon="@Icons.Material.Filled.Close" OnClick="CloseRolePermissions">
-                        Close
-                    </MudButton>
-                </div>
-                <MudDivider Class="admin-divider" />
-                @if (_permissionsLoading)
-                {
-                    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-                }
-                else if (_rolePermissions is null || !_rolePermissions.IsSuccess || _rolePermissions.Role is null)
-                {
-                    <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
-                        @(_rolePermissions?.Message ?? "Role permissions could not be loaded.")
-                        <MudButton Variant="Variant.Text" OnClick="ReloadRolePermissionsAsync">Retry</MudButton>
-                    </MudAlert>
-                }
-                else if (_rolePermissions.Role.Permissions.Count == 0)
-                {
-                    <MudPaper Class="admin-empty-state" Elevation="0">
-                        <MudIcon Icon="@Icons.Material.Filled.Policy" Class="admin-empty-icon" />
-                        <MudText Typo="Typo.subtitle1" Class="admin-card-title">No permissions assigned</MudText>
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">
-                            This role does not currently have any permission mappings.
-                        </MudText>
-                    </MudPaper>
-                }
-                else
-                {
-                    <MudGrid Spacing="3" Class="admin-permission-groups">
-                        @foreach (var moduleGroup in _rolePermissions.Role.Permissions
-                            .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
-                            .OrderBy(group => group.Key))
-                        {
-                            <MudItem xs="12" md="6" xl="4">
-                                <MudPaper Class="admin-permission-module" Elevation="0">
-                                    <div class="admin-permission-module-heading">
-                                        <MudText Typo="Typo.subtitle2" Class="admin-card-title">@moduleGroup.Key</MudText>
-                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
-                                            @moduleGroup.Count()
-                                        </MudChip>
-                                    </div>
-                                    <MudDivider Class="admin-divider" />
-                                    <div class="admin-permission-chips">
-                                        @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
-                                        {
-                                            <MudTooltip Text="@permission.Code">
-                                                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default"
-                                                         Size="Size.Small">
-                                                    @permission.Name
-                                                </MudChip>
-                                            </MudTooltip>
-                                        }
-                                    </div>
-                                </MudPaper>
-                            </MudItem>
-                        }
-                    </MudGrid>
-                }
-            </MudPaper>
-        }
     </MudContainer>
 </section>
 
