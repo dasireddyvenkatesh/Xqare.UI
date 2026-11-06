@@ -29,7 +29,7 @@
                 <AuthorizeView Policy="@PermissionPolicies.RbacRolesManage">
                     <Authorized>
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
-                                   StartIcon="@Icons.Material.Filled.Add" OnClick="BeginCreate"
+                                   StartIcon="@Icons.Material.Filled.Add" OnClick="BeginCreateAsync"
                                    Disabled="_saving">
                             Create role
                         </MudButton>
@@ -69,6 +69,74 @@
                         </MudItem>
                     }
                 </MudGrid>
+
+                <div class="admin-create-permissions">
+                    <div class="admin-create-permissions-heading">
+                        <div>
+                            <MudText Typo="Typo.subtitle1" Class="admin-card-title">Assign permissions</MudText>
+                            <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                                Choose the actions members with this role should be allowed to perform.
+                            </MudText>
+                        </div>
+                        <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                            @_selectedPermissionCodes.Count selected
+                        </MudChip>
+                    </div>
+                    @if (_permissionsLoading)
+                    {
+                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                    }
+                    else if (_permissionsLoadError)
+                    {
+                        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                            Permissions could not be loaded. Retry before creating the role.
+                            <MudButton Variant="Variant.Text" OnClick="LoadCreatePermissionsAsync">Retry</MudButton>
+                        </MudAlert>
+                    }
+                    else if (_availablePermissions.Count == 0)
+                    {
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                            No permissions are currently available in the catalogue.
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="admin-create-permissions-hint">
+                            Select only the permissions required for this role. You can leave this empty and configure permissions later.
+                        </MudText>
+                        <MudGrid Spacing="2" Class="admin-create-permission-groups">
+                            @foreach (var moduleGroup in _availablePermissions
+                                .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
+                                .OrderBy(group => group.Key))
+                            {
+                                <MudItem xs="12" md="6">
+                                    <MudPaper Class="admin-create-permission-module" Elevation="0">
+                                        <div class="admin-permission-module-heading">
+                                            <MudText Typo="Typo.subtitle2" Class="admin-card-title">@moduleGroup.Key</MudText>
+                                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                                                       OnClick="@(() => ToggleModulePermissions(moduleGroup.Select(permission => permission.Code)))">
+                                                @(moduleGroup.All(permission => _selectedPermissionCodes.Contains(permission.Code)) ? "Clear" : "Select all")
+                                            </MudButton>
+                                        </div>
+                                        <MudDivider Class="admin-divider" />
+                                        <div class="admin-create-permission-list">
+                                            @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
+                                            {
+                                                <MudCheckBox T="bool"
+                                                             Value="@_selectedPermissionCodes.Contains(permission.Code)"
+                                                             ValueChanged="@((bool selected) => TogglePermission(permission.Code, selected))"
+                                                             Color="Color.Primary"
+                                                             Label="@permission.Name"
+                                                             Size="Size.Small" />
+                                            }
+                                        </div>
+                                    </MudPaper>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
+                </div>
+
                 <div class="admin-role-form-actions">
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save"
                                OnClick="SaveRoleAsync" Disabled="@(_saving || !CanSave)">
@@ -321,6 +389,9 @@
     private Guid? _viewingPermissionsRoleId;
     private RolePermissionsResult? _rolePermissions;
     private bool _permissionsLoading;
+    private List<PermissionResponse> _availablePermissions = new();
+    private HashSet<string> _selectedPermissionCodes = new(StringComparer.OrdinalIgnoreCase);
+    private bool _permissionsLoadError;
 
     private string GeneratedRoleCode
     {
@@ -369,11 +440,62 @@
         }
     }
 
-    private void BeginCreate()
+    private async Task BeginCreateAsync()
     {
         _editingRoleId = null;
         _roleName = string.Empty;
+        _selectedPermissionCodes.Clear();
         _formVisible = true;
+        await LoadCreatePermissionsAsync();
+    }
+
+    private async Task LoadCreatePermissionsAsync()
+    {
+        _permissionsLoading = true;
+        _permissionsLoadError = false;
+        try
+        {
+            var response = await RbacService.GetPermissionsAsync();
+            if (!response.IsSuccess)
+            {
+                _permissionsLoadError = true;
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
+            }
+
+            _availablePermissions = response.Permissions;
+        }
+        catch
+        {
+            _permissionsLoadError = true;
+            Snackbar.Add("Permissions could not be loaded. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _permissionsLoading = false;
+        }
+    }
+
+    private void TogglePermission(string permissionCode, bool selected)
+    {
+        if (selected)
+            _selectedPermissionCodes.Add(permissionCode);
+        else
+            _selectedPermissionCodes.Remove(permissionCode);
+    }
+
+    private void ToggleModulePermissions(IEnumerable<string> permissionCodes)
+    {
+        var codes = permissionCodes.ToArray();
+        var shouldSelect = codes.Any(code => !_selectedPermissionCodes.Contains(code));
+
+        foreach (var code in codes)
+        {
+            if (shouldSelect)
+                _selectedPermissionCodes.Add(code);
+            else
+                _selectedPermissionCodes.Remove(code);
+        }
     }
 
     private static bool IsProtectedRole(RoleResponse role) =>
@@ -423,7 +545,8 @@
                 : await RbacService.CreateRoleAsync(new CreateRoleRequest
                     {
                         Name = _roleName.Trim(),
-                        Code = GeneratedRoleCode
+                        Code = GeneratedRoleCode,
+                        PermissionCodes = _selectedPermissionCodes.OrderBy(code => code).ToList()
                     });
 
             Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);

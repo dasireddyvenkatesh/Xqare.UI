@@ -280,3 +280,42 @@
 .admin-roles-page ::deep .mud-button-root {
     text-transform: none;
 }
+
+
+.admin-roles-page .admin-create-permissions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xq-space-3);
+    margin-block-start: var(--xq-space-5);
+}
+
+.admin-roles-page .admin-create-permissions-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--xq-space-3);
+}
+
+.admin-roles-page ::deep .admin-create-permission-module {
+    height: 100%;
+    min-width: 0;
+    padding: var(--xq-space-3);
+    border: 1px solid var(--xq-border);
+    border-radius: .75rem;
+    background: var(--xq-surface-muted);
+}
+
+.admin-roles-page .admin-create-permission-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xq-space-1);
+}
+
+.admin-roles-page ::deep .admin-create-permission-list .mud-checkbox {
+    min-height: 2.25rem;
+}
+
+.admin-roles-page ::deep .admin-create-permissions-hint {
+    line-height: 1.5;
+}

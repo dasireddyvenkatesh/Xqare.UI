@@ -28,6 +28,7 @@ namespace Xqare.BusinessLayer.DTO.Rbac
     {
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
+        public List<string> PermissionCodes { get; set; } = new();
     }
 
     public sealed class UpdateRoleRequest
