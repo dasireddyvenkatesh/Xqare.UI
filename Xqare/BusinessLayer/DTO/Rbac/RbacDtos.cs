@@ -34,6 +34,12 @@ namespace Xqare.BusinessLayer.DTO.Rbac
     {
         public string Name { get; set; } = string.Empty;
     }
+    public sealed class RoleAssignmentRequest
+    {
+        public Guid UserId { get; set; }
+        public Guid RoleId { get; set; }
+    }
+
     public sealed class PermissionResponse
     {
         public Guid Id { get; set; }
