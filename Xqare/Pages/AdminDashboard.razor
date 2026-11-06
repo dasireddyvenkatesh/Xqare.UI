@@ -130,11 +130,13 @@
                         <MudText Typo="Typo.body2" Class="admin-shortcut-description">
                             Search accounts, review user details and manage platform access from one place.
                         </MudText>
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                                   EndIcon="@Icons.Material.Filled.ArrowForward"
-                                   Href="/admin/users" Class="admin-primary-button">
-                            Manage users
-                        </MudButton>
+                        <AuthorizeView Policy="@PermissionPolicies.AdminUsersView">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                       EndIcon="@Icons.Material.Filled.ArrowForward"
+                                       Href="/admin/users" Class="admin-primary-button">
+                                Manage users
+                            </MudButton>
+                        </AuthorizeView>
                     </MudPaper>
                 </MudItem>
             </MudGrid>
