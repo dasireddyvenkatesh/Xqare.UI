@@ -12,6 +12,7 @@ using Xqare.BusinessLayer.Classes.PartnerShip;
 using Xqare.BusinessLayer.Classes.Authorization;
 using Xqare.BusinessLayer.Interfaces.Auth;
 using Xqare.BusinessLayer.Interfaces.Admin;
+using Xqare.BusinessLayer.Interfaces.Rbac;
 using Xqare.BusinessLayer.Interfaces.Common;
 using Xqare.BusinessLayer.Interfaces.ContactUs;
 using Xqare.BusinessLayer.Interfaces.PartnerShip;
@@ -19,6 +20,7 @@ using Xqare.BusinessLayer.Interfaces.Profile;
 using Xqare.BusinessLayer.Services.Common;
 using Xqare.BusinessLayer.Services.Profile;
 using Xqare.BusinessLayer.Services.Admin;
+using Xqare.BusinessLayer.Services.Rbac;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -35,6 +37,7 @@ builder.Services.AddScoped<IContactUsService, ContactUsService>();
 builder.Services.AddScoped<IPartnershipService, PartnershipService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IRbacService, RbacService>();
 builder.Services.AddScoped<IApiClient, ApiClient>();
 builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(p =>
