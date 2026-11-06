@@ -60,7 +60,10 @@ else if (_restoreUnavailable)
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
 
             if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                Nav.NavigateTo("/access-denied", replace: true);
                 return;
+            }
 
             if (outcome == SessionRestoreOutcome.Unavailable)
             {
