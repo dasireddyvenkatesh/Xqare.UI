@@ -234,12 +234,15 @@
                                         </div>
                                         <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
                                             <Authorized Context="removeRoleContext">
-                                                <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
-                                                           StartIcon="@Icons.Material.Filled.PersonRemove"
-                                                           Disabled="_assignmentBusy"
-                                                           OnClick="@(() => RemoveRoleAsync(assignment.RoleId, assignment.RoleName))">
-                                                    Remove
-                                                </MudButton>
+                                                @if (!string.Equals(assignment.RoleCode, "SUPERADMIN", StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
+                                                               StartIcon="@Icons.Material.Filled.PersonRemove"
+                                                               Disabled="_assignmentBusy"
+                                                               OnClick="@(() => RemoveRoleAsync(assignment.RoleId, assignment.RoleName))">
+                                                        Remove
+                                                    </MudButton>
+                                                }
                                             </Authorized>
                                         </AuthorizeView>
                                     </div>
