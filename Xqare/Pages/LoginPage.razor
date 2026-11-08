@@ -56,13 +56,22 @@
                     X<span>QARE</span>
                 </MudText>
                 <MudText Class="auth-title">
-                    Sign in to your account
+                    @(isMfaStep ? "Verify your identity" : "Sign in to your account")
                 </MudText>
 
-                <MudText Class="auth-subtitle">
-                    Don’t have an account?
-                    <MudButton Href="/register">Create one free</MudButton>
-                </MudText>
+                @if (!isMfaStep)
+                {
+                    <MudText Class="auth-subtitle">
+                        Don’t have an account?
+                        <MudButton Href="/register">Create one free</MudButton>
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Class="auth-subtitle">
+                        Enter the code from your authenticator app to continue.
+                    </MudText>
+                }
 
                 @if (!isMfaStep)
                 {
@@ -151,11 +160,6 @@
                                        Class="forgot-password-link">
                                 Forgot password?
                             </MudButton>
-                            <MudButton Href="/mfa-recovery"
-                                       Variant="Variant.Text"
-                                       Class="forgot-password-link">
-                                Lost authenticator?
-                            </MudButton>
                         </div>
 
                         <MudButton Disabled="@_processing"
@@ -215,8 +219,8 @@
                             @(isRecoveryCodeStep ? "Use authenticator code" : "Use a recovery code")
                         </MudButton>
                         <MudButton Href="/mfa-recovery" Variant="Variant.Text"
-                                   Color="Color.Secondary" Class="resend-btn">
-                            Lost access to your authenticator?
+                                   Color="Color.Secondary" Class="mfa-help-link">
+                            Can't access your authenticator?
                         </MudButton>
                         <MudButton Disabled="@_processing" FullWidth Variant="Variant.Filled"
                                    OnClick="Submit" Class="login-btn">
