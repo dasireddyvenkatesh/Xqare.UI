@@ -549,10 +549,15 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 // A public Login page does not automatically redirect when the
                 // authentication state changes. Navigate only after this tab has
                 // independently restored and validated its own access token.
-                var relativeUri = _nav.ToBaseRelativePath(_nav.Uri);
-                var currentPath = relativeUri.Split('?', '#')[0].Trim('/');
+                var currentUri = _nav.ToAbsoluteUri(_nav.Uri);
+                var currentPath = _nav.ToBaseRelativePath(currentUri).Split('?', '#')[0].Trim('/');
                 if (string.Equals(currentPath, "login", StringComparison.OrdinalIgnoreCase))
-                    _nav.NavigateTo("/dashboard", replace: true);
+                {
+                    var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(currentUri.Query);
+                    query.TryGetValue("returnUrl", out var returnUrlValue);
+                    var target = LocalReturnUrlHelper.GetSafeReturnUrl(returnUrlValue.ToString());
+                    _nav.NavigateTo(target, replace: true);
+                }
             }
             catch (Exception ex)
             {
