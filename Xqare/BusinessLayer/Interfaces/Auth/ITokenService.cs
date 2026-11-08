@@ -7,5 +7,7 @@
         Task SetTokenAsync(string accessToken);
 
         Task ClearAsync();
+
+        Task<bool> HasSessionHintAsync();
     }
 }
