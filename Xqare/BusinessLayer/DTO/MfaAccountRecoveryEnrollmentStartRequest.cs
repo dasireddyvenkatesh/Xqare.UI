@@ -27,3 +27,10 @@ namespace Xqare.BusinessLayer.DTO
         public IReadOnlyList<string> RecoveryCodes { get; set; } = Array.Empty<string>();
     }
 }
+namespace Xqare.BusinessLayer.DTO
+{
+    public sealed class MfaAccountRecoveryExternalStartRequest
+    {
+        public string EmailProof { get; set; } = string.Empty;
+    }
+}
