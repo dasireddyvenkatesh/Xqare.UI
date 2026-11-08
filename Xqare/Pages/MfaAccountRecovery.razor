@@ -20,6 +20,7 @@
         <MudStepper ActiveIndex="@_step" Class="recovery-stepper">
             <MudStep Title="Verify account" />
             <MudStep Title="Verify email" />
+            <MudStep Title="Verify provider" />
             <MudStep Title="New authenticator" />
             <MudStep Title="Finish" />
         </MudStepper>
@@ -133,7 +134,7 @@
         {
             <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true" Class="mt-4">@_error</MudAlert>
         }
-        @if (_step < 3)
+        @if (_step < 4)
         {
             <MudDivider Class="my-4" />
             <MudButton FullWidth Variant="Variant.Text" Href="/login" Color="Color.Secondary">Back to sign in</MudButton>
@@ -287,7 +288,7 @@
                 _error = _enrollment.Message ?? "Unable to prepare your new authenticator.";
                 return;
             }
-            _step = 2;
+            _step = 3;
             _requiresProvider = false;
         }
         catch
@@ -320,7 +321,7 @@
                 _error = "The authenticator was updated, but recovery codes were not returned. Contact support before signing in.";
                 return;
             }
-            _step = 3;
+            _step = 4;
         }
         catch
         {
