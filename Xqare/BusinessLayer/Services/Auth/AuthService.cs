@@ -315,6 +315,16 @@ namespace Xqare.BusinessLayer.Classes.Auth
         {
             var response = await _api.PostAnonymousAsync<MfaAccountRecoveryCompleteRequest, MfaRecoveryCompleteResponse>(
                 "api/auth/mfa-recovery/complete", request);
+            if (response.Data?.IsSuccess == true)
+            {
+                // Recovery revokes every server session. Clear this tab's cached access
+                // token as well so it cannot keep presenting a stale authenticated state.
+                await _tokenService.ClearAsync();
+                _api.RejectRefreshState();
+                if (_authStateProvider is JwtAuthStateProvider jwt)
+                    jwt.NotifyUserLogout();
+            }
+
             return response.Data ?? new MfaRecoveryCompleteResponse
             {
                 IsSuccess = false,
