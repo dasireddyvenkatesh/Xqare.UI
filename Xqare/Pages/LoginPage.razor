@@ -338,23 +338,9 @@
     {
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(
             Nav.ToAbsoluteUri(Nav.Uri).Query);
-        var target = "/dashboard";
-
-        if (query.TryGetValue("returnUrl", out var returnUrlValue))
-        {
-            var candidate = returnUrlValue.ToString();
-            // Accept only local paths. Prevent open redirects and login redirect loops.
-            if (!string.IsNullOrWhiteSpace(candidate) &&
-                !Uri.TryCreate(candidate, UriKind.Absolute, out _) &&
-                !candidate.StartsWith("//", StringComparison.Ordinal) &&
-                !candidate.Contains('\\') &&
-                !candidate.StartsWith("/login", StringComparison.OrdinalIgnoreCase))
-            {
-                target = candidate.StartsWith("/", StringComparison.Ordinal)
-                    ? candidate
-                    : "/" + candidate;
-            }
-        }
+        query.TryGetValue("returnUrl", out var returnUrlValue);
+        var target = Xqare.BusinessLayer.Classes.Auth.LocalReturnUrlHelper
+            .GetSafeReturnUrl(returnUrlValue.ToString());
 
         Nav.NavigateTo(target);
     }
