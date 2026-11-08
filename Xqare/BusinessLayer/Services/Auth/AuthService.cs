@@ -533,12 +533,31 @@ namespace Xqare.BusinessLayer.Classes.Auth
         [JSInvokable]
         public async Task HandleCrossTabSessionEstablishedAsync()
         {
-            // Never copy or broadcast access tokens between tabs. Force this tab
-            // to validate the shared refresh cookie and obtain its own token.
+            // Never copy or broadcast access tokens between tabs. Discard this
+            // tab's stale token and independently restore from the HttpOnly cookie.
             await _tokenService.ClearAsync();
             _api.ResetRefreshState();
             if (_authStateProvider is JwtAuthStateProvider jwt)
                 jwt.NotifyUserLogout();
+
+            try
+            {
+                var outcome = await InitializeAsync();
+                if (outcome != SessionRestoreOutcome.Restored)
+                    return;
+
+                // A public Login page does not automatically redirect when the
+                // authentication state changes. Navigate only after this tab has
+                // independently restored and validated its own access token.
+                var relativeUri = _nav.ToBaseRelativePath(_nav.Uri);
+                var currentPath = relativeUri.Split('?', '#')[0].Trim('/');
+                if (string.Equals(currentPath, "login", StringComparison.OrdinalIgnoreCase))
+                    _nav.NavigateTo("/dashboard", replace: true);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Cross-tab session restoration failed: {ex.Message}");
+            }
         }
 
         [JSInvokable]
