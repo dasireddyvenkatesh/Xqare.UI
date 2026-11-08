@@ -114,9 +114,9 @@
                 Save these codes somewhere secure. Each code can be used once. You will not be able to view them again.
             </MudText>
             <div class="recovery-codes">
-                @foreach (var code in _recoveryCodes)
+                @foreach (var recoveryCode in _recoveryCodes)
                 {
-                    <MudText Typo="Typo.body2" Class="recovery-code">@code</MudText>
+                    <MudText Typo="Typo.body2" Class="recovery-code">@recoveryCode</MudText>
                 }
             </div>
             <MudButton FullWidth Variant="Variant.Outlined" Color="Color.Primary" OnClick="CopyRecoveryCodes" Class="mt-3">
