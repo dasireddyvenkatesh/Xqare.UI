@@ -1,0 +1,129 @@
+.mfa-recovery-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    background: var(--xq-auth-panel-bg);
+}
+
+::deep .mfa-recovery-card {
+    width: 100%;
+    max-width: 560px;
+    padding: 32px;
+    border: 1px solid var(--xq-auth-input-border);
+    border-radius: 18px;
+    background: var(--xq-surface);
+}
+
+::deep .recovery-brand {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--xq-navy-deep);
+    letter-spacing: .02em;
+}
+
+::deep .recovery-brand span {
+    color: var(--xq-auth-accent);
+}
+
+::deep .recovery-title {
+    margin-top: 12px;
+    text-align: center;
+    color: var(--xq-navy-deep);
+    font-weight: 800;
+}
+
+::deep .recovery-intro {
+    max-width: 420px;
+    margin: 8px auto 22px;
+    text-align: center;
+}
+
+::deep .recovery-stepper {
+    margin-bottom: 24px;
+    background: transparent;
+}
+
+::deep .recovery-primary {
+    min-height: 46px;
+    margin-top: 18px;
+    border-radius: 10px;
+    background: var(--xq-auth-accent);
+    color: var(--xq-text-inverse);
+    font-weight: 700;
+    text-transform: none;
+}
+
+::deep .recovery-primary:hover {
+    background: var(--xq-auth-accent-hover);
+}
+
+.recovery-qr {
+    display: flex;
+    justify-content: center;
+    padding: 18px;
+    margin: 12px auto;
+    border: 1px solid var(--xq-auth-input-border);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.recovery-qr img {
+    width: 210px;
+    height: 210px;
+    object-fit: contain;
+}
+
+::deep .recovery-secret {
+    padding: 12px;
+    margin: 8px 0 14px;
+    border: 1px dashed var(--xq-auth-input-border);
+    border-radius: 8px;
+    text-align: center;
+    overflow-wrap: anywhere;
+    font-family: monospace;
+    letter-spacing: .08em;
+}
+
+.recovery-codes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid var(--xq-auth-input-border);
+    border-radius: 10px;
+    background: var(--xq-auth-panel-bg);
+}
+
+::deep .recovery-code {
+    padding: 8px;
+    border-radius: 6px;
+    background: var(--xq-surface);
+    text-align: center;
+    font-family: monospace;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+@media (max-width: 600px) {
+    .mfa-recovery-page {
+        align-items: flex-start;
+        padding: 16px 10px;
+    }
+
+    ::deep .mfa-recovery-card {
+        padding: 20px 16px;
+        border-radius: 14px;
+    }
+
+    .recovery-codes {
+        grid-template-columns: 1fr;
+    }
+
+    .recovery-qr img {
+        width: 180px;
+        height: 180px;
+    }
+}
