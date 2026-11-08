@@ -5,6 +5,7 @@ namespace Xqare.BusinessLayer.Interfaces.Rbac
     public interface IRbacService
     {
         Task<RbacRolesResult> GetRolesAsync();
+        Task<RbacRolesResult> GetAssignableRolesAsync();
         Task<RolePermissionsResult> GetRolePermissionsAsync(Guid roleId);
         Task<PermissionsResult> GetPermissionsAsync();
         Task<RbacOperationResponse> CreateRoleAsync(CreateRoleRequest request);
