@@ -1,51 +1,16 @@
 @using Microsoft.AspNetCore.Components.Authorization
-@using Xqare.BusinessLayer.Interfaces.Auth
 @using Xqare.Pages
-@inject IAuthService AuthService
-@inject ILogger<App> Logger
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly"
             NotFoundPage="typeof(Pages.NotFound)">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
-                <NotAuthorized>
-                    <RedirectToLogin />
+                <NotAuthorized Context="authState">
+                    <RedirectToLogin AuthenticationState="authState" />
                 </NotAuthorized>
             </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
     </Router>
 </CascadingAuthenticationState>
-
-@code {
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Start one application-wide restore after the first render. Public pages
-            // (including Home/HeaderWrapper) also need the restored auth state, but
-            // must remain visible while the refresh-cookie request is in progress.
-            _ = RestoreSessionSafelyAsync();
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private async Task RestoreSessionSafelyAsync()
-    {
-        try
-        {
-            // AuthService and ApiClient coordinate concurrent calls with their
-            // existing initialization and refresh locks. AuthenticationStateChanged
-            // will cause AuthorizeView to render the signed-in navigation.
-            await AuthService.InitializeAsync();
-        }
-        catch (Exception ex)
-        {
-            // A public page must remain usable when the auth service is unavailable.
-            // Protected routes retain their own retry UI in RedirectToLogin.
-            Logger.LogWarning(ex, "Application startup session restoration failed.");
-        }
-    }
-}
