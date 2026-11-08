@@ -465,6 +465,8 @@ namespace Xqare.BusinessLayer.Classes.Auth
             }
             finally
             {
+                // Lock out further refresh attempts as soon as this tab logs out.
+                _api.RejectRefreshState();
                 await _tokenService.ClearAsync();
                 if (_authStateProvider is JwtAuthStateProvider jwtAuthStateProvider)
                     jwtAuthStateProvider.NotifyUserLogout();
@@ -568,8 +570,10 @@ namespace Xqare.BusinessLayer.Classes.Auth
         [JSInvokable]
         public async Task HandleCrossTabLogoutAsync()
         {
+            // A logout event is authoritative for this tab. Do not clear this
+            // rejection until a new successful login/session-established event.
+            _api.RejectRefreshState();
             await _tokenService.ClearAsync();
-            _api.ResetRefreshState();
             if (_authStateProvider is JwtAuthStateProvider jwt)
                 jwt.NotifyUserLogout();
         }

@@ -106,58 +106,37 @@ namespace Xqare.BusinessLayer.Services.Common
                     return SessionRestoreOutcome.Restored;
                 }
 
-                // Production and sandbox are different browser origins but currently
-                // share the API's HttpOnly refresh cookie. Web Locks cannot coordinate
-                // those origins. If another origin rotates the cookie concurrently,
-                // retry briefly so this request can use the newly-set shared cookie.
+                // Each environment uses a distinct API host and therefore a distinct
+                // host-only refresh cookie. Tabs for this UI origin are serialized by
+                // the Web Lock above, so a rejected refresh response must not be retried.
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(12));
-                HttpResponseMessage? response = null;
+                using var request = CreateRequest(
+                    HttpMethod.Post,
+                    "api/auth/refresh-token",
+                    new StringContent(string.Empty));
 
-                for (var attempt = 0; attempt < 3; attempt++)
+                using var response = await _http.SendAsync(request, timeout.Token);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    using var request = CreateRequest(
-                        HttpMethod.Post,
-                        "api/auth/refresh-token",
-                        new StringContent(string.Empty));
-
-                    response = await _http.SendAsync(request, timeout.Token);
-                    if (response.StatusCode != HttpStatusCode.Unauthorized || attempt == 2)
-                        break;
-
-                    response.Dispose();
-                    response = null;
-
-                    // A competing refresh may have committed in the API database
-                    // just before its Set-Cookie response reaches this browser.
-                    await Task.Delay(attempt == 0 ? 150 : 300, timeout.Token);
+                    _refreshSessionRejected = true;
+                    return SessionRestoreOutcome.Rejected;
                 }
 
-                using (response)
-                {
-                    if (response == null)
-                        return SessionRestoreOutcome.Unavailable;
+                if (!response.IsSuccessStatusCode)
+                    return SessionRestoreOutcome.Unavailable;
 
-                    if (response.StatusCode == HttpStatusCode.Unauthorized)
-                    {
-                        _refreshSessionRejected = true;
-                        return SessionRestoreOutcome.Rejected;
-                    }
+                var result = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>(
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
+                    timeout.Token);
 
-                    if (!response.IsSuccessStatusCode)
-                        return SessionRestoreOutcome.Unavailable;
+                if (result == null || !result.IsSuccess || string.IsNullOrWhiteSpace(result.AccessToken))
+                    return SessionRestoreOutcome.Unavailable;
 
-                    var result = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>(
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
-                        timeout.Token);
-
-                    if (result == null || !result.IsSuccess || string.IsNullOrWhiteSpace(result.AccessToken))
-                        return SessionRestoreOutcome.Unavailable;
-
-                    _refreshSessionRejected = false;
-                    await _tokenService.SetTokenAsync(result.AccessToken);
-                    _authStateProvider.NotifyUserAuthentication();
-                    return SessionRestoreOutcome.Restored;
-                }
+                _refreshSessionRejected = false;
+                await _tokenService.SetTokenAsync(result.AccessToken);
+                _authStateProvider.NotifyUserAuthentication();
+                return SessionRestoreOutcome.Restored
             }
             catch (OperationCanceledException)
             {
@@ -185,6 +164,13 @@ namespace Xqare.BusinessLayer.Services.Common
         public void ResetRefreshState()
         {
             _refreshSessionRejected = false;
+        }
+
+        // Called when this tab or another tab confirms logout. Prevents protected
+        // route restoration and late 401 handlers from posting another refresh.
+        public void RejectRefreshState()
+        {
+            _refreshSessionRejected = true;
         }
 
 
