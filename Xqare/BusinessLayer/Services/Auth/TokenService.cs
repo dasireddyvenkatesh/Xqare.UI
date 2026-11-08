@@ -46,6 +46,16 @@ public class TokenService : ITokenService
         {
             Console.Error.WriteLine($"Unable to persist the tab access token in sessionStorage: {ex.Message}");
         }
+
+        try
+        {
+            // Persist only a boolean-like hint, never the access or refresh token.
+            await _js.InvokeVoidAsync("sessionStorageHelper.setSessionHint");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Unable to persist the browser session hint: {ex.Message}");
+        }
     }
 
     public async Task ClearAsync()
@@ -58,6 +68,28 @@ public class TokenService : ITokenService
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Unable to clear the tab access token from sessionStorage: {ex.Message}");
+        }
+
+        try
+        {
+            await _js.InvokeVoidAsync("sessionStorageHelper.clearSessionHint");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Unable to clear the browser session hint: {ex.Message}");
+        }
+    }
+
+    public async Task<bool> HasSessionHintAsync()
+    {
+        try
+        {
+            return await _js.InvokeAsync<bool>("sessionStorageHelper.hasSessionHint");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Unable to read the browser session hint: {ex.Message}");
+            return false;
         }
     }
 }
