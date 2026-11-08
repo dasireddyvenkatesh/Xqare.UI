@@ -13,6 +13,11 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
         Task<RegisterResponse> RegisterAsync(RegisterRequest request);
         Task<LoginResponse> VerifyRegistrationOtpAsync(VerifyRegisterEmailOtpRequest request);
         Task<LoginResponse> VerifyMfaChallengeAsync(VerifyMfaChallengeRequest request);
+        Task<OtpOperationResponse> RequestMfaAccountRecoveryAsync(MfaAccountRecoveryRequest request);
+        Task<MfaAccountRecoveryVerifyResponse> VerifyMfaAccountRecoveryOtpAsync(MfaAccountRecoveryVerifyRequest request);
+        Task<MfaRecoveryEnrollmentStartResponse> StartMfaAccountRecoveryEnrollmentAsync(string recoveryGrant);
+        Task<MfaRecoveryCompleteResponse> CompleteMfaAccountRecoveryAsync(MfaAccountRecoveryCompleteRequest request);
+        Task<OtpOperationResponse> BeginMfaRecoveryExternalLoginAsync(string provider, string emailProof);
         Task<TotpStatusResponse> GetTotpStatusAsync();
         Task<TotpEnrollmentStartResponse> StartTotpEnrollmentAsync(TotpEnrollmentStartRequest request);
         Task<TotpEnrollmentConfirmResponse> ConfirmTotpEnrollmentAsync(TotpEnrollmentConfirmRequest request);
