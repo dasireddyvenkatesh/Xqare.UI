@@ -1,10 +1,12 @@
 @page "/"
+@using Microsoft.AspNetCore.Components.Authorization
 @using MudBlazor
 @using Xqare.BusinessLayer.Interfaces.Auth
 @using Xqare.Wrappers.CommonWrapper
 @using Xqare.Wrappers.HomePageWrapper
 @inject IAuthService AuthService
 @inject ITokenService TokenService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <HeaderWrapper/>
 <HeroContentUpdated/>
@@ -22,12 +24,22 @@
 
         try
         {
-            // Public visitors do not trigger session restoration. A small,
-            // non-sensitive hint lets returning signed-in users restore after
-            // sessionStorage is lost when the browser tab was closed.
+            // Backfill the non-sensitive hint for users who already have a
+            // valid tab token from a session established before this feature.
             if (!await TokenService.HasSessionHintAsync())
-                return;
+            {
+                var currentState = await AuthStateProvider.GetAuthenticationStateAsync();
+                if (currentState.User.Identity?.IsAuthenticated == true)
+                {
+                    await TokenService.MarkSessionHintAsync();
+                    return;
+                }
 
+                return;
+            }
+
+            // Anonymous visitors do not trigger session restoration. Returning
+            // users with a prior session hint restore through the existing API flow.
             await AuthService.InitializeAsync();
         }
         catch (Exception ex)
