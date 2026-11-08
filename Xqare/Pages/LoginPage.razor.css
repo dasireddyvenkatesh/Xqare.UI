@@ -188,3 +188,23 @@
     min-width: 0;
     padding: 4px 0;
 }
+
+
+::deep .mfa-help-link {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 36px;
+    margin: 8px auto 2px;
+    padding: 4px 8px;
+    color: var(--xq-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: none;
+    text-align: center;
+}
+
+::deep .mfa-help-link:hover {
+    color: var(--xq-auth-accent);
+    background: transparent;
+}
