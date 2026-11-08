@@ -59,7 +59,7 @@
                 <MudTextField Label="Email address" Value="_otpRequest.Email" ReadOnly="true" Variant="Variant.Outlined" />
                 <MudTextField Label="Email verification code" @bind-Value="_otpRequest.OtpCode"
                               For="@(() => _otpRequest.OtpCode)" MaxLength="6" InputMode="InputMode.numeric"
-                              InputType="InputType.Number" AutoComplete="one-time-code" Immediate="true"
+                              InputType="InputType.Text" AutoComplete="one-time-code" Immediate="true"
                               Variant="Variant.Outlined" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
                            OnClick="VerifyEmailCode" Class="recovery-primary">Verify email</MudButton>
@@ -98,7 +98,7 @@
             <MudForm @ref="_form" Model="_completeRequest" Validation="_completeValidator.ToMudValidator()">
                 <MudTextField Label="New authenticator code" @bind-Value="_completeRequest.Code"
                               For="@(() => _completeRequest.Code)" MaxLength="6"
-                              InputMode="InputMode.numeric" InputType="InputType.Number"
+                              InputMode="InputMode.numeric" InputType="InputType.Text"
                               AutoComplete="one-time-code" Immediate="true" Variant="Variant.Outlined" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
                            OnClick="CompleteRecovery" Class="recovery-primary">Confirm new authenticator</MudButton>
