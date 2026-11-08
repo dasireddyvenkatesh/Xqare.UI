@@ -193,11 +193,17 @@
                 Password = _passwordless ? null : _request.Password
             });
 
-            // The API intentionally returns a generic response to avoid account enumeration.
-            // Proceed to the OTP step without confirming whether the account exists.
+            if (!response.IsSuccess)
+            {
+                _error = response.Message ?? "The request could not be completed. Please wait and try again.";
+                return;
+            }
+
+            // The API intentionally returns a generic successful response to avoid
+            // account enumeration. Continue without confirming whether the account exists.
             _otpRequest.Email = _request.Email.Trim();
             _step = 1;
-            Snackbar.Add(response.Message ?? "If the account is eligible, a verification code has been sent.", response.IsSuccess ? Severity.Info : Severity.Warning);
+            Snackbar.Add(response.Message ?? "If the account is eligible, a verification code has been sent.", Severity.Info);
         }
         catch
         {
