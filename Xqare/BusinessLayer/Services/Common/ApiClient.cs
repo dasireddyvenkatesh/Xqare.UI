@@ -197,7 +197,7 @@ namespace Xqare.BusinessLayer.Services.Common
             {
                 // After an explicit refresh rejection, do not send further protected
                 // requests until a successful sign-in resets the client state.
-                if (attachAccessToken && _refreshSessionRejected)
+                if (attachAccessToken && retryAfterRefresh && _refreshSessionRejected)
                 {
                     return new ApiResponse<T>
                     {
@@ -309,7 +309,7 @@ namespace Xqare.BusinessLayer.Services.Common
             => SendAsync<TResponse>(
                 () => CreateRequest(HttpMethod.Post, url, JsonContent.Create(data)),
                 retryAfterRefresh: false,
-                attachAccessToken: false);
+                attachAccessToken: true);
 
         public Task<ApiResponse<TResponse>> PutAsync<TRequest, TResponse>(string url, TRequest data)
             => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Put, url, JsonContent.Create(data)));
