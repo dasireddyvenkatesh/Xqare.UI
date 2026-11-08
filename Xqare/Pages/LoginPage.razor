@@ -369,7 +369,12 @@
     protected override async Task OnInitializedAsync()
     {
         var uri = Nav.ToAbsoluteUri(Nav.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        // OAuth exchange codes are carried in the URL fragment so browsers do
+        // not send them to the API or include them in Referer headers.
+        var callbackState = string.IsNullOrEmpty(uri.Fragment)
+            ? uri.Query
+            : "?" + uri.Fragment.TrimStart('#');
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(callbackState);
 
         // OAuth MFA uses the same one-time exchange as a normal external login.
         // The API sets its HttpOnly MFA cookie only after this frontend-origin request.
