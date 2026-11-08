@@ -442,6 +442,10 @@ namespace Xqare.BusinessLayer.Classes.Auth
             await _tokenService.SetTokenAsync(response.AccessToken);
             if (_authStateProvider is JwtAuthStateProvider jwt)
                 jwt.NotifyUserAuthentication();
+
+            // Other tabs must discard any pre-logout access token and restore
+            // independently from the newly established HttpOnly refresh cookie.
+            await BroadcastCrossTabSessionEstablishedAsync();
         }
 
         public async Task Logout()
@@ -512,6 +516,29 @@ namespace Xqare.BusinessLayer.Classes.Auth
             {
                 // Never block local logout on cross-tab notification support.
             }
+        }
+
+        private async Task BroadcastCrossTabSessionEstablishedAsync()
+        {
+            try
+            {
+                await _js.InvokeVoidAsync("sessionRefreshCoordinator.broadcastSessionEstablished");
+            }
+            catch (JSException)
+            {
+                // Each tab can still restore on its next protected-route visit.
+            }
+        }
+
+        [JSInvokable]
+        public async Task HandleCrossTabSessionEstablishedAsync()
+        {
+            // Never copy or broadcast access tokens between tabs. Force this tab
+            // to validate the shared refresh cookie and obtain its own token.
+            await _tokenService.ClearAsync();
+            _api.ResetRefreshState();
+            if (_authStateProvider is JwtAuthStateProvider jwt)
+                jwt.NotifyUserLogout();
         }
 
         [JSInvokable]
