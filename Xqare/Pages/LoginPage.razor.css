@@ -175,6 +175,8 @@
 ::deep .forgot-password-row {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-top: 2px;
 }
 
