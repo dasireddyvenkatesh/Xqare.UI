@@ -275,6 +275,86 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data;
         }
 
+        public async Task<OtpOperationResponse> RequestMfaAccountRecoveryAsync(MfaAccountRecoveryRequest request)
+        {
+            request.Email = request.Email?.Trim() ?? string.Empty;
+            var response = await _api.PostAnonymousAsync<MfaAccountRecoveryRequest, OtpOperationResponse>(
+                "api/auth/mfa-recovery/request", request);
+            return response.Data ?? new OtpOperationResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to start account recovery. Please try again."
+            };
+        }
+
+        public async Task<MfaAccountRecoveryVerifyResponse> VerifyMfaAccountRecoveryOtpAsync(MfaAccountRecoveryVerifyRequest request)
+        {
+            request.Email = request.Email?.Trim() ?? string.Empty;
+            var response = await _api.PostAnonymousAsync<MfaAccountRecoveryVerifyRequest, MfaAccountRecoveryVerifyResponse>(
+                "api/auth/mfa-recovery/verify-otp", request);
+            return response.Data ?? new MfaAccountRecoveryVerifyResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "The verification code could not be confirmed."
+            };
+        }
+
+        public async Task<MfaRecoveryEnrollmentStartResponse> StartMfaAccountRecoveryEnrollmentAsync(string recoveryGrant)
+        {
+            var response = await _api.PostAnonymousAsync<MfaAccountRecoveryEnrollmentStartRequest, MfaRecoveryEnrollmentStartResponse>(
+                "api/auth/mfa-recovery/start-enrollment",
+                new MfaAccountRecoveryEnrollmentStartRequest { RecoveryGrant = recoveryGrant });
+            return response.Data ?? new MfaRecoveryEnrollmentStartResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to start authenticator replacement."
+            };
+        }
+
+        public async Task<MfaRecoveryCompleteResponse> CompleteMfaAccountRecoveryAsync(MfaAccountRecoveryCompleteRequest request)
+        {
+            var response = await _api.PostAnonymousAsync<MfaAccountRecoveryCompleteRequest, MfaRecoveryCompleteResponse>(
+                "api/auth/mfa-recovery/complete", request);
+            return response.Data ?? new MfaRecoveryCompleteResponse
+            {
+                IsSuccess = false,
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to complete account recovery."
+            };
+        }
+
+        public async Task<OtpOperationResponse> BeginMfaRecoveryExternalLoginAsync(string provider, string emailProof)
+        {
+            var route = provider?.Trim().ToLowerInvariant() switch
+            {
+                "google" => "google",
+                "github" => "github",
+                "linkedin" => "linkedin",
+                "twitter" => "twitter",
+                _ => null
+            };
+
+            if (route == null)
+                return new OtpOperationResponse { IsSuccess = false, Message = "This sign-in provider is not supported." };
+
+            var response = await _api.PostAnonymousAsync<MfaAccountRecoveryExternalStartRequest, OtpOperationResponse>(
+                $"api/auth/mfa-recovery/external/{route}/begin",
+                new MfaAccountRecoveryExternalStartRequest { EmailProof = emailProof });
+
+            if (!response.IsSuccess || response.Data == null || !response.Data.IsSuccess)
+                return response.Data ?? new OtpOperationResponse
+                {
+                    IsSuccess = false,
+                    Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to begin linked-provider verification."
+                };
+
+            var apiBaseUrl = _configuration["ApiSettings:BaseUrl"]?.TrimEnd('/');
+            if (string.IsNullOrWhiteSpace(apiBaseUrl))
+                return new OtpOperationResponse { IsSuccess = false, Message = "The authentication service URL is not configured." };
+
+            _nav.NavigateTo($"{apiBaseUrl}/api/auth/mfa-recovery/{route}-login", forceLoad: true);
+            return response.Data;
+        }
+
         public async Task<TotpStatusResponse> GetTotpStatusAsync()
         {
             var response = await _api.GetAsync<TotpStatusResponse>("api/auth/totp/status");
