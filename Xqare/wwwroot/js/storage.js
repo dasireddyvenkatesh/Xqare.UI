@@ -36,6 +36,20 @@ window.sessionRefreshCoordinator = (() => {
             return await execute();
         },
 
+        runExclusiveAction: async (dotNetReference, methodName) => {
+            const execute = () => dotNetReference.invokeMethodAsync(methodName);
+
+            if (navigator.locks && typeof navigator.locks.request === "function") {
+                return await navigator.locks.request(
+                    "xqare-auth-refresh",
+                    { mode: "exclusive" },
+                    execute
+                );
+            }
+
+            return await execute();
+        },
+
         registerLogoutListener: dotNetReference => {
             const currentChannel = getChannel();
             if (!currentChannel)
