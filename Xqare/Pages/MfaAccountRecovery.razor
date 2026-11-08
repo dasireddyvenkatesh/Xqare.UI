@@ -9,13 +9,27 @@
 @inject ISnackbar Snackbar
 @inject Microsoft.JSInterop.IJSRuntime JS
 
-<section class="mfa-recovery-page">
-    <MudPaper Elevation="0" Class="mfa-recovery-card">
-        <MudText Class="recovery-brand">X<span>QARE</span></MudText>
-        <MudText Typo="Typo.h5" Class="recovery-title">Recover your authenticator</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="recovery-intro">
-            Verify your account, connect a new authenticator, and replace your recovery codes.
-        </MudText>
+<section>
+    <MudGrid Class="login-wrapper" GutterSize="0">
+        <MudItem xs="12" md="6" Class="left-panel d-none d-md-flex">
+            <MudStack Class="left-content">
+                <MudText Class="logo-text">X<span>QARE</span></MudText>
+                <MudText Class="hero-title mt-8">
+                    Securely restore your <span>account access</span>
+                </MudText>
+                <MudText Class="hero-sub mt-4">
+                    Verify your identity and set up a new authenticator to get back to your career growth journey.
+                </MudText>
+            </MudStack>
+        </MudItem>
+
+        <MudItem xs="12" md="6" Class="right-panel">
+            <MudPaper Elevation="0" Class="auth-container recovery-auth-container">
+                <MudText Class="mobile-logo d-block d-md-none">X<span>QARE</span></MudText>
+                <MudText Class="auth-title">Recover your authenticator</MudText>
+                <MudText Class="auth-subtitle recovery-intro">
+                    Verify your account, connect a new authenticator, and replace your recovery codes.
+                </MudText>
 
         <MudStepper ActiveIndex="@_step" Class="recovery-stepper">
             <MudStep Title="Verify account" />
@@ -139,7 +153,9 @@
             <MudDivider Class="my-4" />
             <MudButton FullWidth Variant="Variant.Text" Href="/login" Color="Color.Secondary">Back to sign in</MudButton>
         }
-    </MudPaper>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
 </section>
 
 @code {
