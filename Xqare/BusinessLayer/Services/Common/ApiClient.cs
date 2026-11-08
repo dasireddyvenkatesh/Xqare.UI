@@ -106,36 +106,58 @@ namespace Xqare.BusinessLayer.Services.Common
                     return SessionRestoreOutcome.Restored;
                 }
 
-                using var request = CreateRequest(
-                    HttpMethod.Post,
-                    "api/auth/refresh-token",
-                    new StringContent(string.Empty));
-
-                // Bound session restoration so the protected-route UI can offer a
-                // retry. A timeout/network failure is not proof that the session is invalid.
+                // Production and sandbox are different browser origins but currently
+                // share the API's HttpOnly refresh cookie. Web Locks cannot coordinate
+                // those origins. If another origin rotates the cookie concurrently,
+                // retry briefly so this request can use the newly-set shared cookie.
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(12));
-                using var response = await _http.SendAsync(request, timeout.Token);
+                HttpResponseMessage? response = null;
 
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                for (var attempt = 0; attempt < 3; attempt++)
                 {
-                    _refreshSessionRejected = true;
-                    return SessionRestoreOutcome.Rejected;
+                    using var request = CreateRequest(
+                        HttpMethod.Post,
+                        "api/auth/refresh-token",
+                        new StringContent(string.Empty));
+
+                    response = await _http.SendAsync(request, timeout.Token);
+                    if (response.StatusCode != HttpStatusCode.Unauthorized || attempt == 2)
+                        break;
+
+                    response.Dispose();
+                    response = null;
+
+                    // A competing refresh may have committed in the API database
+                    // just before its Set-Cookie response reaches this browser.
+                    await Task.Delay(attempt == 0 ? 150 : 300, timeout.Token);
                 }
 
-                if (!response.IsSuccessStatusCode)
-                    return SessionRestoreOutcome.Unavailable;
+                using (response)
+                {
+                    if (response == null)
+                        return SessionRestoreOutcome.Unavailable;
 
-                var result = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>(
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
-                    timeout.Token);
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        _refreshSessionRejected = true;
+                        return SessionRestoreOutcome.Rejected;
+                    }
 
-                if (result == null || !result.IsSuccess || string.IsNullOrWhiteSpace(result.AccessToken))
-                    return SessionRestoreOutcome.Unavailable;
+                    if (!response.IsSuccessStatusCode)
+                        return SessionRestoreOutcome.Unavailable;
 
-                _refreshSessionRejected = false;
-                await _tokenService.SetTokenAsync(result.AccessToken);
-                _authStateProvider.NotifyUserAuthentication();
-                return SessionRestoreOutcome.Restored;
+                    var result = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>(
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
+                        timeout.Token);
+
+                    if (result == null || !result.IsSuccess || string.IsNullOrWhiteSpace(result.AccessToken))
+                        return SessionRestoreOutcome.Unavailable;
+
+                    _refreshSessionRejected = false;
+                    await _tokenService.SetTokenAsync(result.AccessToken);
+                    _authStateProvider.NotifyUserAuthentication();
+                    return SessionRestoreOutcome.Restored;
+                }
             }
             catch (OperationCanceledException)
             {
