@@ -20,9 +20,12 @@
     font-weight: 800;
 }
 
-::deep .logo-text span,
-::deep .mobile-logo span {
+::deep .logo-text span {
     color: var(--xq-auth-highlight);
+}
+
+::deep .mobile-logo span {
+    color: var(--xq-auth-accent);
 }
 
 ::deep .hero-title {
