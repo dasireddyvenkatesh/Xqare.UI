@@ -477,6 +477,11 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return "completed";
         }
 
+        // Register cross-tab logout handling independently from session restoration.
+        // Every tab must listen even when it already has a valid access token.
+        public Task InitializeCrossTabSessionAsync()
+            => EnsureCrossTabLogoutListenerAsync();
+
         private async Task EnsureCrossTabLogoutListenerAsync()
         {
             if (_logoutListenerRegistered)
