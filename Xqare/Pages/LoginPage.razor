@@ -366,7 +366,7 @@
         await AuthService.LoginWithTwitter();
     }
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         var uri = Nav.ToAbsoluteUri(Nav.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
@@ -393,10 +393,22 @@
             var externalStatus = externalValue.ToString();
             if (string.Equals(externalStatus, "success", StringComparison.OrdinalIgnoreCase))
             {
-                // Session restoration runs in the background. The protected dashboard
-                // route waits for that shared restore attempt before redirecting to login.
-                Nav.NavigateTo("/dashboard", forceLoad: false, replace: true);
-                return Task.CompletedTask;
+                // Remove the one-time code from the address bar before exchanging it.
+                query.TryGetValue("code", out var codeValue);
+                Nav.NavigateTo("/login", forceLoad: false, replace: true);
+
+                var exchange = await AuthService.CompleteExternalLoginAsync(codeValue.ToString());
+                if (exchange.IsSuccess && !string.IsNullOrWhiteSpace(exchange.AccessToken))
+                {
+                    Snackbar.Add("Signed in successfully.", Severity.Success);
+                    Nav.NavigateTo("/dashboard", replace: true);
+                }
+                else
+                {
+                    Snackbar.Add(exchange.Message ?? "Google sign-in could not be completed. Please try again.", Severity.Error);
+                }
+
+                return;
             }
 
             if (string.Equals(externalStatus, "failed", StringComparison.OrdinalIgnoreCase))
@@ -411,6 +423,6 @@
             }
         }
 
-        return Task.CompletedTask;
+        return;
     }
 }
