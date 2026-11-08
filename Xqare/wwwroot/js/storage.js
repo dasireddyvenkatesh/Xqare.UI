@@ -1,7 +1,14 @@
 window.sessionStorageHelper = {
     set: (key, value) => sessionStorage.setItem(key, value),
     get: (key) => sessionStorage.getItem(key),
-    remove: (key) => sessionStorage.removeItem(key)
+    remove: (key) => sessionStorage.removeItem(key),
+
+    // A non-sensitive hint survives tab closure. It only indicates that this
+    // browser previously established a session; the HttpOnly cookie and API
+    // remain authoritative when the session is restored.
+    hasSessionHint: () => localStorage.getItem("xq_session_hint_v1") === "1",
+    setSessionHint: () => localStorage.setItem("xq_session_hint_v1", "1"),
+    clearSessionHint: () => localStorage.removeItem("xq_session_hint_v1")
 };
 
 // Coordinate refresh-token rotation and logout between tabs on this UI origin.
