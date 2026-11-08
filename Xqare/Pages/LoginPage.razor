@@ -371,20 +371,30 @@
         var uri = Nav.ToAbsoluteUri(Nav.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
-        // OAuth MFA returns with an API-hosted HttpOnly challenge cookie.
-        // No user identifier or challenge token is carried in the URL.
+        // OAuth MFA uses the same one-time exchange as a normal external login.
+        // The API sets its HttpOnly MFA cookie only after this frontend-origin request.
         if (query.TryGetValue("mfa", out var mfaValue) &&
             string.Equals(mfaValue.ToString(), "required", StringComparison.OrdinalIgnoreCase))
         {
-            mfaRequest = new VerifyMfaChallengeRequest { Factor = "totp" };
-            isMfaStep = true;
-            isRecoveryCodeStep = false;
-
-            if (query.TryGetValue("message", out var messageValue) &&
-                !string.IsNullOrWhiteSpace(messageValue.ToString()))
-                Snackbar.Add(messageValue.ToString(), Severity.Info);
-
+            query.TryGetValue("code", out var codeValue);
+            query.TryGetValue("message", out var messageValue);
             Nav.NavigateTo("/login", forceLoad: false, replace: true);
+
+            var exchange = await AuthService.CompleteExternalLoginAsync(codeValue.ToString());
+            if (exchange.IsSuccess && exchange.RequiresMfa)
+            {
+                mfaRequest = new VerifyMfaChallengeRequest { Factor = "totp" };
+                isMfaStep = true;
+                isRecoveryCodeStep = false;
+                Snackbar.Add(messageValue.ToString().Length > 0
+                    ? messageValue.ToString()
+                    : "Enter the six-digit code from your authenticator app.", Severity.Info);
+            }
+            else
+            {
+                Snackbar.Add(exchange.Message ?? "The verification request has expired. Please sign in again.", Severity.Error);
+            }
+
             return;
         }
 
