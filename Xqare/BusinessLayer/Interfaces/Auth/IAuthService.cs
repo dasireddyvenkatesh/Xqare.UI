@@ -7,6 +7,7 @@ namespace Xqare.BusinessLayer.Interfaces.Auth
         Task<SessionRestoreOutcome> InitializeAsync();
         Task InitializeCrossTabSessionAsync();
         Task<LoginResponse> LoginAsync(LoginRequest request);
+        Task<LoginResponse> CompleteExternalLoginAsync(string code);
         Task<OtpOperationResponse> ForgotPasswordAsync(ForgotPasswordRequest request);
         Task<OtpOperationResponse> ResetPasswordAsync(ResetPasswordRequest request);
         Task<RegisterResponse> RegisterAsync(RegisterRequest request);
