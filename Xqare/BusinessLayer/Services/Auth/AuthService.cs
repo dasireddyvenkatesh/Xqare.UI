@@ -448,6 +448,15 @@ namespace Xqare.BusinessLayer.Classes.Auth
         {
             try
             {
+                _logoutListenerReference ??= DotNetObjectReference.Create(this);
+                await _js.InvokeAsync<string>(
+                    "sessionRefreshCoordinator.runExclusiveAction",
+                    _logoutListenerReference,
+                    nameof(LogoutUnderBrowserLockAsync));
+            }
+            catch (JSException)
+            {
+                // If browser coordination is unavailable, still complete local/server logout.
                 await _api.CookieCredential<string>("api/auth/logout");
             }
             finally
@@ -459,6 +468,13 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 await BroadcastCrossTabLogoutAsync();
                 _nav.NavigateTo("/", false);
             }
+        }
+
+        [JSInvokable]
+        public async Task<string> LogoutUnderBrowserLockAsync()
+        {
+            await _api.CookieCredential<string>("api/auth/logout");
+            return "completed";
         }
 
         private async Task EnsureCrossTabLogoutListenerAsync()
