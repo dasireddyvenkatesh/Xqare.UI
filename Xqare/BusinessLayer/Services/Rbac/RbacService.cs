@@ -26,6 +26,18 @@ namespace Xqare.BusinessLayer.Services.Rbac
                 };
         }
 
+        public async Task<RbacRolesResult> GetAssignableRolesAsync()
+        {
+            var response = await _api.GetAsync<List<RoleResponse>>("api/admin/rbac/roles/assignable");
+            return response.Data is not null
+                ? new RbacRolesResult { IsSuccess = true, Roles = response.Data }
+                : new RbacRolesResult
+                {
+                    IsSuccess = false,
+                    Message = ExtractMessage(response.ErrorMessage) ?? "Assignable roles could not be loaded."
+                };
+        }
+
         public async Task<PermissionsResult> GetPermissionsAsync()
         {
             var response = await _api.GetAsync<List<PermissionResponse>>("api/admin/rbac/permissions");
