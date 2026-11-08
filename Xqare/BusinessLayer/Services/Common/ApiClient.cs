@@ -136,7 +136,7 @@ namespace Xqare.BusinessLayer.Services.Common
                 _refreshSessionRejected = false;
                 await _tokenService.SetTokenAsync(result.AccessToken);
                 _authStateProvider.NotifyUserAuthentication();
-                return SessionRestoreOutcome.Restored
+                return SessionRestoreOutcome.Restored;
             }
             catch (OperationCanceledException)
             {
