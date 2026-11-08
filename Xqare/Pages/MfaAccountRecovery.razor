@@ -17,7 +17,7 @@
             Verify your account, connect a new authenticator, and replace your recovery codes.
         </MudText>
 
-        <MudStepper ActiveIndex="@_step" Linear="true" Elevation="0" Class="recovery-stepper">
+        <MudStepper ActiveIndex="@_step" Class="recovery-stepper">
             <MudStep Title="Verify account" />
             <MudStep Title="Verify email" />
             <MudStep Title="New authenticator" />
@@ -31,13 +31,13 @@
             </MudAlert>
             <MudForm @ref="_form" Model="_request" Validation="_requestValidator.ToMudValidator()">
                 <MudTextField Label="Email address" @bind-Value="_request.Email" For="@(() => _request.Email)"
-                              InputType="InputType.Email" AutoComplete="email" MaxLength="256"
+                              InputType="InputType.Email" MaxLength="256"
                               Variant="Variant.Outlined" Immediate="true" />
                 @if (!_passwordless)
                 {
                     <MudTextField Label="Password (optional for social sign-in accounts)"
                                   @bind-Value="_request.Password" InputType="@(_showPassword ? InputType.Text : InputType.Password)"
-                                  AutoComplete="current-password" MaxLength="128" Variant="Variant.Outlined"
+                                  MaxLength="128" Variant="Variant.Outlined"
                                   Adornment="Adornment.End"
                                   AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                                   OnAdornmentClick="@(() => _showPassword = !_showPassword)" />
@@ -59,7 +59,7 @@
                 <MudTextField Label="Email address" Value="_otpRequest.Email" ReadOnly="true" Variant="Variant.Outlined" />
                 <MudTextField Label="Email verification code" @bind-Value="_otpRequest.OtpCode"
                               For="@(() => _otpRequest.OtpCode)" MaxLength="6" InputMode="InputMode.numeric"
-                              InputType="InputType.Text" AutoComplete="one-time-code" Immediate="true"
+                              InputType="InputType.Text" Immediate="true"
                               Variant="Variant.Outlined" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
                            OnClick="VerifyEmailCode" Class="recovery-primary">Verify email</MudButton>
