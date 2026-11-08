@@ -214,6 +214,10 @@
                                    OnClick="ToggleRecoveryCode" Class="resend-btn">
                             @(isRecoveryCodeStep ? "Use authenticator code" : "Use a recovery code")
                         </MudButton>
+                        <MudButton Href="/mfa-recovery" Variant="Variant.Text"
+                                   Color="Color.Secondary" Class="resend-btn">
+                            Lost access to your authenticator?
+                        </MudButton>
                         <MudButton Disabled="@_processing" FullWidth Variant="Variant.Filled"
                                    OnClick="Submit" Class="login-btn">
                             <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
