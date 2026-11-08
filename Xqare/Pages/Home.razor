@@ -1,7 +1,10 @@
 @page "/"
 @using MudBlazor
+@using Xqare.BusinessLayer.Interfaces.Auth
 @using Xqare.Wrappers.CommonWrapper
 @using Xqare.Wrappers.HomePageWrapper
+@inject IAuthService AuthService
+@inject ITokenService TokenService
 
 <HeaderWrapper/>
 <HeroContentUpdated/>
@@ -11,6 +14,28 @@
 <FAQWrapper/>
 <Footer/>
 
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            // Public visitors do not trigger session restoration. A small,
+            // non-sensitive hint lets returning signed-in users restore after
+            // sessionStorage is lost when the browser tab was closed.
+            if (!await TokenService.HasSessionHintAsync())
+                return;
+
+            await AuthService.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Home session restoration failed: {ex.Message}");
+        }
+    }
+}
 
 @* <AuthWrapper />
 <PromoBarWrapper IsExpired="true" OfferEndsAt="@offerEnd"
