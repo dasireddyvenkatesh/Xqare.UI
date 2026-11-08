@@ -1,5 +1,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Xqare.Pages
+@using Xqare.BusinessLayer.Interfaces.Auth
+@inject IAuthService AuthService
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly"
@@ -14,3 +16,25 @@
         </Found>
     </Router>
 </CascadingAuthenticationState>
+
+@code {
+    private bool _crossTabSessionInitialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _crossTabSessionInitialized)
+            return;
+
+        _crossTabSessionInitialized = true;
+
+        try
+        {
+            // Register logout notifications only; do not restore a session here.
+            await AuthService.InitializeCrossTabSessionAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Cross-tab session listener initialization failed: {ex}");
+        }
+    }
+}
