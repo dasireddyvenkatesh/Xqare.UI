@@ -84,7 +84,7 @@
             </MudGrid>
             <MudButton FullWidth Variant="Variant.Text" Color="Color.Secondary" OnClick="RestartRecovery">Start over</MudButton>
         }
-        else if (_step == 2 && _enrollment != null)
+        else if (_step == 3 && _enrollment != null)
         {
             <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mb-4">
                 Scan this QR code with your new authenticator app. Your old authenticator remains active until the new code is confirmed.
@@ -100,12 +100,12 @@
                 <MudTextField Label="New authenticator code" @bind-Value="_completeRequest.Code"
                               For="@(() => _completeRequest.Code)" MaxLength="6"
                               InputMode="InputMode.numeric" InputType="InputType.Text"
-                              AutoComplete="one-time-code" Immediate="true" Variant="Variant.Outlined" />
+                              Immediate="true" Variant="Variant.Outlined" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
                            OnClick="CompleteRecovery" Class="recovery-primary">Confirm new authenticator</MudButton>
             </MudForm>
         }
-        else if (_step == 3)
+        else if (_step == 4)
         {
             <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mb-4">
                 Your authenticator has been replaced. All previous sessions and recovery codes have been invalidated.
