@@ -385,7 +385,7 @@
                 Snackbar.Add(messageValue.ToString(), Severity.Info);
 
             Nav.NavigateTo("/login", forceLoad: false, replace: true);
-            return Task.CompletedTask;
+            return;
         }
 
         if (query.TryGetValue("externalLogin", out var externalValue))
