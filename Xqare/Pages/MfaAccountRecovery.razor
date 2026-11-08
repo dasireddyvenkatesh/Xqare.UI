@@ -1,0 +1,364 @@
+@page "/mfa-recovery"
+@using MudBlazor
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.Auth
+@using Xqare.BusinessLayer.Validators
+@using Xqare.BusinessLayer.Validators.FluentValidation
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<section class="mfa-recovery-page">
+    <MudPaper Elevation="0" Class="mfa-recovery-card">
+        <MudText Class="recovery-brand">X<span>QARE</span></MudText>
+        <MudText Typo="Typo.h5" Class="recovery-title">Recover your authenticator</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="recovery-intro">
+            Verify your account, connect a new authenticator, and replace your recovery codes.
+        </MudText>
+
+        <MudStepper ActiveIndex="@_step" Linear="true" Elevation="0" Class="recovery-stepper">
+            <MudStep Title="Verify account" />
+            <MudStep Title="Verify email" />
+            <MudStep Title="New authenticator" />
+            <MudStep Title="Finish" />
+        </MudStepper>
+
+        @if (_step == 0)
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mb-4">
+                Use your account email. If you sign in only with a connected provider, leave the password empty and verify with that provider after the email code.
+            </MudAlert>
+            <MudForm @ref="_form" Model="_request" Validation="_requestValidator.ToMudValidator()">
+                <MudTextField Label="Email address" @bind-Value="_request.Email" For="@(() => _request.Email)"
+                              InputType="InputType.Email" AutoComplete="email" MaxLength="256"
+                              Variant="Variant.Outlined" Immediate="true" />
+                @if (!_passwordless)
+                {
+                    <MudTextField Label="Password (optional for social sign-in accounts)"
+                                  @bind-Value="_request.Password" InputType="@(_showPassword ? InputType.Text : InputType.Password)"
+                                  AutoComplete="current-password" MaxLength="128" Variant="Variant.Outlined"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                  OnAdornmentClick="@(() => _showPassword = !_showPassword)" />
+                }
+                <MudCheckBox T="bool" @bind-Value="_passwordless" Color="Color.Primary" Label="I use Google, GitHub, LinkedIn or Twitter and don't have an XQARE password" />
+                <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
+                           OnClick="RequestRecovery" Class="recovery-primary">
+                    @if (_busy) { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> }
+                    Send verification code
+                </MudButton>
+            </MudForm>
+        }
+        else if (_step == 1)
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mb-4">
+                Enter the six-digit code sent to your registered email address.
+            </MudAlert>
+            <MudForm @ref="_form" Model="_otpRequest" Validation="_otpValidator.ToMudValidator()">
+                <MudTextField Label="Email address" Value="_otpRequest.Email" ReadOnly="true" Variant="Variant.Outlined" />
+                <MudTextField Label="Email verification code" @bind-Value="_otpRequest.OtpCode"
+                              For="@(() => _otpRequest.OtpCode)" MaxLength="6" InputMode="InputMode.numeric"
+                              InputType="InputType.Number" AutoComplete="one-time-code" Immediate="true"
+                              Variant="Variant.Outlined" />
+                <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
+                           OnClick="VerifyEmailCode" Class="recovery-primary">Verify email</MudButton>
+                <MudButton FullWidth Variant="Variant.Text" Color="Color.Secondary" Disabled="_busy"
+                           OnClick="BackToRequest">Use a different email</MudButton>
+            </MudForm>
+        }
+        else if (_step == 2 && _requiresProvider)
+        {
+            <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mb-4">
+                Email verified. Now prove ownership using a sign-in provider already connected to this XQARE account.
+            </MudAlert>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                Choose the same provider you previously linked. A new provider or an account with a matching email cannot be used.
+            </MudText>
+            <MudGrid Spacing="2">
+                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Google" Disabled="_busy" OnClick="@(() => ContinueWithProvider("google"))">Google</MudButton></MudItem>
+                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.GitHub" Disabled="_busy" OnClick="@(() => ContinueWithProvider("github"))">GitHub</MudButton></MudItem>
+                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.LinkedIn" Disabled="_busy" OnClick="@(() => ContinueWithProvider("linkedin"))">LinkedIn</MudButton></MudItem>
+                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Twitter" Disabled="_busy" OnClick="@(() => ContinueWithProvider("twitter"))">Twitter</MudButton></MudItem>
+            </MudGrid>
+            <MudButton FullWidth Variant="Variant.Text" Color="Color.Secondary" OnClick="RestartRecovery">Start over</MudButton>
+        }
+        else if (_step == 2 && _enrollment != null)
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mb-4">
+                Scan this QR code with your new authenticator app. Your old authenticator remains active until the new code is confirmed.
+            </MudAlert>
+            @if (!string.IsNullOrWhiteSpace(_enrollment.QrCodeDataUri))
+            {
+                <div class="recovery-qr"><img src="@_enrollment.QrCodeDataUri" alt="New authenticator QR code" /></div>
+            }
+            <MudText Typo="Typo.subtitle2" Class="mt-3">Can't scan the QR code?</MudText>
+            <MudText Typo="Typo.body2" Class="recovery-secret">@_enrollment.Secret</MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">Enter the six-digit code shown by the new authenticator app.</MudText>
+            <MudForm @ref="_form" Model="_completeRequest" Validation="_completeValidator.ToMudValidator()">
+                <MudTextField Label="New authenticator code" @bind-Value="_completeRequest.Code"
+                              For="@(() => _completeRequest.Code)" MaxLength="6"
+                              InputMode="InputMode.numeric" InputType="InputType.Number"
+                              AutoComplete="one-time-code" Immediate="true" Variant="Variant.Outlined" />
+                <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
+                           OnClick="CompleteRecovery" Class="recovery-primary">Confirm new authenticator</MudButton>
+            </MudForm>
+        }
+        else if (_step == 3)
+        {
+            <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mb-4">
+                Your authenticator has been replaced. All previous sessions and recovery codes have been invalidated.
+            </MudAlert>
+            <MudText Typo="Typo.subtitle1" Class="mb-2">Your new recovery codes</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                Save these codes somewhere secure. Each code can be used once. You will not be able to view them again.
+            </MudText>
+            <div class="recovery-codes">
+                @foreach (var code in _recoveryCodes)
+                {
+                    <MudText Typo="Typo.body2" Class="recovery-code">@code</MudText>
+                }
+            </div>
+            <MudButton FullWidth Variant="Variant.Outlined" Color="Color.Primary" OnClick="CopyRecoveryCodes" Class="mt-3">
+                <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Class="mr-2" /> Copy recovery codes
+            </MudButton>
+            <MudCheckBox T="bool" @bind-Value="_savedCodes" Color="Color.Primary" Label="I have saved these recovery codes securely" />
+            <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_savedCodes)"
+                       OnClick="@(() => Nav.NavigateTo("/login", replace: true))" Class="recovery-primary">
+                Continue to sign in
+            </MudButton>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true" Class="mt-4">@_error</MudAlert>
+        }
+        @if (_step < 3)
+        {
+            <MudDivider Class="my-4" />
+            <MudButton FullWidth Variant="Variant.Text" Href="/login" Color="Color.Secondary">Back to sign in</MudButton>
+        }
+    </MudPaper>
+</section>
+
+@code {
+    private MudForm? _form;
+    private readonly MfaAccountRecoveryRequest _request = new();
+    private readonly MfaAccountRecoveryRequestValidator _requestValidator = new();
+    private readonly MfaAccountRecoveryVerifyRequest _otpRequest = new();
+    private readonly MfaAccountRecoveryOtpValidator _otpValidator = new();
+    private readonly MfaAccountRecoveryCompleteRequest _completeRequest = new();
+    private readonly MfaRecoveryCompleteRequestValidator _completeValidator = new();
+    private MfaRecoveryEnrollmentStartResponse? _enrollment;
+    private IReadOnlyList<string> _recoveryCodes = Array.Empty<string>();
+    private string? _emailProof;
+    private bool _requiresProvider;
+    private bool _passwordless;
+    private bool _showPassword;
+    private bool _busy;
+    private bool _savedCodes;
+    private int _step;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+        if (string.IsNullOrEmpty(uri.Fragment))
+            return;
+
+        var fragment = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery("?" + uri.Fragment.TrimStart('#'));
+        if (!fragment.TryGetValue("recoveryGrant", out var grant) ||
+            string.IsNullOrWhiteSpace(grant))
+            return;
+
+        Nav.NavigateTo("/mfa-recovery", replace: true);
+        _completeRequest.RecoveryGrant = grant.ToString();
+        await StartEnrollmentAsync();
+    }
+
+    private async Task RequestRecovery()
+    {
+        if (_busy || _form == null) return;
+        _busy = true;
+        _error = null;
+        try
+        {
+            await _form.ValidateAsync();
+            if (!_form.IsValid) return;
+
+            var response = await AuthService.RequestMfaAccountRecoveryAsync(new MfaAccountRecoveryRequest
+            {
+                Email = _request.Email,
+                Password = _passwordless ? null : _request.Password
+            });
+
+            // The API intentionally returns a generic response to avoid account enumeration.
+            // Proceed to the OTP step without confirming whether the account exists.
+            _otpRequest.Email = _request.Email.Trim();
+            _step = 1;
+            Snackbar.Add(response.Message ?? "If the account is eligible, a verification code has been sent.", response.IsSuccess ? Severity.Info : Severity.Warning);
+        }
+        catch
+        {
+            _error = "We couldn't start recovery. Please try again.";
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task VerifyEmailCode()
+    {
+        if (_busy || _form == null) return;
+        _busy = true;
+        _error = null;
+        try
+        {
+            await _form.ValidateAsync();
+            if (!_form.IsValid) return;
+
+            var response = await AuthService.VerifyMfaAccountRecoveryOtpAsync(_otpRequest);
+            if (!response.IsSuccess)
+            {
+                _error = response.Message ?? "The code is invalid or expired. Request a new code and try again.";
+                return;
+            }
+
+            if (response.RequiresExternalVerification)
+            {
+                _emailProof = response.EmailProof;
+                _requiresProvider = !string.IsNullOrWhiteSpace(_emailProof);
+                if (!_requiresProvider)
+                {
+                    _error = "The linked-provider verification could not be started. Please restart recovery.";
+                    return;
+                }
+                _step = 2;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(response.RecoveryGrant))
+            {
+                _error = "The recovery authorization was not returned. Please start again.";
+                return;
+            }
+
+            _completeRequest.RecoveryGrant = response.RecoveryGrant;
+            await StartEnrollmentAsync();
+        }
+        catch
+        {
+            _error = "Email verification could not be completed. Please try again.";
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task ContinueWithProvider(string provider)
+    {
+        if (_busy || string.IsNullOrWhiteSpace(_emailProof)) return;
+        _busy = true;
+        _error = null;
+        try
+        {
+            var response = await AuthService.BeginMfaRecoveryExternalLoginAsync(provider, _emailProof);
+            if (!response.IsSuccess)
+                _error = response.Message ?? "Unable to continue with the selected provider.";
+        }
+        catch
+        {
+            _error = "Unable to open the selected provider. Please try again.";
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task StartEnrollmentAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_completeRequest.RecoveryGrant))
+        {
+            _error = "Your recovery session is missing. Please start again.";
+            return;
+        }
+
+        _busy = true;
+        _error = null;
+        try
+        {
+            _enrollment = await AuthService.StartMfaAccountRecoveryEnrollmentAsync(_completeRequest.RecoveryGrant);
+            if (!_enrollment.IsSuccess)
+            {
+                _error = _enrollment.Message ?? "Unable to prepare your new authenticator.";
+                return;
+            }
+            _step = 2;
+            _requiresProvider = false;
+        }
+        catch
+        {
+            _error = "Unable to prepare your new authenticator. Please try again.";
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task CompleteRecovery()
+    {
+        if (_busy || _form == null) return;
+        _busy = true;
+        _error = null;
+        try
+        {
+            await _form.ValidateAsync();
+            if (!_form.IsValid) return;
+
+            var response = await AuthService.CompleteMfaAccountRecoveryAsync(_completeRequest);
+            if (!response.IsSuccess)
+            {
+                _error = response.Message ?? "The authenticator code could not be verified.";
+                return;
+            }
+
+            _recoveryCodes = response.RecoveryCodes ?? Array.Empty<string>();
+            if (_recoveryCodes.Count == 0)
+            {
+                _error = "The authenticator was updated, but recovery codes were not returned. Contact support before signing in.";
+                return;
+            }
+            _step = 3;
+        }
+        catch
+        {
+            _error = "Account recovery could not be completed. Please try again.";
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task BackToRequest()
+    {
+        _step = 0;
+        _error = null;
+        _otpRequest.OtpCode = string.Empty;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RestartRecovery()
+    {
+        _step = 0;
+        _error = null;
+        _emailProof = null;
+        _requiresProvider = false;
+        _otpRequest.OtpCode = string.Empty;
+        _completeRequest.RecoveryGrant = string.Empty;
+        _completeRequest.Code = string.Empty;
+        _enrollment = null;
+    }
+
+    private async Task CopyRecoveryCodes()
+    {
+        try
+        {
+            await Microsoft.JSInterop.JSRuntimeExtensions.InvokeVoidAsync(
+                (Microsoft.JSInterop.IJSRuntime)typeof(Microsoft.JSInterop.IJSRuntime), "navigator.clipboard.writeText",
+                string.Join(Environment.NewLine, _recoveryCodes));
+        }
+        catch
+        {
+            Snackbar.Add("Copy was blocked by the browser. Select and copy the codes manually.", Severity.Warning);
+        }
+    }
+}
