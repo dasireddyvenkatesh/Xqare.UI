@@ -4,6 +4,7 @@
 @using Xqare.BusinessLayer.Interfaces.Auth
 @inject NavigationManager Nav
 @inject IAuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
 
 @if (_checkingSession)
 {
@@ -65,9 +66,21 @@ else if (_restorationSucceeded)
     private bool _restorationSucceeded;
     private bool _restoreStarted;
     private bool _redirectingToAccessDenied;
+    private string? _lastRequestedUri;
 
     protected override async Task OnParametersSetAsync()
     {
+        // AuthorizeRouteView may reuse this component when the user navigates
+        // between protected routes. A new URL gets its own restoration attempt.
+        var requestedUri = Nav.Uri;
+        if (!string.Equals(_lastRequestedUri, requestedUri, StringComparison.Ordinal))
+        {
+            _lastRequestedUri = requestedUri;
+            _restoreStarted = false;
+            _restoreUnavailable = false;
+            _restorationSucceeded = false;
+            _redirectingToAccessDenied = false;
+        }
         // AuthorizeRouteView renders this fragment for both anonymous users and
         // authenticated users who fail the route's authorization requirements.
         // The supplied state lets us distinguish those cases correctly.
@@ -99,10 +112,17 @@ else if (_restorationSucceeded)
 
             if (outcome == SessionRestoreOutcome.Restored)
             {
-                // Do not navigate here. AuthService/ApiClient publishes the new
-                // authentication state. AuthorizeRouteView then re-evaluates the
-                // original route: authorized users continue; others reach the
-                // authenticated NotAuthorized branch and are sent to Access Denied.
+                var restoredState = await AuthStateProvider.GetAuthenticationStateAsync();
+                if (restoredState.User.Identity?.IsAuthenticated != true)
+                {
+                    // A successful HTTP response is not enough: the returned JWT
+                    // must also satisfy the UI's session/expiry validation.
+                    NavigateToLogin();
+                    return;
+                }
+
+                // Do not navigate here. AuthorizeRouteView re-evaluates the
+                // original route against the refreshed principal.
                 _restorationSucceeded = true;
                 return;
             }
