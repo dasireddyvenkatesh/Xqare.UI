@@ -550,7 +550,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 // authentication state changes. Navigate only after this tab has
                 // independently restored and validated its own access token.
                 var currentUri = _nav.ToAbsoluteUri(_nav.Uri);
-                var currentPath = _nav.ToBaseRelativePath(currentUri).Split('?', '#')[0].Trim('/');
+                var currentPath = _nav.ToBaseRelativePath(currentUri.ToString()).Split('?', '#')[0].Trim('/');
                 if (string.Equals(currentPath, "login", StringComparison.OrdinalIgnoreCase))
                 {
                     var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(currentUri.Query);
