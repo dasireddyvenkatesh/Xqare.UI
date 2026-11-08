@@ -151,6 +151,11 @@
                                        Class="forgot-password-link">
                                 Forgot password?
                             </MudButton>
+                            <MudButton Href="/mfa-recovery"
+                                       Variant="Variant.Text"
+                                       Class="forgot-password-link">
+                                Lost authenticator?
+                            </MudButton>
                         </div>
 
                         <MudButton Disabled="@_processing"
@@ -375,6 +380,17 @@
             ? uri.Query
             : "?" + uri.Fragment.TrimStart('#');
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(callbackState);
+
+        // MFA account recovery returns its short-lived grant in the URL fragment.
+        // Transfer it to the dedicated recovery route and immediately clear this URL.
+        if (query.TryGetValue("mfaRecovery", out var recoveryValue) &&
+            string.Equals(recoveryValue.ToString(), "success", StringComparison.OrdinalIgnoreCase) &&
+            query.TryGetValue("grant", out var recoveryGrant) &&
+            !string.IsNullOrWhiteSpace(recoveryGrant))
+        {
+            Nav.NavigateTo($"/mfa-recovery#recoveryGrant={Uri.EscapeDataString(recoveryGrant.ToString())}", replace: true);
+            return;
+        }
 
         // OAuth MFA uses the same one-time exchange as a normal external login.
         // The API sets its HttpOnly MFA cookie only after this frontend-origin request.
