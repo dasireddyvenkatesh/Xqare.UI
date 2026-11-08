@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
 using System.Text.Json;
 using Xqare.BusinessLayer.DTO;
 using Xqare.BusinessLayer.Interfaces.Auth;
@@ -15,10 +16,13 @@ namespace Xqare.BusinessLayer.Classes.Auth
         private readonly NavigationManager _nav;
         private readonly AuthenticationStateProvider _authStateProvider;
         private readonly IConfiguration _configuration;
+        private readonly IJSRuntime _js;
+        private DotNetObjectReference<AuthService>? _logoutListenerReference;
+        private bool _logoutListenerRegistered;
 
         public AuthService(IDeviceService device, IApiClient api, ITokenService tokenService,
                             NavigationManager nav, AuthenticationStateProvider authStateProvider,
-                            IConfiguration configuration)
+                            IConfiguration configuration, IJSRuntime js)
         {
             _device = device;
             _api = api;
@@ -26,6 +30,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             _nav = nav;
             _authStateProvider = authStateProvider;
             _configuration = configuration;
+            _js = js;
         }
 
         private readonly object _initializeLock = new();
@@ -48,6 +53,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
         {
             try
             {
+                await EnsureCrossTabLogoutListenerAsync();
                 // A still-valid access token already exists in this tab's session storage.
                 // Use it immediately; do not make every application startup wait for a
                 // refresh-token API round-trip. The API remains authoritative and the
@@ -450,8 +456,50 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 if (_authStateProvider is JwtAuthStateProvider jwtAuthStateProvider)
                     jwtAuthStateProvider.NotifyUserLogout();
 
+                await BroadcastCrossTabLogoutAsync();
                 _nav.NavigateTo("/", false);
             }
+        }
+
+        private async Task EnsureCrossTabLogoutListenerAsync()
+        {
+            if (_logoutListenerRegistered)
+                return;
+
+            _logoutListenerReference ??= DotNetObjectReference.Create(this);
+            try
+            {
+                await _js.InvokeVoidAsync(
+                    "sessionRefreshCoordinator.registerLogoutListener",
+                    _logoutListenerReference);
+                _logoutListenerRegistered = true;
+            }
+            catch (JSException)
+            {
+                // Cross-tab notification is an enhancement; local authentication
+                // remains functional if BroadcastChannel is unavailable.
+            }
+        }
+
+        private async Task BroadcastCrossTabLogoutAsync()
+        {
+            try
+            {
+                await _js.InvokeVoidAsync("sessionRefreshCoordinator.broadcastLogout");
+            }
+            catch (JSException)
+            {
+                // Never block local logout on cross-tab notification support.
+            }
+        }
+
+        [JSInvokable]
+        public async Task HandleCrossTabLogoutAsync()
+        {
+            await _tokenService.ClearAsync();
+            _api.ResetRefreshState();
+            if (_authStateProvider is JwtAuthStateProvider jwt)
+                jwt.NotifyUserLogout();
         }
 
         private async Task PrepareForExternalSignInAsync()
