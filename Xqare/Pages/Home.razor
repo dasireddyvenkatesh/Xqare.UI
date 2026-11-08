@@ -1,42 +1,7 @@
-﻿@page "/"
+@page "/"
 @using MudBlazor
 @using Xqare.Wrappers.CommonWrapper
 @using Xqare.Wrappers.HomePageWrapper
-@using Xqare.BusinessLayer.Interfaces.Auth
-@inject IAuthService AuthService
-@inject ILogger<Home> Logger
-
-
-@code {
-    DateTime offerEnd = DateTime.UtcNow.AddHours(6);
-
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Home is public, but its header must reflect an existing session.
-            // Restore in the background so the public page is never blocked.
-            _ = RestoreHomeSessionSafelyAsync();
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private async Task RestoreHomeSessionSafelyAsync()
-    {
-        try
-        {
-            await AuthService.InitializeAsync();
-        }
-        catch (Exception ex)
-        {
-            // Home remains usable with its anonymous header if session restoration
-            // is unavailable. A successful restore notifies AuthorizeView automatically.
-            Logger.LogWarning(ex, "Home page session restoration failed.");
-        }
-    }
-}
-
 
 <HeaderWrapper/>
 <HeroContentUpdated/>
