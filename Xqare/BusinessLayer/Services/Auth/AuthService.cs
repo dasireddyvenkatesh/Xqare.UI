@@ -159,6 +159,29 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
         }
 
+        public async Task<LoginResponse> CompleteExternalLoginAsync(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                return new LoginResponse { IsSuccess = false, Message = "The sign-in exchange is missing. Please try again." };
+
+            var response = await _api.PostAnonymousAsync<string, LoginResponse>(
+                "api/auth/external-login/exchange", code);
+
+            if (!response.IsSuccess || response.Data == null)
+                return new LoginResponse
+                {
+                    IsSuccess = false,
+                    Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
+                        ?? "Google sign-in could not be completed. Please try again."
+                };
+
+            if (!response.Data.IsSuccess || string.IsNullOrWhiteSpace(response.Data.AccessToken))
+                return response.Data;
+
+            await ApplySessionAsync(response.Data);
+            return response.Data;
+        }
+
         public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
         {
 
