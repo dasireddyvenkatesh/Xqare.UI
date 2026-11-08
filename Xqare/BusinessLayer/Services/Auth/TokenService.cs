@@ -27,9 +27,10 @@ public class TokenService : ITokenService
             _cachedToken = await _js.InvokeAsync<string?>("sessionStorageHelper.get", Key);
             return _cachedToken;
         }
-        catch
+        catch (Exception ex)
         {
-            // JS not ready yet (rare in WASM but safe to handle)
+            // Storage access can be unavailable in restricted browser contexts.
+            Console.Error.WriteLine($"Unable to read the tab access token from sessionStorage: {ex.Message}");
             return null;
         }
     }
@@ -41,7 +42,10 @@ public class TokenService : ITokenService
         {
             await _js.InvokeVoidAsync("sessionStorageHelper.set", Key, accessToken);
         }
-        catch { /* ignore if JS not ready */ }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Unable to persist the tab access token in sessionStorage: {ex.Message}");
+        }
     }
 
     public async Task ClearAsync()
@@ -51,6 +55,9 @@ public class TokenService : ITokenService
         {
             await _js.InvokeVoidAsync("sessionStorageHelper.remove", Key);
         }
-        catch { /* ignore */ }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Unable to clear the tab access token from sessionStorage: {ex.Message}");
+        }
     }
 }
