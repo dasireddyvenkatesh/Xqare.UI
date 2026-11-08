@@ -56,8 +56,11 @@ window.sessionRefreshCoordinator = (() => {
                 return false;
 
             logoutListener = event => {
-                if (event.data?.type === "logout")
+                if (event.data?.type === "logout") {
                     dotNetReference.invokeMethodAsync("HandleCrossTabLogoutAsync");
+                } else if (event.data?.type === "session-established") {
+                    dotNetReference.invokeMethodAsync("HandleCrossTabSessionEstablishedAsync");
+                }
             };
 
             currentChannel.removeEventListener("message", logoutListener);
@@ -67,6 +70,10 @@ window.sessionRefreshCoordinator = (() => {
 
         broadcastLogout: () => {
             getChannel()?.postMessage({ type: "logout" });
+        },
+
+        broadcastSessionEstablished: () => {
+            getChannel()?.postMessage({ type: "session-established" });
         }
     };
 })();
