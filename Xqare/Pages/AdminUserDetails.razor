@@ -174,22 +174,16 @@
                         </div>
                         <MudDivider Class="admin-divider" />
 
-                        @if (_rolesLoading)
-                        {
-                            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-                        }
-                        else if (_roles.Count == 0)
-                        {
-                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-4">
-                                No roles are available to assign.
-                            </MudText>
-                        }
-                        else
-                        {
-                            @* RBAC_ASSIGNMENTS_MANAGE grants the mutation controls only; it does not grant role-catalogue visibility. *@
-                            <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
-                                <Authorized Context="assignRoleContext">
-                                    @if (_user.IsActive)
+                        @* Assignment controls are shown only to actors with RBAC_ASSIGNMENTS_MANAGE. *@
+                        <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
+                            <Authorized Context="assignRoleContext">
+                                @if (_user.IsActive)
+                                {
+                                    @if (_rolesLoading)
+                                    {
+                                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                                    }
+                                    else if (AvailableRoles.Any())
                                     {
                                         <MudGrid Spacing="2" Class="pa-3">
                                             <MudItem xs="12" sm="8" md="6">
@@ -215,12 +209,18 @@
                                     else
                                     {
                                         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-3">
-                                            Roles cannot be assigned while this account is disabled.
+                                            No roles are available to assign.
                                         </MudText>
                                     }
-                                </Authorized>
-                            </AuthorizeView>
-                        }
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-3">
+                                        Roles cannot be assigned while this account is disabled.
+                                    </MudText>
+                                }
+                            </Authorized>
+                        </AuthorizeView>
 
                         @if (_user.RoleAssignments.Count == 0)
                         {
@@ -318,7 +318,7 @@
         _rolesLoading = true;
         try
         {
-            var result = await RbacService.GetRolesAsync();
+            var result = await RbacService.GetAssignableRolesAsync();
             if (result.IsSuccess)
                 _roles = result.Roles;
             else
@@ -430,10 +430,10 @@
         {
             _user = await AdminService.GetUserDetailsAsync(UserId);
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var canViewRoles = await AuthorizationService.AuthorizeAsync(
-                authState.User, null, PermissionPolicies.RbacRolesView);
+            var canManageAssignments = await AuthorizationService.AuthorizeAsync(
+                authState.User, null, PermissionPolicies.RbacAssignmentsManage);
 
-            if (canViewRoles.Succeeded)
+            if (canManageAssignments.Succeeded)
                 await LoadAssignableRolesAsync();
         }
         catch { _user = null; }
