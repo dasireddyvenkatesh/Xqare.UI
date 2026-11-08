@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.JSInterop;
 using Xqare.BusinessLayer.Classes.Auth;
 using Xqare.BusinessLayer.DTO;
 using Xqare.BusinessLayer.Interfaces.Auth;
@@ -15,14 +16,16 @@ namespace Xqare.BusinessLayer.Services.Common
         private readonly HttpClient _http;
         private readonly ITokenService _tokenService;
         private readonly JwtAuthStateProvider _authStateProvider;
+        private readonly IJSRuntime _js;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
         private volatile bool _refreshSessionRejected;
 
-        public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider)
+        public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider, IJSRuntime js)
         {
             _http = http;
             _tokenService = tokenService;
             _authStateProvider = authStateProvider;
+            _js = js;
         }
 
         private async Task<string?> AttachTokenAsync(HttpRequestMessage request)
@@ -44,6 +47,41 @@ namespace Xqare.BusinessLayer.Services.Common
         }
 
         private async Task<SessionRestoreOutcome> TryRefreshTokenAsync(string? accessTokenUsed)
+        {
+            // Web Locks serialize refresh-token rotation across tabs on this UI origin.
+            // The access token remains tab-scoped in sessionStorage; each tab obtains
+            // its own access token after it acquires the lock.
+            using var dotNetReference = DotNetObjectReference.Create(this);
+
+            try
+            {
+                var outcome = await _js.InvokeAsync<string>(
+                    "sessionRefreshCoordinator.runExclusive",
+                    dotNetReference,
+                    nameof(RefreshTokenUnderBrowserLockAsync),
+                    accessTokenUsed);
+
+                return Enum.TryParse<SessionRestoreOutcome>(outcome, out var parsedOutcome)
+                    ? parsedOutcome
+                    : SessionRestoreOutcome.Unavailable;
+            }
+            catch (JSException)
+            {
+                // A failed browser-coordination call is not proof that the refresh
+                // session is invalid. Leave the session intact and allow a retry.
+                return SessionRestoreOutcome.Unavailable;
+            }
+            catch (OperationCanceledException)
+            {
+                return SessionRestoreOutcome.Unavailable;
+            }
+        }
+
+        [JSInvokable]
+        public async Task<string> RefreshTokenUnderBrowserLockAsync(string? accessTokenUsed)
+            => (await TryRefreshTokenCoreAsync(accessTokenUsed)).ToString();
+
+        private async Task<SessionRestoreOutcome> TryRefreshTokenCoreAsync(string? accessTokenUsed)
         {
             await _refreshLock.WaitAsync();
             try
