@@ -1,5 +1,6 @@
 using FluentValidation;
 using Xqare.BusinessLayer.DTO;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Validators
 {
@@ -9,9 +10,9 @@ namespace Xqare.BusinessLayer.Validators
         {
             RuleFor(x => x.Email)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("Email address is required.")
-                .MaximumLength(256).WithMessage("Email address cannot exceed 256 characters.")
-                .Must(EmailValidationRules.IsValid).WithMessage("Enter a valid email address.");
+                .NotEmpty().WithMessage(CommonValidationMessages.EmailRequired)
+                .MaximumLength(256).WithMessage(CommonValidationMessages.EmailTooLong)
+                .Must(EmailValidationRules.IsValid).WithMessage(CommonValidationMessages.EmailInvalid);
         }
     }
 }

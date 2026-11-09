@@ -1,5 +1,6 @@
 using FluentValidation;
 using Xqare.BusinessLayer.DTO;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Validators
 {
@@ -11,16 +12,16 @@ namespace Xqare.BusinessLayer.Validators
         {
             RuleFor(x => x.Factor)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("Choose a verification method.")
+                .NotEmpty().WithMessage(MfaValidationMessages.MethodRequired)
                 .Must(value => AllowedFactors.Contains(value.Trim(), StringComparer.OrdinalIgnoreCase))
-                .WithMessage("Choose a supported verification method.");
+                .WithMessage(MfaValidationMessages.MethodUnsupported);
 
             RuleFor(x => x.ChallengeToken).MaximumLength(512);
 
             RuleFor(x => x.Code)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("A verification code is required.")
-                .MaximumLength(36).WithMessage("The verification code is too long.")
+                .NotEmpty().WithMessage(MfaValidationMessages.CodeRequired)
+                .MaximumLength(36).WithMessage(MfaValidationMessages.CodeTooLong)
                 .Must((request, value) =>
                 {
                     var code = value?.Trim() ?? string.Empty;
@@ -41,7 +42,7 @@ namespace Xqare.BusinessLayer.Validators
 
                     return code.Length == 6 && code.All(char.IsDigit);
                 })
-                .WithMessage("Enter a valid six-digit authenticator code or recovery code.");
+                .WithMessage(MfaValidationMessages.InvalidAuthenticatorOrRecoveryCode);
         }
     }
 }
