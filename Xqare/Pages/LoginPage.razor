@@ -1,4 +1,6 @@
 ﻿@page "/login"
+@implements IDisposable
+@inject RateLimitState RateLimits
 @using MudBlazor
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.Auth
@@ -58,6 +60,8 @@
                 <MudText Class="auth-title">
                     @(isMfaStep ? "Verify your identity" : "Sign in to your account")
                 </MudText>
+
+                <RateLimitNotice Policy="@(isMfaStep ? "auth-otp-ip" : "auth-login-ip")" OnTick="HandleRateLimitTick" />
 
                 @if (!isMfaStep)
                 {
@@ -162,7 +166,7 @@
                             </MudButton>
                         </div>
 
-                        <MudButton Disabled="@_processing"
+                        <MudButton Disabled="@(_processing || RateLimits.IsBlocked(isMfaStep ? "auth-otp-ip" : "auth-login-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
@@ -261,6 +265,10 @@
 
 
     void TogglePassword() => showPassword = !showPassword;
+
+    private Task HandleRateLimitTick() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() { }
 
     async Task Submit()
     {
