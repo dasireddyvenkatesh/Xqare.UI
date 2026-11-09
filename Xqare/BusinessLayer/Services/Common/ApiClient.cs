@@ -8,6 +8,7 @@ using Xqare.BusinessLayer.Classes.Auth;
 using Xqare.BusinessLayer.DTO;
 using Xqare.BusinessLayer.Interfaces.Auth;
 using Xqare.BusinessLayer.Interfaces.Common;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Services.Common
 {
@@ -235,7 +236,7 @@ namespace Xqare.BusinessLayer.Services.Common
                     {
                         IsSuccess = false,
                         StatusCode = HttpStatusCode.Unauthorized,
-                        ErrorMessage = "Session expired. Please sign in again."
+                        ErrorMessage = SessionMessages.Expired
                     };
                 }
 
@@ -265,7 +266,7 @@ namespace Xqare.BusinessLayer.Services.Common
                         {
                             IsSuccess = false,
                             StatusCode = HttpStatusCode.Unauthorized,
-                            ErrorMessage = "Session expired. Please sign in again."
+                            ErrorMessage = SessionMessages.Expired
                         };
                     }
 
@@ -275,7 +276,7 @@ namespace Xqare.BusinessLayer.Services.Common
                         {
                             IsSuccess = false,
                             StatusCode = HttpStatusCode.ServiceUnavailable,
-                            ErrorMessage = "Session validation is temporarily unavailable. Check your connection and retry."
+                            ErrorMessage = SessionMessages.ValidationUnavailable
                         };
                     }
 
@@ -328,7 +329,7 @@ namespace Xqare.BusinessLayer.Services.Common
                 {
                     IsSuccess = false,
                     StatusCode = HttpStatusCode.InternalServerError,
-                    ErrorMessage = "The request could not be completed. Please try again."
+                    ErrorMessage = CommonMessages.RequestFailed
                 };
             }
         }

@@ -5,6 +5,7 @@ using System.Text.Json;
 using Xqare.BusinessLayer.DTO;
 using Xqare.BusinessLayer.Interfaces.Auth;
 using Xqare.BusinessLayer.Interfaces.Common;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Classes.Auth
 {
@@ -102,7 +103,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             {
                 IsSuccess = false,
                 Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
-                    ?? "The request could not be completed. Please try again."
+                    ?? CommonMessages.RequestFailed
             };
         }
 
@@ -127,7 +128,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             {
                 IsSuccess = false,
                 Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
-                    ?? "The request could not be completed. Please try again."
+                    ?? CommonMessages.RequestFailed
             };
         }
 
@@ -140,7 +141,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             var response = await _api.PostAnonymousAsync<LoginRequest, LoginResponse>("api/auth/login", request);
 
             if (!response.IsSuccess || response.Data == null)
-                return new LoginResponse { IsSuccess = false, Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage) ?? "The request could not be completed. Please try again." };
+                return new LoginResponse { IsSuccess = false, Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage) ?? CommonMessages.RequestFailed };
 
             if (!response.Data.IsSuccess)
                 return response.Data;
@@ -162,7 +163,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
         public async Task<LoginResponse> CompleteExternalLoginAsync(string code)
         {
             if (string.IsNullOrWhiteSpace(code))
-                return new LoginResponse { IsSuccess = false, Message = "The sign-in exchange is missing. Please try again." };
+                return new LoginResponse { IsSuccess = false, Message = ExternalLoginMessages.SignInExchangeMissing };
 
             var response = await _api.PostAnonymousAsync<string, LoginResponse>(
                 "api/auth/external-login/exchange", code);
@@ -172,7 +173,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 {
                     IsSuccess = false,
                     Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
-                        ?? "Google sign-in could not be completed. Please try again."
+                        ?? ExternalLoginMessages.GoogleExchangeFailed
                 };
 
             if (!response.Data.IsSuccess || string.IsNullOrWhiteSpace(response.Data.AccessToken))
@@ -191,7 +192,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             var response = await _api.PostAnonymousAsync<RegisterRequest, RegisterResponse>("api/auth/register", request);
 
             if (!response.IsSuccess || response.Data == null)
-                return response.Data ?? new RegisterResponse { IsSuccess = false, Message = ExtractBackendMessage(response.ErrorMessage) ?? "The request could not be completed. Please try again." };
+                return response.Data ?? new RegisterResponse { IsSuccess = false, Message = ExtractBackendMessage(response.ErrorMessage) ?? CommonMessages.RequestFailed };
 
             return response.Data;
 
@@ -209,7 +210,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             {
                 IsSuccess = false,
                 Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
-                    ?? "The request could not be completed. Please try again."
+                    ?? CommonMessages.RequestFailed
             };
         }
 
@@ -254,7 +255,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
 
             var response = await _api.PostAnonymousAsync<TRequest, LoginResponse>(endpoint, request);
             if (!response.IsSuccess || response.Data == null)
-                return response.Data ?? new LoginResponse { IsSuccess = false, Message = ExtractBackendMessage(response.ErrorMessage) ?? "The request could not be completed. Please try again." };
+                return response.Data ?? new LoginResponse { IsSuccess = false, Message = ExtractBackendMessage(response.ErrorMessage) ?? CommonMessages.RequestFailed };
 
             await ApplySessionAsync(response.Data);
             return response.Data;
@@ -269,7 +270,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 {
                     IsSuccess = false,
                     Message = ExtractBackendMessage(response.ErrorMessage)
-                        ?? "MFA verification could not be completed. Please sign in again and retry."
+                        ?? AuthServiceMessages.MfaVerificationFailed
                 };
             await ApplySessionAsync(response.Data);
             return response.Data;
@@ -283,7 +284,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new OtpOperationResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to start account recovery. Please try again."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.RecoveryStartFailed
             };
         }
 
@@ -295,7 +296,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new MfaAccountRecoveryVerifyResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "The verification code could not be confirmed."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.RecoveryCodeConfirmationFailed
             };
         }
 
@@ -307,7 +308,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new MfaRecoveryEnrollmentStartResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to start authenticator replacement."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.AuthenticatorReplacementStartFailed
             };
         }
 
@@ -328,7 +329,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new MfaRecoveryCompleteResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to complete account recovery."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.RecoveryCompletionFailed
             };
         }
 
@@ -344,7 +345,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             };
 
             if (route == null)
-                return new OtpOperationResponse { IsSuccess = false, Message = "This sign-in provider is not supported." };
+                return new OtpOperationResponse { IsSuccess = false, Message = ExternalLoginMessages.ProviderUnsupported };
 
             var response = await _api.PostAnonymousAsync<MfaAccountRecoveryExternalStartRequest, OtpOperationResponse>(
                 $"api/auth/mfa-recovery/external/{route}/begin",
@@ -354,12 +355,12 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 return response.Data ?? new OtpOperationResponse
                 {
                     IsSuccess = false,
-                    Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to begin linked-provider verification."
+                    Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.LinkedProviderVerificationFailed
                 };
 
             var apiBaseUrl = _configuration["ApiSettings:BaseUrl"]?.TrimEnd('/');
             if (string.IsNullOrWhiteSpace(apiBaseUrl))
-                return new OtpOperationResponse { IsSuccess = false, Message = "The authentication service URL is not configured." };
+                return new OtpOperationResponse { IsSuccess = false, Message = ExternalLoginMessages.ServiceUrlMissing };
 
             _nav.NavigateTo($"{apiBaseUrl}/api/auth/mfa-recovery/{route}-login", forceLoad: true);
             return response.Data;
@@ -371,7 +372,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new TotpStatusResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to retrieve authenticator status."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.AuthenticatorStatusFailed
             };
         }
 
@@ -382,7 +383,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new TotpEnrollmentStartResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to start authenticator setup."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.AuthenticatorSetupFailed
             };
         }
 
@@ -393,7 +394,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new TotpEnrollmentConfirmResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to verify the authenticator code."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.AuthenticatorVerificationFailed
             };
         }
 
@@ -404,7 +405,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new TotpEnrollmentConfirmResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to regenerate recovery codes."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.RecoveryCodesRegenerationFailed
             };
         }
 
@@ -415,7 +416,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new OtpOperationResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to disable the authenticator."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.AuthenticatorDisableFailed
             };
         }
 
@@ -425,7 +426,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new ConnectedAccountsResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to retrieve connected sign-in methods."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.ConnectedMethodsLoadFailed
             };
         }
 
@@ -441,7 +442,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             };
 
             if (route == null)
-                return new OtpOperationResponse { IsSuccess = false, Message = "This sign-in provider is not supported." };
+                return new OtpOperationResponse { IsSuccess = false, Message = ExternalLoginMessages.ProviderUnsupported };
 
             var response = await _api.PostAsync<object, OtpOperationResponse>(
                 $"api/auth/external-links/{route}/begin", new { });
@@ -452,7 +453,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 {
                     IsSuccess = false,
                     Message = response.Data?.Message ?? ExtractBackendMessage(response.ErrorMessage)
-                        ?? "Unable to start the account-linking process."
+                        ?? AuthServiceMessages.AccountLinkStartFailed
                 };
             }
 
@@ -465,7 +466,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
                 return new OtpOperationResponse
                 {
                     IsSuccess = false,
-                    Message = "The authentication service URL is not configured."
+                    Message = ExternalLoginMessages.ServiceUrlMissing
                 };
             }
 
@@ -485,7 +486,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             };
 
             if (route == null)
-                return new OtpOperationResponse { IsSuccess = false, Message = "This sign-in provider is not supported." };
+                return new OtpOperationResponse { IsSuccess = false, Message = ExternalLoginMessages.ProviderUnsupported };
 
             var response = await _api.PostAsync<DisconnectExternalLoginRequest, OtpOperationResponse>(
                 $"api/auth/external-links/{route}/disconnect", request);
@@ -493,7 +494,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new OtpOperationResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to disconnect this provider."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.ProviderDisconnectFailed
             };
         }
 
@@ -505,7 +506,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new OtpOperationResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to change your password."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.PasswordChangeFailed
             };
         }
 
@@ -515,7 +516,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new ActiveSessionsResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to retrieve active sessions."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.SessionsLoadFailed
             };
         }
 
@@ -527,7 +528,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new SessionActionResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to revoke the selected session."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.SessionRevokeFailed
             };
         }
 
@@ -539,7 +540,7 @@ namespace Xqare.BusinessLayer.Classes.Auth
             return response.Data ?? new SessionActionResponse
             {
                 IsSuccess = false,
-                Message = ExtractBackendMessage(response.ErrorMessage) ?? "Unable to revoke other sessions."
+                Message = ExtractBackendMessage(response.ErrorMessage) ?? AuthServiceMessages.OtherSessionsRevokeFailed
             };
         }
 
