@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Xqare.BusinessLayer.DTO;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Validators
 {
@@ -9,10 +10,10 @@ namespace Xqare.BusinessLayer.Validators
         {
             RuleFor(x => x.FullName)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("Full name is required.")
+                .NotEmpty().WithMessage(ContactValidationMessages.FullNameRequired)
                 .MaximumLength(100)
                 .Matches(NameValidationRules.Pattern)
-                .WithMessage("Use letters only, with spaces, apostrophes or hyphens.");
+                .WithMessage(ContactValidationMessages.FullNameInvalid);
             RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(256);
             RuleFor(x => x.Subject).NotEmpty().MinimumLength(5).MaximumLength(100);
             RuleFor(x => x.Message).NotEmpty().MinimumLength(20).MaximumLength(500);
