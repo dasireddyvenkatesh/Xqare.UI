@@ -89,7 +89,7 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Google"
-                                       OnClick="RegisterWithGoogle">
+                                       OnClick="@AuthService.LoginWithGoogle">
 
                                 Google
                             </MudButton>
@@ -98,7 +98,7 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.GitHub"
-                                       OnClick="RegisterWithGitHub">
+                                       OnClick="@AuthService.LoginWithGitHub">
                                 GitHub
                             </MudButton>
                         </MudItem>
@@ -106,7 +106,7 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.LinkedIn"
-                                       OnClick="RegisterWithLinkedIn">
+                                       OnClick="@AuthService.LoginWithLinkedIn">
                                 LinkedIn
                             </MudButton>
                         </MudItem>
@@ -114,7 +114,7 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Twitter"
-                                       OnClick="RegisterWithTwitter">
+                                       OnClick="@AuthService.LoginWithTwitter">
                                 Twitter
                             </MudButton>
                         </MudItem>
@@ -500,10 +500,13 @@
     {
         InvokeAsync(() =>
         {
-            if (secondsRemaining > 0)
+            if (secondsRemaining > 1)
+            {
                 secondsRemaining--;
+            }
             else
             {
+                secondsRemaining = 0;
                 isResendDisabled = false;
                 isRegistrationRetryDisabled = false;
                 isOtpLocked = false;
@@ -526,24 +529,8 @@
         isOtpLocked = false;
     }
 
-    async Task RegisterWithGoogle()
-    {
-        await AuthService.LoginWithGoogle();
-    }
-    async Task RegisterWithGitHub()
-    {
-        await AuthService.LoginWithGitHub();
-    }
 
-    async Task RegisterWithLinkedIn()
-    {
-        await AuthService.LoginWithLinkedIn();
-    }
 
-    async Task RegisterWithTwitter()
-    {
-        await AuthService.LoginWithTwitter();
-    }
 
     public void Dispose()
     {
