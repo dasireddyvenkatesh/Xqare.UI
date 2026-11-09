@@ -84,7 +84,7 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Google"
-                                       OnClick="LoginWithGoogle">
+                                        Disabled="@RateLimits.IsBlocked(\"auth-login-ip\")"\n                                       OnClick="LoginWithGoogle">
                                 Google
                             </MudButton>
                         </MudItem>
@@ -92,7 +92,7 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.GitHub"
-                                       OnClick="LoginWithGitHub">
+                                        Disabled="@RateLimits.IsBlocked(\"auth-login-ip\")"\n                                       OnClick="LoginWithGitHub">
                                 GitHub
                             </MudButton>
                         </MudItem>
@@ -100,7 +100,7 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.LinkedIn"
-                                       OnClick="LoginWithLinkedIn">
+                                        Disabled="@RateLimits.IsBlocked(\"auth-login-ip\")"\n                                       OnClick="LoginWithLinkedIn">
                                 LinkedIn
                             </MudButton>
                         </MudItem>
@@ -108,7 +108,7 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Twitter"
-                                       OnClick="LoginWithTwitter">
+                                        Disabled="@RateLimits.IsBlocked(\"auth-login-ip\")"\n                                       OnClick="LoginWithTwitter">
                                 Twitter
                             </MudButton>
                         </MudItem>
