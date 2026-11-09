@@ -1,4 +1,5 @@
 @page "/settings"
+@inject RateLimitState RateLimits
 @layout AuthenticatedLayout
 @using Microsoft.AspNetCore.Authorization
 @using Xqare.BusinessLayer.DTO
@@ -26,6 +27,7 @@
                 Account security
             </MudChip>
         </div>
+        <RateLimitNotice Policy="auth-security-ip" OnTick="HandleRateLimitTick" />
 
         @if (_loading)
         {
@@ -66,7 +68,7 @@
                                     {
                                         <MudChip T="string" Color="Color.Success" Variant="Variant.Outlined">@provider connected</MudChip>
                                         <MudButton Variant="Variant.Outlined" Color="Color.Error"
-                                                   Disabled="@(_busy || !_connectedAccounts.HasPassword)"
+                                                   Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip") || !_connectedAccounts.HasPassword)"
                                                    OnClick="@(() => BeginDisconnect(provider))">
                                             Disconnect
                                         </MudButton>
@@ -74,7 +76,7 @@
                                     else
                                     {
                                         <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                                                   Disabled="_busy"
+                                                   Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))"
                                                    OnClick="@(() => ConnectProviderAsync(provider))">
                                             Connect @provider
                                         </MudButton>
@@ -95,7 +97,7 @@
                                                   MaxLength="128" FullWidth="true" />
                                     <div class="settings-form-actions">
                                         <MudButton Variant="Variant.Filled" Color="Color.Error"
-                                                   Disabled="@(_busy || string.IsNullOrWhiteSpace(_disconnectPassword))"
+                                                   Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip") || string.IsNullOrWhiteSpace(_disconnectPassword))"
                                                    OnClick="DisconnectProviderAsync">
                                             Confirm disconnect
                                         </MudButton>
@@ -216,7 +218,7 @@
                                                       @bind-Value="_enrollmentRequest.CurrentTotpCode" FullWidth="true" />
                                     }
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="StartEnrollmentAsync" Class="settings-primary">Continue</MudButton>
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="StartEnrollmentAsync" Class="settings-primary">Continue</MudButton>
                                         <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -235,7 +237,7 @@
                                         <MudTextField T="string" Label="Authenticator code" @bind-Value="_enrollmentConfirmRequest.Code"
                                                       For="@(() => _enrollmentConfirmRequest.Code)"
                                                       Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" FullWidth="true" />
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="ConfirmEnrollmentAsync" Class="settings-primary">
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ConfirmEnrollmentAsync" Class="settings-primary">
                                             Verify and enable
                                         </MudButton>
                                     </MudForm>
@@ -253,7 +255,7 @@
                                                   Margin="Margin.Dense" MaxLength="6" For="@(() => _recoveryRequest.Code)"
                                                   @bind-Value="_recoveryRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="_busy" OnClick="RegenerateRecoveryAsync" Class="settings-primary">Generate new codes</MudButton>
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="RegenerateRecoveryAsync" Class="settings-primary">Generate new codes</MudButton>
                                         <MudButton Variant="Variant.Text" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -275,7 +277,7 @@
                                                   Margin="Margin.Dense" MaxLength="6" For="@(() => _disableRequest.Code)"
                                                   @bind-Value="_disableRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_busy" OnClick="DisableTotpAsync">Disable authenticator</MudButton>
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="DisableTotpAsync">Disable authenticator</MudButton>
                                         <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -408,7 +410,7 @@
                             At least 8 characters, with uppercase, lowercase, a number and a symbol.
                         </MudText>
                         <div class="settings-form-actions">
-                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="_busy" OnClick="ChangePasswordAsync" Class="settings-primary">Change password</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ChangePasswordAsync" Class="settings-primary">Change password</MudButton>
                         </div>
                     </MudPaper>
                 </MudItem>
@@ -647,6 +649,8 @@
             _busy = false;
         }
     }
+
+    private Task HandleRateLimitTick() => InvokeAsync(StateHasChanged);
 
     private async Task LoadTotpAsync()
     {
