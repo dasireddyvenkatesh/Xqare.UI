@@ -24,6 +24,10 @@ namespace Xqare.BusinessLayer.DTO.Admin
         public bool IsEmailConfirmed { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        public bool IsLockedOut { get; set; }
+        public DateTime? LockoutEndUtc { get; set; }
+        public int FailedLoginCount { get; set; }
+        public int LockoutLevel { get; set; }
         public List<string> Roles { get; set; } = new();
     }
 
@@ -69,6 +73,10 @@ namespace Xqare.BusinessLayer.DTO.Admin
         public DateTime? LastLoginAt { get; set; }
         public int ActiveSessionCount { get; set; }
         public int TotalSessionCount { get; set; }
+        public bool IsLockedOut { get; set; }
+        public DateTime? LockoutEndUtc { get; set; }
+        public int FailedLoginCount { get; set; }
+        public int LockoutLevel { get; set; }
         public List<string> Roles { get; set; } = new();
         public List<AdminUserRoleAssignmentResponse> RoleAssignments { get; set; } = new();
     }
