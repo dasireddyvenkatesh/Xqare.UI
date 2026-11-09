@@ -1,4 +1,5 @@
 ﻿@page "/register"
+@inject RateLimitState RateLimits
 @implements IDisposable
 @using System.Timers
 @using MudBlazor
@@ -78,6 +79,7 @@
                     Already have an account?
                     <MudButton Href="/login">Sign in</MudButton>
                 </MudText>
+                <RateLimitNotice Policy="auth-otp-ip" OnTick="HandleRateLimitTick" />
 
                 @if (!isOtpStep)
                 {
@@ -160,7 +162,7 @@
                                       HelperText="Please enter your personal email id"
                                       HelperTextOnFocus="true" />
 
-                        <MudButton Disabled="@(_processing || isRegistrationRetryDisabled)"
+                        <MudButton Disabled="@(_processing || isRegistrationRetryDisabled || RateLimits.IsBlocked("auth-otp-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
@@ -254,7 +256,7 @@
                                       OnAdornmentClick="ToggleConfirmPassword" />
 
                         <MudButton Variant="Variant.Text"
-                                   Disabled="@(_processing || _resending || isResendDisabled)"
+                                   Disabled="@(_processing || _resending || isResendDisabled || RateLimits.IsBlocked("auth-otp-ip"))"
                                    OnClick="ResendOtp"
                                    Class="resend-btn">
                             @if (_resending)
@@ -271,7 +273,7 @@
                             }
                         </MudButton>
 
-                        <MudButton Disabled="@(_processing || isOtpLocked)"
+                        <MudButton Disabled="@(_processing || isOtpLocked || RateLimits.IsBlocked("auth-otp-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
@@ -327,6 +329,8 @@
     bool isOtpLocked;
     int secondsRemaining = 60;
     Timer timer = new();
+
+    private Task HandleRateLimitTick() => InvokeAsync(StateHasChanged);
 
     void TogglePassword() => showPassword = !showPassword;
     void ToggleConfirmPassword() => showConfirmPassword = !showConfirmPassword;
