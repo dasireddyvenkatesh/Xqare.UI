@@ -1,5 +1,6 @@
 using FluentValidation;
 using Xqare.BusinessLayer.DTO;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Validators
 {
@@ -10,14 +11,14 @@ namespace Xqare.BusinessLayer.Validators
         public LoginMfaVerificationRequestValidator()
         {
             RuleFor(x => x.Email)
-                .NotEmpty().WithMessage("Email is required.")
-                .EmailAddress().WithMessage("Enter a valid email address.")
+                .NotEmpty().WithMessage(MfaValidationMessages.EmailRequired)
+                .EmailAddress().WithMessage(MfaValidationMessages.EmailInvalid)
                 .MaximumLength(256);
 
             RuleFor(x => x.OtpCode)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("A verification code is required.")
-                .Matches(@"^[0-9]{6}$").WithMessage("Enter the six-digit email verification code.");
+                .NotEmpty().WithMessage(MfaValidationMessages.CodeRequired)
+                .Matches(@"^[0-9]{6}$").WithMessage(MfaValidationMessages.InvalidEmailCode);
         }
     }
 }

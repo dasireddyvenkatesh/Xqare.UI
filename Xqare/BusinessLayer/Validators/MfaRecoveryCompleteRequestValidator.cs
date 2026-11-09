@@ -1,5 +1,6 @@
 using FluentValidation;
 using Xqare.BusinessLayer.DTO;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Validators
 {
@@ -8,13 +9,13 @@ namespace Xqare.BusinessLayer.Validators
         public MfaRecoveryCompleteRequestValidator()
         {
             RuleFor(x => x.RecoveryGrant)
-                .NotEmpty().WithMessage("Your recovery session has expired. Start again.")
+                .NotEmpty().WithMessage(MfaValidationMessages.RecoverySessionExpired)
                 .MaximumLength(128);
 
             RuleFor(x => x.Code)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("Authenticator code is required.")
-                .Matches(@"^\d{6}$").WithMessage("Enter a valid six-digit authenticator code.");
+                .NotEmpty().WithMessage(MfaValidationMessages.AuthenticatorCodeRequired)
+                .Matches(@"^\d{6}$").WithMessage(MfaValidationMessages.InvalidAuthenticatorCode);
         }
     }
 }
