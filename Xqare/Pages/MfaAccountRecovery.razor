@@ -93,10 +93,10 @@
                 Choose the same provider you previously linked. A new provider or an account with a matching email cannot be used.
             </MudText>
             <MudGrid Spacing="2">
-                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Google" Disabled="_busy" OnClick="@(() => ContinueWithProvider("google"))">Google</MudButton></MudItem>
-                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.GitHub" Disabled="_busy" OnClick="@(() => ContinueWithProvider("github"))">GitHub</MudButton></MudItem>
-                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.LinkedIn" Disabled="_busy" OnClick="@(() => ContinueWithProvider("linkedin"))">LinkedIn</MudButton></MudItem>
-                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Twitter" Disabled="_busy" OnClick="@(() => ContinueWithProvider("twitter"))">Twitter</MudButton></MudItem>
+                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Google" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("google"))">Google</MudButton></MudItem>
+                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.GitHub" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("github"))">GitHub</MudButton></MudItem>
+                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.LinkedIn" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("linkedin"))">LinkedIn</MudButton></MudItem>
+                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Twitter" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("twitter"))">Twitter</MudButton></MudItem>
             </MudGrid>
             <MudButton FullWidth Variant="Variant.Text" Color="Color.Secondary" OnClick="RestartRecovery">Start over</MudButton>
         }
