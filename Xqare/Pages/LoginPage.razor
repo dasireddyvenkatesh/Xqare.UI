@@ -61,7 +61,7 @@
                     @(isMfaStep ? "Verify your identity" : "Sign in to your account")
                 </MudText>
 
-                <RateLimitNotice Policy="@(isMfaStep ? "auth-otp-ip" : "auth-login-ip")" OnTick="HandleRateLimitTick" />
+                <RateLimitNotice Policy='@(isMfaStep ? "auth-otp-ip" : "auth-login-ip")' OnTick="HandleRateLimitTick" />
 
                 @if (!isMfaStep)
                 {
@@ -84,7 +84,8 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Google"
-                                        Disabled="@RateLimits.IsBlocked(\"auth-login-ip\")"\n                                       OnClick="LoginWithGoogle">
+                                        Disabled='@RateLimits.IsBlocked("auth-login-ip")'
+                                       OnClick="LoginWithGoogle">
                                 Google
                             </MudButton>
                         </MudItem>
@@ -92,7 +93,8 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.GitHub"
-                                        Disabled="@RateLimits.IsBlocked(\"auth-login-ip\")"\n                                       OnClick="LoginWithGitHub">
+                                        Disabled='@RateLimits.IsBlocked("auth-login-ip")'
+                                       OnClick="LoginWithGitHub">
                                 GitHub
                             </MudButton>
                         </MudItem>
@@ -100,7 +102,8 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.LinkedIn"
-                                        Disabled="@RateLimits.IsBlocked(\"auth-login-ip\")"\n                                       OnClick="LoginWithLinkedIn">
+                                        Disabled='@RateLimits.IsBlocked("auth-login-ip")'
+                                       OnClick="LoginWithLinkedIn">
                                 LinkedIn
                             </MudButton>
                         </MudItem>
@@ -108,7 +111,8 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Twitter"
-                                        Disabled="@RateLimits.IsBlocked(\"auth-login-ip\")"\n                                       OnClick="LoginWithTwitter">
+                                        Disabled='@RateLimits.IsBlocked("auth-login-ip")'
+                                       OnClick="LoginWithTwitter">
                                 Twitter
                             </MudButton>
                         </MudItem>
