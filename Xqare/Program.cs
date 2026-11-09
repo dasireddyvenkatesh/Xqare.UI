@@ -38,6 +38,7 @@ builder.Services.AddScoped<IPartnershipService, PartnershipService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IRbacService, RbacService>();
+builder.Services.AddScoped<RateLimitState>();
 builder.Services.AddScoped<IApiClient, ApiClient>();
 builder.Services.AddScoped<JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(p =>
