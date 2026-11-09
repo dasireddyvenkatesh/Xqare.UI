@@ -60,6 +60,7 @@ namespace Xqare.BusinessLayer.Services.Common
         private void Tick()
         {
             bool hasActiveCountdown;
+            bool removedExpiredEntry = false;
             lock (_sync)
             {
                 foreach (var key in _blockedUntil
@@ -68,14 +69,15 @@ namespace Xqare.BusinessLayer.Services.Common
                     .ToArray())
                 {
                     _blockedUntil.Remove(key);
+                    removedExpiredEntry = true;
                 }
 
                 hasActiveCountdown = _blockedUntil.Count > 0;
             }
 
-            // Notify while a countdown is active so notices and disabled buttons
-            // update once per second. All dictionary access remains synchronized.
-            if (hasActiveCountdown)
+            // Notify while active and once more when the last countdown expires,
+            // so notices disappear and previously disabled buttons are re-enabled.
+            if (hasActiveCountdown || removedExpiredEntry)
                 Changed?.Invoke();
         }
 
