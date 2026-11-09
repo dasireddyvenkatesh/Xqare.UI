@@ -149,6 +149,20 @@
                                         <MudChip T="string" Size="Size.Small"
                                                  Color="@(user.IsEmailConfirmed ? Color.Success : Color.Warning)"
                                                  Variant="Variant.Outlined">@(user.IsEmailConfirmed ? "Email verified" : "Email pending")</MudChip>
+                                        @if (user.IsLockedOut)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Error"
+                                                     Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Lock">
+                                                Locked · Level @user.LockoutLevel
+                                            </MudChip>
+                                        }
+                                        else if (user.FailedLoginCount > 0)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Warning"
+                                                     Variant="Variant.Outlined">
+                                                @user.FailedLoginCount failed attempt(s)
+                                            </MudChip>
+                                        }
                                     </div>
                                 </div>
                             </div>
