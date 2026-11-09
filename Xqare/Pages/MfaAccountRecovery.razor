@@ -1,4 +1,5 @@
 @page "/mfa-recovery"
+@inject RateLimitState RateLimits
 @using MudBlazor
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.Auth
@@ -30,6 +31,7 @@
                 <MudText Class="auth-subtitle recovery-intro">
                     Verify your account, connect a new authenticator, and replace your recovery codes.
                 </MudText>
+                <RateLimitNotice Policy="auth-recovery-ip" OnTick="HandleRateLimitTick" />
 
         <MudStepper ActiveIndex="@_step" Class="recovery-stepper">
             <MudStep Title="Verify account" />
@@ -58,7 +60,7 @@
                                   OnAdornmentClick="@(() => _showPassword = !_showPassword)" />
                 }
                 <MudCheckBox T="bool" @bind-Value="_passwordless" Color="Color.Primary" Label="I use Google, GitHub, LinkedIn or Twitter and don't have an XQARE password" />
-                <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
+                <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))"
                            OnClick="RequestRecovery" Class="recovery-primary">
                     @if (_busy) { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> }
                     Send verification code
@@ -176,6 +178,8 @@
     private bool _savedCodes;
     private int _step;
     private string? _error;
+
+    private Task HandleRateLimitTick() => InvokeAsync(StateHasChanged);
 
     protected override async Task OnInitializedAsync()
     {
