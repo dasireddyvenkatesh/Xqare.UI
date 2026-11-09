@@ -180,7 +180,7 @@
                         <MudButton Disabled="@(_processing || RateLimits.IsBlocked(isMfaStep ? "auth-otp-ip" : "auth-login-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
-                                   OnClick="Submit"
+                                   ButtonType="ButtonType.Submit"
                                    Class="login-btn">
                             <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
 
@@ -238,7 +238,7 @@
                             Can't access your authenticator?
                         </MudButton>
                         <MudButton Disabled="@_processing" FullWidth Variant="Variant.Filled"
-                                   OnClick="Submit" Class="login-btn">
+                                   ButtonType="ButtonType.Submit" Class="login-btn">
                             <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
                                 @if (_processing)
                                 {
@@ -290,10 +290,6 @@
         _loginErrorCode = null;
         try
         {
-            await form.ValidateAsync();
-            if (!form.IsValid)
-                return;
-
             if (!isMfaStep)
             {
                 // 🔐 CALL LOGIN API
