@@ -138,8 +138,7 @@
                     <!-- FORM -->
                     <MudForm @ref="form"
                              Model="registerRequest"
-                             Validation="validationRules.ToMudValidator()"
-                             >
+                             Validation="validationRules.ToMudValidator()">
 
                         <MudTextField Label="Full Name"
                                       MaxLength="100"
@@ -208,7 +207,6 @@
                     <MudForm @ref="form"
                              Model="otpRequest"
                              Validation="registrationOtpValidator.ToMudValidator()"
-                             
                              Class="mt-6">
 
                         <MudButton Variant="Variant.Text"
@@ -341,14 +339,13 @@
         if (_processing)
             return;
 
-        await form.ValidateAsync();
-        if (!form.IsValid)
-            return;
-
         _processing = true;
-
         try
         {
+            await form.ValidateAsync();
+            if (!form.IsValid)
+                return;
+
             if (!isOtpStep)
             {
                 // STEP 1: Create a pending account and request email verification.
