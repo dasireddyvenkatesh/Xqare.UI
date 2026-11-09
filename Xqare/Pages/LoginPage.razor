@@ -146,8 +146,7 @@
                     <!-- LOGIN FORM -->
                     <MudForm @ref="form"
                              Model="loginRequest"
-                             Validation="loginValidator.ToMudValidator()"
-                             >
+                             Validation="loginValidator.ToMudValidator()">
 
                         <MudTextField Label="Email Address"
                                       MaxLength="256"
@@ -206,7 +205,6 @@
                     <MudForm @ref="form"
                              Model="mfaRequest"
                              Validation="mfaValidator.ToMudValidator()"
-                             
                              Class="mt-6">
                         <MudButton Variant="Variant.Text" OnClick="BackToLogin" Class="back-btn">
                             ← Back to login
@@ -285,15 +283,15 @@
         if (_processing)
             return;
 
-        await form.ValidateAsync();
-        if (!form.IsValid)
-            return;
-
         _processing = true;
-        _loginError = null;
-        _loginErrorCode = null;
         try
         {
+            await form.ValidateAsync();
+            if (!form.IsValid)
+                return;
+
+            _loginError = null;
+            _loginErrorCode = null;
             if (!isMfaStep)
             {
                 // 🔐 CALL LOGIN API
