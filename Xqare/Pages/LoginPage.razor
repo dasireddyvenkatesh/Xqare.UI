@@ -63,6 +63,14 @@
 
                 <RateLimitNotice Policy='@(isMfaStep ? "auth-otp-ip" : "auth-login-ip")' OnTick="HandleRateLimitTick" />
 
+                @if (!string.IsNullOrWhiteSpace(_loginError) && !isMfaStep)
+                {
+                    <MudAlert Severity="@(_loginErrorCode == "account_locked" ? Severity.Warning : Severity.Error)"
+                              Variant="Variant.Outlined" Dense="true" Class="mt-3 mb-2">
+                        @_loginError
+                    </MudAlert>
+                }
+
                 @if (!isMfaStep)
                 {
                     <MudText Class="auth-subtitle">
@@ -266,6 +274,8 @@
     bool isRecoveryCodeStep = false;
     string? mfaChallengeToken;
     bool showPassword;
+    private string? _loginError;
+    private string? _loginErrorCode;
 
 
     void TogglePassword() => showPassword = !showPassword;
@@ -280,6 +290,8 @@
             return;
 
         _processing = true;
+        _loginError = null;
+        _loginErrorCode = null;
         try
         {
             await form.ValidateAsync();
@@ -293,7 +305,9 @@
 
                 if (!response.IsSuccess)
                 {
-                    Snackbar.Add(response.Message ?? "Invalid email or password. Please try again.", Severity.Error);
+                    _loginError = response.Message ?? "We couldn't sign you in. Check your details and try again.";
+                    _loginErrorCode = response.ErrorCode;
+                    Snackbar.Add(_loginError, response.ErrorCode == "account_locked" ? Severity.Warning : Severity.Error);
                     return;
                 }
 
