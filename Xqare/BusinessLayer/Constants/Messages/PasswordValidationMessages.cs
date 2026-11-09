@@ -17,4 +17,5 @@ public static class PasswordValidationMessages
     public const string NumberRequiredSentence = "Include at least one number.";
     public const string SymbolRequiredSentence = "Include at least one symbol.";
     public const string ConfirmRequired = "Confirm your new password.";
+    public const string InputTooLong = "Password input is too long.";
 }
