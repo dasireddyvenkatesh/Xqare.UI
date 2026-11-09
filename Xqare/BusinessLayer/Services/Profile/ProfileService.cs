@@ -2,6 +2,7 @@ using System.Text.Json;
 using Xqare.BusinessLayer.DTO;
 using Xqare.BusinessLayer.Interfaces.Common;
 using Xqare.BusinessLayer.Interfaces.Profile;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Services.Profile
 {
@@ -24,7 +25,7 @@ namespace Xqare.BusinessLayer.Services.Profile
             {
                 IsSuccess = false,
                 Message = ExtractMessage(response.ErrorMessage)
-                    ?? "Your profile could not be loaded. Please try again."
+                    ?? ProfileMessages.LoadFailedFallback
             };
         }
 
@@ -38,7 +39,7 @@ namespace Xqare.BusinessLayer.Services.Profile
             {
                 IsSuccess = false,
                 Message = ExtractMessage(response.ErrorMessage)
-                    ?? "Your changes could not be saved. Please try again."
+                    ?? ProfileMessages.SaveFailedFallback
             };
         }
 

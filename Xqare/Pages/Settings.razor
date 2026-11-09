@@ -1,3 +1,4 @@
+@using Xqare.BusinessLayer.Constants.Messages
 @page "/settings"
 @inject RateLimitState RateLimits
 @layout AuthenticatedLayout
@@ -148,7 +149,7 @@
                         }
                         else if (_totp == null || !_totp.IsSuccess)
                         {
-                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">Authenticator status is unavailable.</MudAlert>
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">{SettingsMessages.AuthenticatorStatusUnavailable}</MudAlert>
                         }
                         else
                         {
@@ -561,7 +562,7 @@
         catch
         {
             _connectedAccounts = null;
-            _connectedAccountsError = "Unable to retrieve connected sign-in methods. Please retry.";
+            _connectedAccountsError = SettingsMessages.ConnectedAccountsLoadFailed;
         }
     }
 
@@ -576,7 +577,7 @@
         }
         catch
         {
-            Snackbar.Add("Unable to start provider connection. Please try again.", Severity.Error);
+            Snackbar.Add(SettingsMessages.ProviderConnectFailed, Severity.Error);
         }
         finally
         {
@@ -601,7 +602,7 @@
         if (string.IsNullOrWhiteSpace(_disconnectProvider) ||
             string.IsNullOrWhiteSpace(_disconnectPassword))
         {
-            Snackbar.Add("Enter your current XQARE password to disconnect this provider.", Severity.Warning);
+            Snackbar.Add(SettingsMessages.DisconnectPasswordRequired, Severity.Warning);
             return;
         }
 
@@ -621,7 +622,7 @@
         }
         catch
         {
-            Snackbar.Add("Unable to disconnect this provider. Please try again.", Severity.Error);
+            Snackbar.Add(SettingsMessages.ProviderDisconnectFailed, Severity.Error);
         }
         finally
         {
@@ -643,7 +644,7 @@
         }
         catch
         {
-            Snackbar.Add("Unable to request a password setup link. Please try again.", Severity.Error);
+            Snackbar.Add(SettingsMessages.PasswordSetupLinkFailed, Severity.Error);
         }
         finally
         {
@@ -662,7 +663,7 @@
         }
         catch
         {
-            _totpError = "Unable to retrieve authenticator status. Please retry.";
+            _totpError = SettingsMessages.AuthenticatorStatusLoadFailed;
         }
     }
 
@@ -684,7 +685,7 @@
         }
         catch
         {
-            _sessionsError = "Unable to retrieve active sessions. Please retry.";
+            _sessionsError = SettingsMessages.ActiveSessionsLoadFailed;
         }
         finally
         {
@@ -732,7 +733,7 @@
         }
         if (_totp?.IsEnabled == true && !IsSixDigitCode(_enrollmentRequest.CurrentTotpCode))
         {
-            Snackbar.Add("Enter your current six-digit authenticator code.", Severity.Warning);
+            Snackbar.Add(SettingsMessages.AuthenticatorCodeRequired, Severity.Warning);
             return;
         }
         _busy = true;
