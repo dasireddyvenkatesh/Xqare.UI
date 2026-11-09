@@ -131,6 +131,57 @@
                     </MudPaper>
                 </MudItem>
 
+                <MudItem xs="12">
+                    <MudPaper Class="admin-card admin-detail-section" Elevation="0">
+                        <div class="admin-section-heading">
+                            <div class="admin-section-heading-left">
+                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Security" /></span>
+                                <div>
+                                    <MudText Typo="Typo.h6" Class="admin-card-title">Login security</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">Current lockout and failed sign-in state</MudText>
+                                </div>
+                            </div>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+                        @if (_user.IsLockedOut)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true" Class="mb-3">
+                                This account is temporarily locked until
+                                <strong>@(_user.LockoutEndUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm:ss tt") ?? "the lockout expires")</strong>.
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mb-3">
+                                This account is not currently locked.
+                            </MudAlert>
+                        }
+                        <MudGrid Spacing="3" Class="admin-detail-fields">
+                            <MudItem xs="12" sm="4">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Current failed attempts</MudText>
+                                    <MudText Typo="Typo.h5" Class="admin-session-value">@_user.FailedLoginCount</MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="4">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Lockout level</MudText>
+                                    <MudText Typo="Typo.h5" Class="admin-session-value">@_user.LockoutLevel / 3</MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="4">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Lockout status</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@(_user.IsLockedOut ? "Locked" : "Not locked")</MudText>
+                                </div>
+                            </MudItem>
+                        </MudGrid>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+                            Failed attempts show the current counter only. Historical sign-in events are not stored in this account summary.
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+
                 <MudItem xs="12" lg="4">
                     <MudPaper Class="admin-card admin-detail-section" Elevation="0">
                         <div class="admin-section-heading">
