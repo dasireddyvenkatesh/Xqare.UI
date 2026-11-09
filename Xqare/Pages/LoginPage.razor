@@ -92,7 +92,7 @@
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Google"
                                         Disabled='@RateLimits.IsBlocked("auth-login-ip")'
-                                       OnClick="LoginWithGoogle">
+                                       OnClick="@AuthService.LoginWithGoogle">
                                 Google
                             </MudButton>
                         </MudItem>
@@ -101,7 +101,7 @@
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.GitHub"
                                         Disabled='@RateLimits.IsBlocked("auth-login-ip")'
-                                       OnClick="LoginWithGitHub">
+                                       OnClick="@AuthService.LoginWithGitHub">
                                 GitHub
                             </MudButton>
                         </MudItem>
@@ -110,7 +110,7 @@
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.LinkedIn"
                                         Disabled='@RateLimits.IsBlocked("auth-login-ip")'
-                                       OnClick="LoginWithLinkedIn">
+                                       OnClick="@AuthService.LoginWithLinkedIn">
                                 LinkedIn
                             </MudButton>
                         </MudItem>
@@ -119,7 +119,7 @@
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Twitter"
                                         Disabled='@RateLimits.IsBlocked("auth-login-ip")'
-                                       OnClick="LoginWithTwitter">
+                                       OnClick="@AuthService.LoginWithTwitter">
                                 Twitter
                             </MudButton>
                         </MudItem>
@@ -374,26 +374,9 @@
         Nav.NavigateTo(target);
     }
 
-    async Task LoginWithGoogle()
-    {
-        await AuthService.LoginWithGoogle();
 
-    }
 
-    async Task LoginWithGitHub()
-    {
-        await AuthService.LoginWithGitHub();
-    }
 
-    async Task LoginWithLinkedIn()
-    {
-        await AuthService.LoginWithLinkedIn();
-    }
-
-    async Task LoginWithTwitter()
-    {
-        await AuthService.LoginWithTwitter();
-    }
 
     protected override async Task OnInitializedAsync()
     {
