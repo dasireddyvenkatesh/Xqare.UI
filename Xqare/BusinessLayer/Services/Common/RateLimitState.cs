@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Xqare.BusinessLayer.Services.Common
 {
@@ -58,7 +59,7 @@ namespace Xqare.BusinessLayer.Services.Common
 
         private void Tick()
         {
-            bool changed = false;
+            bool hasActiveCountdown;
             lock (_sync)
             {
                 foreach (var key in _blockedUntil
@@ -67,13 +68,14 @@ namespace Xqare.BusinessLayer.Services.Common
                     .ToArray())
                 {
                     _blockedUntil.Remove(key);
-                    changed = true;
                 }
+
+                hasActiveCountdown = _blockedUntil.Count > 0;
             }
 
             // Notify while a countdown is active so notices and disabled buttons
-            // update once per second. Expired entries are removed above.
-            if (changed || _blockedUntil.Count > 0)
+            // update once per second. All dictionary access remains synchronized.
+            if (hasActiveCountdown)
                 Changed?.Invoke();
         }
 
