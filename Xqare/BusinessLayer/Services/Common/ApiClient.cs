@@ -17,15 +17,17 @@ namespace Xqare.BusinessLayer.Services.Common
         private readonly ITokenService _tokenService;
         private readonly JwtAuthStateProvider _authStateProvider;
         private readonly IJSRuntime _js;
+        private readonly RateLimitState _rateLimitState;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
         private volatile bool _refreshSessionRejected;
 
-        public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider, IJSRuntime js)
+        public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider, IJSRuntime js, RateLimitState rateLimitState)
         {
             _http = http;
             _tokenService = tokenService;
             _authStateProvider = authStateProvider;
             _js = js;
+            _rateLimitState = rateLimitState;
         }
 
         private async Task<string?> AttachTokenAsync(HttpRequestMessage request)
@@ -174,6 +176,50 @@ namespace Xqare.BusinessLayer.Services.Common
         }
 
 
+        private void CaptureRateLimit(HttpResponseMessage response, string responseBody)
+        {
+            var policy = response.Headers.TryGetValues("X-RateLimit-Policy", out var policyValues)
+                ? policyValues.FirstOrDefault()
+                : null;
+            var retryAfterSeconds = 0;
+
+            if (response.Headers.TryGetValues("Retry-After", out var retryValues))
+            {
+                var retryValue = retryValues.FirstOrDefault();
+                if (int.TryParse(retryValue, out var parsedSeconds))
+                    retryAfterSeconds = parsedSeconds;
+                else if (DateTimeOffset.TryParse(retryValue, out var retryAt))
+                    retryAfterSeconds = (int)Math.Ceiling((retryAt - DateTimeOffset.UtcNow).TotalSeconds);
+            }
+
+            // The JSON body is a fallback for non-browser clients or proxies that
+            // preserve the body but strip response headers.
+            if ((string.IsNullOrWhiteSpace(policy) || retryAfterSeconds <= 0) &&
+                !string.IsNullOrWhiteSpace(responseBody))
+            {
+                try
+                {
+                    using var document = JsonDocument.Parse(responseBody);
+                    var root = document.RootElement;
+                    if (string.IsNullOrWhiteSpace(policy) &&
+                        root.TryGetProperty("policy", out var policyElement))
+                        policy = policyElement.GetString();
+
+                    if (retryAfterSeconds <= 0 &&
+                        root.TryGetProperty("retryAfterSeconds", out var retryElement) &&
+                        retryElement.TryGetInt32(out var bodySeconds))
+                        retryAfterSeconds = bodySeconds;
+                }
+                catch (JsonException)
+                {
+                    // Keep the generic API error path if the server returned non-JSON.
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(policy) && retryAfterSeconds > 0)
+                _rateLimitState.SetBlocked(policy, retryAfterSeconds);
+        }
+
         private async Task<ApiResponse<T>> SendAsync<T>(
             Func<HttpRequestMessage> requestFactory,
             bool retryAfterRefresh = true,
@@ -249,6 +295,10 @@ namespace Xqare.BusinessLayer.Services.Common
                 using (retryResponse)
                 {
                     var json = await responseToRead.Content.ReadAsStringAsync();
+
+                    if (responseToRead.StatusCode == HttpStatusCode.TooManyRequests)
+                        CaptureRateLimit(responseToRead, json);
+
                     var result = new ApiResponse<T>
                     {
                         StatusCode = responseToRead.StatusCode,
