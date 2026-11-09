@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@using Xqare.BusinessLayer.Constants.Messages
 @inject RateLimitState RateLimits
 @using MudBlazor
 @using Xqare.BusinessLayer.DTO
@@ -299,7 +300,7 @@
 
                 if (!response.IsSuccess)
                 {
-                    _loginError = response.Message ?? "We couldn't sign you in. Check your details and try again.";
+                    _loginError = response.Message ?? LoginMessages.InvalidCredentialsFallback;
                     _loginErrorCode = response.ErrorCode;
                     Snackbar.Add(_loginError, response.ErrorCode == "account_locked" ? Severity.Warning : Severity.Error);
                     return;
@@ -318,7 +319,7 @@
 
                 if (string.IsNullOrWhiteSpace(response.AccessToken))
                 {
-                    Snackbar.Add("Login did not return a valid session. Please try again.", Severity.Error);
+                    Snackbar.Add(LoginMessages.MissingSession, Severity.Error);
                     return;
                 }
 
@@ -330,21 +331,21 @@
 
                 if (!otpResponse.IsSuccess)
                 {
-                    Snackbar.Add(otpResponse.Message ?? "Verification failed.", Severity.Error);
+                    Snackbar.Add(otpResponse.Message ?? LoginMessages.MfaVerificationFailed, Severity.Error);
                     return;
                 }
                 if (string.IsNullOrWhiteSpace(otpResponse.AccessToken))
                 {
-                    Snackbar.Add(otpResponse.Message ?? "MFA verification did not return a valid session.", Severity.Error);
+                    Snackbar.Add(otpResponse.Message ?? LoginMessages.MfaMissingSession, Severity.Error);
                     return;
                 }
-                Snackbar.Add(otpResponse.Message ?? "Login successful.", Severity.Success);
+                Snackbar.Add(otpResponse.Message ?? LoginMessages.Success, Severity.Success);
                 Nav.NavigateTo("/dashboard");
             }
         }
         catch
         {
-            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
         }
         finally
         {
@@ -418,11 +419,11 @@
                 isRecoveryCodeStep = false;
                 Snackbar.Add(messageValue.ToString().Length > 0
                     ? messageValue.ToString()
-                    : "Enter the six-digit code from your authenticator app.", Severity.Info);
+                    : LoginMessages.AuthenticatorCodePrompt, Severity.Info);
             }
             else
             {
-                Snackbar.Add(exchange.Message ?? "The verification request has expired. Please sign in again.", Severity.Error);
+                Snackbar.Add(exchange.Message ?? ExternalLoginMessages.VerificationExpired, Severity.Error);
             }
 
             return;
@@ -440,12 +441,12 @@
                 var exchange = await AuthService.CompleteExternalLoginAsync(codeValue.ToString());
                 if (exchange.IsSuccess && !string.IsNullOrWhiteSpace(exchange.AccessToken))
                 {
-                    Snackbar.Add("Signed in successfully.", Severity.Success);
+                    Snackbar.Add(ExternalLoginMessages.Success, Severity.Success);
                     Nav.NavigateTo("/dashboard", replace: true);
                 }
                 else
                 {
-                    Snackbar.Add(exchange.Message ?? "Google sign-in could not be completed. Please try again.", Severity.Error);
+                    Snackbar.Add(exchange.Message ?? ExternalLoginMessages.GoogleExchangeFailed, Severity.Error);
                 }
 
                 return;
@@ -455,7 +456,7 @@
             {
                 var error = query.TryGetValue("message", out var errorValue)
                     ? errorValue.ToString()
-                    : "External sign-in failed. Please try again.";
+                    : ExternalLoginMessages.Failed;
                 // Keep the login page mounted after queuing the Snackbar.
                 // MudBlazor is configured with ClearAfterNavigation=true, so navigating
                 // immediately here would clear the notification before it is visible.

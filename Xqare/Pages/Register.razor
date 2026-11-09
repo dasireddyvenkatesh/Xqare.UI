@@ -1,4 +1,5 @@
 ﻿@page "/register"
+@using Xqare.BusinessLayer.Constants.Messages
 @inject RateLimitState RateLimits
 @implements IDisposable
 @using System.Timers
@@ -362,7 +363,7 @@
 
                     isOtpStep = true;
                     Snackbar.Add(
-                        response.Message ?? "Enter the verification code sent to your email.",
+                        response.Message ?? RegistrationMessages.VerificationCodeSentPrompt,
                         response.IsSuccess ? Severity.Info : Severity.Warning);
 
                     StartTimer(response.RetryAfterSeconds ?? 60);
@@ -371,7 +372,7 @@
 
                 if (!response.IsSuccess)
                 {
-                    Snackbar.Add(response.Message ?? "Registration could not be started.", Severity.Error);
+                    Snackbar.Add(response.Message ?? RegistrationMessages.StartFailed, Severity.Error);
 
                     // If delivery failed or the OTP is locked, keep the user on the
                     // registration step and use the server-provided retry interval.
@@ -382,7 +383,7 @@
                 }
 
                 Snackbar.Add(
-                    response.Message ?? "Registration could not be completed. Please try again.",
+                    response.Message ?? RegistrationMessages.CompletionFailed,
                     Severity.Error);
             }
             else
@@ -392,7 +393,7 @@
 
                 if (!otpResponse.IsSuccess)
                 {
-                    Snackbar.Add(otpResponse.Message ?? "OTP verification failed.", Severity.Error);
+                    Snackbar.Add(otpResponse.Message ?? RegistrationMessages.OtpVerificationFailed, Severity.Error);
 
                     if (otpResponse.RetryAfterSeconds is > 0)
                     {
@@ -412,18 +413,18 @@
 
                 if (string.IsNullOrWhiteSpace(otpResponse.AccessToken))
                 {
-                    Snackbar.Add(otpResponse.Message ?? "Email verified, but a login session was not returned. Please sign in.", Severity.Error);
+                    Snackbar.Add(otpResponse.Message ?? RegistrationMessages.SessionMissing, Severity.Error);
                     Nav.NavigateTo("/login");
                     return;
                 }
 
-                Snackbar.Add(otpResponse.Message ?? "Registration completed successfully.", Severity.Success);
+                Snackbar.Add(otpResponse.Message ?? RegistrationMessages.Success, Severity.Success);
                 Nav.NavigateTo("/dashboard");
             }
         }
         catch
         {
-            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
         }
         finally
         {
@@ -460,7 +461,7 @@
         }
         catch
         {
-            Snackbar.Add("We couldn't request another verification code. Please try again.", Severity.Error);
+            Snackbar.Add(RegistrationMessages.ResendFailed, Severity.Error);
         }
         finally
         {

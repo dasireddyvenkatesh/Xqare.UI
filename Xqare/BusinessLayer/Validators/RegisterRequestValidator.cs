@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+@using Xqare.BusinessLayer.Constants.Messages
 using Xqare.BusinessLayer.DTO;
 
 namespace Xqare.BusinessLayer.Validators
@@ -8,16 +9,16 @@ namespace Xqare.BusinessLayer.Validators
         public RegisterRequestValidator()
         {
             RuleFor(x => x.FullName)
-                .NotEmpty().WithMessage("Full name is required.")
-                .MaximumLength(100).WithMessage("Full name cannot exceed 100 characters.")
-                .Must(NameValidationRules.IsValid).WithMessage("Use letters only, with spaces, apostrophes or hyphens.");
+                .NotEmpty().WithMessage(RegistrationValidationMessages.FullNameRequired)
+                .MaximumLength(100).WithMessage(RegistrationValidationMessages.FullNameTooLong)
+                .Must(NameValidationRules.IsValid).WithMessage(RegistrationValidationMessages.FullNameInvalid);
 
 
             RuleFor(x => x.Email)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("Email address is required.")
-                .MaximumLength(256).WithMessage("Email address cannot exceed 256 characters.")
-                .Must(EmailValidationRules.IsValid).WithMessage("Enter a valid email address.");
+                .NotEmpty().WithMessage(CommonValidationMessages.EmailRequired)
+                .MaximumLength(256).WithMessage(CommonValidationMessages.EmailTooLong)
+                .Must(EmailValidationRules.IsValid).WithMessage(CommonValidationMessages.EmailInvalid);
 
         }
     }

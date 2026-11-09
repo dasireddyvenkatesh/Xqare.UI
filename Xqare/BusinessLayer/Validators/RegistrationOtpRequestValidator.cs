@@ -1,4 +1,5 @@
 using FluentValidation;
+@using Xqare.BusinessLayer.Constants.Messages
 using Xqare.BusinessLayer.DTO;
 
 namespace Xqare.BusinessLayer.Validators
@@ -9,29 +10,29 @@ namespace Xqare.BusinessLayer.Validators
         {
             RuleFor(x => x.Email)
                 .Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage("Email address is required.")
-                .MaximumLength(256).WithMessage("Email address cannot exceed 256 characters.")
-                .Must(EmailValidationRules.IsValid).WithMessage("Enter a valid email address.");
+                .NotEmpty().WithMessage(CommonValidationMessages.EmailRequired)
+                .MaximumLength(256).WithMessage(CommonValidationMessages.EmailTooLong)
+                .Must(EmailValidationRules.IsValid).WithMessage(CommonValidationMessages.EmailInvalid);
 
             RuleFor(x => x.OtpCode)
                 .NotEmpty()
                 .Length(6)
                 .Matches(@"^[0-9]{6}$")
-                .WithMessage("OTP must be 6 digits.");
+                .WithMessage(RegistrationValidationMessages.OtpInvalid);
 
             RuleFor(x => x.Password)
                 .NotEmpty()
                 .MinimumLength(8)
-                .Matches("[A-Z]").WithMessage("One uppercase required")
-                .Matches("[a-z]").WithMessage("One lowercase required")
-                .Matches("[0-9]").WithMessage("One number required")
-                .Matches(@"[\W_]").WithMessage("One symbol required")
-                .MaximumLength(128).WithMessage("Password cannot exceed 128 characters.");
+                .Matches("[A-Z]").WithMessage(RegistrationValidationMessages.PasswordUppercaseRequired)
+                .Matches("[a-z]").WithMessage(RegistrationValidationMessages.PasswordLowercaseRequired)
+                .Matches("[0-9]").WithMessage(RegistrationValidationMessages.PasswordNumberRequired)
+                .Matches(@"[\W_]").WithMessage(RegistrationValidationMessages.PasswordSymbolRequired)
+                .MaximumLength(128).WithMessage(RegistrationValidationMessages.PasswordTooLong);
 
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty()
                 .Equal(x => x.Password)
-                .WithMessage("Passwords do not match.")
+                .WithMessage(RegistrationValidationMessages.PasswordMismatch)
                 .MaximumLength(128);
         }
     }
