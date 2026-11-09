@@ -1,33 +1,21 @@
-﻿namespace Xqare.BusinessLayer.DTO
+namespace Xqare.BusinessLayer.DTO
 {
     public class LoginResponse
     {
         public bool IsSuccess { get; set; }
-
+        public string? ErrorCode { get; set; }
         public bool RequiresMfa { get; set; }
-
         public string? MfaChallengeToken { get; set; }
-
         public bool RequiresEmailVerification { get; set; }
-
         public int? RetryAfterSeconds { get; set; }
-
-        public string AccessToken { get; set; } = default!;
-
+        public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
-
         public DateTime? AccessTokenExpiry { get; set; }
-
         public string? UserPublicId { get; set; }
-
         public Guid? UserId { get; set; }
-
         public string? Email { get; set; }
-
         public IEnumerable<string>? Roles { get; set; }
-
         public IEnumerable<string>? Permissions { get; set; }
-
         public string? Message { get; set; }
     }
 }
