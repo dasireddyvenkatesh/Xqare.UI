@@ -1,3 +1,4 @@
+@using Xqare.BusinessLayer.Constants.Messages
 @page "/mfa-recovery"
 @inject RateLimitState RateLimits
 @using MudBlazor
@@ -215,7 +216,7 @@
 
             if (!response.IsSuccess)
             {
-                _error = response.Message ?? "The request could not be completed. Please wait and try again.";
+                _error = response.Message ?? MfaRecoveryMessages.RequestFailed;
                 return;
             }
 
@@ -223,11 +224,11 @@
             // account enumeration. Continue without confirming whether the account exists.
             _otpRequest.Email = _request.Email.Trim();
             _step = 1;
-            Snackbar.Add(response.Message ?? "If the account is eligible, a verification code has been sent.", Severity.Info);
+            Snackbar.Add(response.Message ?? MfaRecoveryMessages.RequestConfirmation, Severity.Info);
         }
         catch
         {
-            _error = "We couldn't start recovery. Please try again.";
+            _error = MfaRecoveryMessages.StartFailed;
         }
         finally { _busy = false; }
     }
@@ -245,7 +246,7 @@
             var response = await AuthService.VerifyMfaAccountRecoveryOtpAsync(_otpRequest);
             if (!response.IsSuccess)
             {
-                _error = response.Message ?? "The code is invalid or expired. Request a new code and try again.";
+                _error = response.Message ?? MfaRecoveryMessages.InvalidOrExpiredCode;
                 return;
             }
 
@@ -255,7 +256,7 @@
                 _requiresProvider = !string.IsNullOrWhiteSpace(_emailProof);
                 if (!_requiresProvider)
                 {
-                    _error = "The linked-provider verification could not be started. Please restart recovery.";
+                    _error = MfaRecoveryMessages.ProviderVerificationFailed;
                     return;
                 }
                 _step = 2;
@@ -264,7 +265,7 @@
 
             if (string.IsNullOrWhiteSpace(response.RecoveryGrant))
             {
-                _error = "The recovery authorization was not returned. Please start again.";
+                _error = MfaRecoveryMessages.AuthorizationMissing;
                 return;
             }
 
@@ -273,7 +274,7 @@
         }
         catch
         {
-            _error = "Email verification could not be completed. Please try again.";
+            _error = MfaRecoveryMessages.EmailVerificationFailed;
         }
         finally { _busy = false; }
     }
@@ -287,11 +288,11 @@
         {
             var response = await AuthService.BeginMfaRecoveryExternalLoginAsync(provider, _emailProof);
             if (!response.IsSuccess)
-                _error = response.Message ?? "Unable to continue with the selected provider.";
+                _error = response.Message ?? MfaRecoveryMessages.ProviderContinuationFailed;
         }
         catch
         {
-            _error = "Unable to open the selected provider. Please try again.";
+            _error = MfaRecoveryMessages.ProviderOpenFailed;
         }
         finally { _busy = false; }
     }
@@ -300,7 +301,7 @@
     {
         if (string.IsNullOrWhiteSpace(_completeRequest.RecoveryGrant))
         {
-            _error = "Your recovery session is missing. Please start again.";
+            _error = MfaRecoveryMessages.SessionMissing;
             return;
         }
 
@@ -311,7 +312,7 @@
             _enrollment = await AuthService.StartMfaAccountRecoveryEnrollmentAsync(_completeRequest.RecoveryGrant);
             if (!_enrollment.IsSuccess)
             {
-                _error = _enrollment.Message ?? "Unable to prepare your new authenticator.";
+                _error = _enrollment.Message ?? MfaRecoveryMessages.AuthenticatorSetupFailed;
                 return;
             }
             _step = 3;
@@ -319,7 +320,7 @@
         }
         catch
         {
-            _error = "Unable to prepare your new authenticator. Please try again.";
+            _error = MfaRecoveryMessages.AuthenticatorSetupRetryFailed;
         }
         finally { _busy = false; }
     }
@@ -337,21 +338,21 @@
             var response = await AuthService.CompleteMfaAccountRecoveryAsync(_completeRequest);
             if (!response.IsSuccess)
             {
-                _error = response.Message ?? "The authenticator code could not be verified.";
+                _error = response.Message ?? MfaRecoveryMessages.AuthenticatorVerificationFailed;
                 return;
             }
 
             _recoveryCodes = response.RecoveryCodes ?? Array.Empty<string>();
             if (_recoveryCodes.Count == 0)
             {
-                _error = "The authenticator was updated, but recovery codes were not returned. Contact support before signing in.";
+                _error = MfaRecoveryMessages.RecoveryCodesMissing;
                 return;
             }
             _step = 4;
         }
         catch
         {
-            _error = "Account recovery could not be completed. Please try again.";
+            _error = MfaRecoveryMessages.CompletionFailed;
         }
         finally { _busy = false; }
     }
@@ -384,7 +385,7 @@
         }
         catch
         {
-            Snackbar.Add("Copy was blocked by the browser. Select and copy the codes manually.", Severity.Warning);
+            Snackbar.Add(MfaRecoveryMessages.CopyBlocked, Severity.Warning);
         }
     }
 }
