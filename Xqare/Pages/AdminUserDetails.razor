@@ -56,7 +56,7 @@
         }
         else
         {
-            <MudGrid Spacing="4" Class="admin-detail-grid">
+            <MudGrid Spacing="3" Class="admin-detail-grid">
                 <MudItem xs="12">
                     <MudPaper Class="admin-card admin-detail-profile-card" Elevation="0">
                         <div class="admin-detail-profile">
@@ -84,7 +84,7 @@
                     </MudPaper>
                 </MudItem>
 
-                <MudItem xs="12" lg="8">
+                <MudItem xs="12" lg="6">
                     <MudPaper Class="admin-card admin-detail-section" Elevation="0">
                         <div class="admin-section-heading">
                             <div class="admin-section-heading-left">
@@ -157,19 +157,29 @@
                             </MudAlert>
                         }
                         <MudGrid Spacing="3" Class="admin-detail-fields">
-                            <MudItem xs="12" sm="4">
+                            <MudItem xs="12" sm="6" md="3">
                                 <div class="admin-detail-field">
-                                    <MudText Typo="Typo.caption" Class="admin-field-label">Current failed attempts</MudText>
-                                    <MudText Typo="Typo.h5" Class="admin-session-value">@_user.FailedLoginCount</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Failed attempts</MudText>
+                                    <MudText Typo="Typo.h5" Class="admin-session-value">@_user.FailedLoginCount / 5</MudText>
                                 </div>
                             </MudItem>
-                            <MudItem xs="12" sm="4">
+                            <MudItem xs="12" sm="6" md="3">
                                 <div class="admin-detail-field">
-                                    <MudText Typo="Typo.caption" Class="admin-field-label">Lockout level</MudText>
-                                    <MudText Typo="Typo.h5" Class="admin-session-value">@_user.LockoutLevel / 3</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Lockout escalation</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">
+                                        @(_user.IsLockedOut ? $"Level {_user.LockoutLevel} (active)" : _user.LockoutLevel > 0 ? $"Level {_user.LockoutLevel} reached" : "None")
+                                    </MudText>
                                 </div>
                             </MudItem>
-                            <MudItem xs="12" sm="4">
+                            <MudItem xs="12" sm="6" md="3">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Next lockout</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">
+                                        Level @NextLockoutLevel · @NextLockoutDuration
+                                    </MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="3">
                                 <div class="admin-detail-field">
                                     <MudText Typo="Typo.caption" Class="admin-field-label">Lockout status</MudText>
                                     <MudText Typo="Typo.body1" Class="admin-field-value">@(_user.IsLockedOut ? "Locked" : "Not locked")</MudText>
@@ -182,11 +192,11 @@
                     </MudPaper>
                 </MudItem>
 
-                <MudItem xs="12" lg="4">
+                <MudItem xs="12" lg="6">
                     <MudPaper Class="admin-card admin-detail-section" Elevation="0">
                         <div class="admin-section-heading">
                             <div class="admin-section-heading-left">
-                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Security" /></span>
+                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Devices" /></span>
                                 <div>
                                     <MudText Typo="Typo.h6" Class="admin-card-title">Session summary</MudText>
                                     <MudText Typo="Typo.caption" Class="admin-card-subtitle">Current account sessions</MudText>
@@ -458,6 +468,15 @@
             _assignmentBusy = false;
         }
     }
+
+    private int NextLockoutLevel => Math.Min(3, Math.Max(0, _user?.LockoutLevel ?? 0) + 1);
+
+    private string NextLockoutDuration => NextLockoutLevel switch
+    {
+        1 => "15 minutes",
+        2 => "30 minutes",
+        _ => "60 minutes"
+    };
 
     private string DisplayName => _user is null
         ? string.Empty
