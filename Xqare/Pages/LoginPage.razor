@@ -147,7 +147,7 @@
                     <MudForm @ref="form"
                              Model="loginRequest"
                              Validation="loginValidator.ToMudValidator()"
-                             OnValidSubmit="Submit">
+                             >
 
                         <MudTextField Label="Email Address"
                                       MaxLength="256"
@@ -180,7 +180,7 @@
                         <MudButton Disabled="@(_processing || RateLimits.IsBlocked(isMfaStep ? "auth-otp-ip" : "auth-login-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
-                                   ButtonType="ButtonType.Submit"
+                                   OnClick="Submit"
                                    Class="login-btn">
                             <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
 
@@ -206,7 +206,7 @@
                     <MudForm @ref="form"
                              Model="mfaRequest"
                              Validation="mfaValidator.ToMudValidator()"
-                             OnValidSubmit="Submit"
+                             
                              Class="mt-6">
                         <MudButton Variant="Variant.Text" OnClick="BackToLogin" Class="back-btn">
                             ← Back to login
@@ -238,7 +238,7 @@
                             Can't access your authenticator?
                         </MudButton>
                         <MudButton Disabled="@_processing" FullWidth Variant="Variant.Filled"
-                                   ButtonType="ButtonType.Submit" Class="login-btn">
+                                   OnClick="Submit" Class="login-btn">
                             <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
                                 @if (_processing)
                                 {
@@ -283,6 +283,10 @@
     async Task Submit()
     {
         if (_processing)
+            return;
+
+        await form.ValidateAsync();
+        if (!form.IsValid)
             return;
 
         _processing = true;
