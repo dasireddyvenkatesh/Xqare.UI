@@ -1,3 +1,4 @@
+@using Xqare.BusinessLayer.Constants.Messages
 ﻿@page "/contact"
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.ContactUs
@@ -291,7 +292,7 @@
         }
         catch
         {
-            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
         }
         finally
         {

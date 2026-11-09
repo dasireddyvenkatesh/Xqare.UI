@@ -1,3 +1,4 @@
+@using Xqare.BusinessLayer.Constants.Messages
 ﻿@using MudBlazor
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.PartnerShip
@@ -268,7 +269,7 @@
         }
         catch
         {
-            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
         }
         finally
         {
