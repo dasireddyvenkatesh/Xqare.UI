@@ -28,6 +28,7 @@
             </MudChip>
         </div>
         <RateLimitNotice Policy="auth-security-ip" OnTick="HandleRateLimitTick" />
+        <RateLimitNotice Policy="auth-recovery-ip" OnTick="HandleRateLimitTick" />
 
         @if (_loading)
         {
@@ -114,7 +115,7 @@
                                     Password sign-in is not enabled for this account. You can establish a password using a secure reset link sent to your verified email address.
                                 </MudAlert>
                                 <div class="settings-form-actions">
-                                    <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="_busy"
+                                    <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))"
                                                OnClick="SendPasswordSetupLinkAsync" Class="settings-primary">
                                         Set password
                                     </MudButton>
