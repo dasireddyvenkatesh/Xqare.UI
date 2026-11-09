@@ -139,7 +139,7 @@
                     <MudForm @ref="form"
                              Model="registerRequest"
                              Validation="validationRules.ToMudValidator()"
-                             OnValidSubmit="Submit">
+                             >
 
                         <MudTextField Label="Full Name"
                                       MaxLength="100"
@@ -165,7 +165,7 @@
                         <MudButton Disabled="@(_processing || isRegistrationRetryDisabled || RateLimits.IsBlocked("auth-otp-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
-                                   ButtonType="ButtonType.Submit"
+                                   OnClick="Submit"
                                    Class="register-btn">
                             <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
 
@@ -208,7 +208,7 @@
                     <MudForm @ref="form"
                              Model="otpRequest"
                              Validation="registrationOtpValidator.ToMudValidator()"
-                             OnValidSubmit="Submit"
+                             
                              Class="mt-6">
 
                         <MudButton Variant="Variant.Text"
@@ -276,7 +276,7 @@
                         <MudButton Disabled="@(_processing || isOtpLocked || RateLimits.IsBlocked("auth-otp-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
-                                   ButtonType="ButtonType.Submit"
+                                   OnClick="Submit"
                                    Class="register-btn">
                             <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
 
@@ -339,6 +339,10 @@
     {
         // Guard against repeated submissions while a request is in progress.
         if (_processing)
+            return;
+
+        await form.ValidateAsync();
+        if (!form.IsValid)
             return;
 
         _processing = true;
