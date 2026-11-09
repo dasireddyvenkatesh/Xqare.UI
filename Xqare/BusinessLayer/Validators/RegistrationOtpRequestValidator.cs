@@ -1,5 +1,5 @@
 using FluentValidation;
-@using Xqare.BusinessLayer.Constants.Messages
+using Xqare.BusinessLayer.Constants.Messages
 using Xqare.BusinessLayer.DTO;
 
 namespace Xqare.BusinessLayer.Validators
