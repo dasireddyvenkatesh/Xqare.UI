@@ -221,3 +221,104 @@
     text-decoration: underline;
     text-underline-offset: 2px;
 }
+
+
+/* Premium provider buttons shared with the login experience */
+::deep .social-grid .social-btn {
+    width: 100%;
+    min-height: 50px;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    text-transform: none;
+    font-size: 14px;
+    font-weight: 650;
+    letter-spacing: .1px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+
+::deep .social-grid .social-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(15, 23, 42, .14);
+}
+
+::deep .social-grid .social-google {
+    color: #3c4043;
+    background: #ffffff;
+    border-color: #dadce0;
+}
+
+::deep .social-grid .social-google:hover {
+    background: #f8faff;
+    border-color: #c6dafc;
+}
+
+::deep .social-grid .social-github {
+    color: #ffffff;
+    background: #24292f;
+    border-color: #24292f;
+}
+
+::deep .social-grid .social-github:hover {
+    background: #32383f;
+}
+
+::deep .social-grid .social-linkedin {
+    color: #ffffff;
+    background: #0a66c2;
+    border-color: #0a66c2;
+}
+
+::deep .social-grid .social-linkedin:hover {
+    background: #004182;
+}
+
+::deep .social-grid .social-x {
+    color: #ffffff;
+    background: #000000;
+    border-color: #000000;
+}
+
+::deep .social-grid .social-x:hover {
+    background: #202020;
+}
+
+::deep .social-grid .social-btn:focus-visible {
+    outline: 3px solid var(--xq-auth-accent);
+    outline-offset: 3px;
+}
+
+::deep .social-grid .social-btn:disabled {
+    opacity: .62;
+    transform: none;
+    box-shadow: none;
+}
+
+::deep .social-grid .x-brand-mark {
+    font-size: 19px;
+    line-height: 1;
+    margin-right: 9px;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    ::deep .social-grid {
+        margin-top: 20px;
+    }
+
+    ::deep .social-grid .social-btn {
+        min-height: 52px;
+        border-radius: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::deep .social-grid .social-btn {
+        transition: none;
+    }
+
+    ::deep .social-grid .social-btn:hover {
+        transform: none;
+    }
+}
