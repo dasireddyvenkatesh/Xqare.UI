@@ -725,6 +725,9 @@
 
     private async Task ToggleRolePermissionsAsync(RoleResponse role)
     {
+        if (_saving || _permissionsLoading)
+            return;
+
         if (_viewingPermissionsRoleId == role.Id)
         {
             CloseRolePermissions();
@@ -768,7 +771,7 @@
 
     private async Task ToggleManagePermissionsAsync(RoleResponse role)
     {
-        if (IsProtectedRole(role))
+        if (IsProtectedRole(role) || _saving || _permissionEditorLoading || _permissionsLoading)
             return;
 
         if (_managingPermissionsRoleId == role.Id)
@@ -871,11 +874,15 @@
         finally
         {
             _saving = false;
+            _savingAction = null;
         }
     }
 
     private void CloseManagePermissions()
     {
+        if (_saving || _permissionEditorLoading)
+            return;
+
         _managingPermissionsRoleId = null;
         _managedPermissionCodes.Clear();
         _originalManagedPermissionCodes.Clear();
@@ -922,6 +929,7 @@
         finally
         {
             _saving = false;
+            _savingAction = null;
         }
     }
 }
