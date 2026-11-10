@@ -265,7 +265,7 @@
                                                        StartIcon="@Icons.Material.Filled.Visibility"
                                                        OnClick="@(() => ToggleRolePermissionsAsync(role))"
                                                        Disabled="_permissionsLoading">
-                                                @(_viewingPermissionsRoleId == role.Id ? "Hide permissions" : "View permissions")
+                                                <LoadingButtonContent IsLoading="@(_permissionsLoading && _viewingPermissionsRoleId == role.Id)" LoadingText="Loading permissions...">@( _viewingPermissionsRoleId == role.Id ? "Hide permissions" : "View permissions")</LoadingButtonContent>
                                             </MudButton>
                                         </Authorized>
                                     </AuthorizeView>
@@ -278,7 +278,7 @@
                                                            StartIcon="@Icons.Material.Filled.Tune"
                                                            OnClick="@(() => ToggleManagePermissionsAsync(role))"
                                                            Disabled="@(_saving || _permissionEditorLoading)">
-                                                    @(_managingPermissionsRoleId == role.Id ? "Close editor" : "Manage permissions")
+                                                    <LoadingButtonContent IsLoading="@(_permissionEditorLoading && _managingPermissionsRoleId == role.Id)" LoadingText="Loading permissions...">@( _managingPermissionsRoleId == role.Id ? "Close editor" : "Manage permissions")</LoadingButtonContent>
                                                 </MudButton>
                                             }
                                         </Authorized>
@@ -415,7 +415,7 @@
                                                            StartIcon="@Icons.Material.Filled.Save"
                                                            OnClick="@(() => SaveManagedPermissionsAsync(role))"
                                                            Disabled="@(_saving || _managedPermissionCodes.SetEquals(_originalManagedPermissionCodes))">
-                                                    @(_saving && _savingAction == "permissions" ? "Saving permissions..." : "Save permissions")
+                                                    <LoadingButtonContent IsLoading="@(_saving && _savingAction == "permissions")" LoadingText="Saving permissions...">Save permissions</LoadingButtonContent>
                                                 </MudButton>
                                                 <MudButton Variant="Variant.Text" Color="Color.Default"
                                                            OnClick="@(() => ResetManagedPermissions())"
@@ -456,7 +456,7 @@
                                         {
                                             <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
                                                 @(_rolePermissions?.Message ?? "Role permissions could not be loaded.")
-                                                <MudButton Variant="Variant.Text" OnClick="ReloadRolePermissionsAsync">Retry</MudButton>
+                                                <MudButton Variant="Variant.Text" OnClick="ReloadRolePermissionsAsync"><LoadingButtonContent IsLoading="_permissionsLoading" LoadingText="Retrying...">Retry</LoadingButtonContent></MudButton>
                                             </MudAlert>
                                         }
                                         else if (_rolePermissions.Role.Permissions.Count == 0)
