@@ -236,7 +236,7 @@
                                    Color="Color.Secondary" Class="mfa-help-link">
                             Can't access your authenticator?
                         </MudButton>
-                        <MudButton Disabled="@_processing" FullWidth Variant="Variant.Filled"
+                        <MudButton Disabled="@(_processing || RateLimits.IsBlocked("auth-otp-ip"))" FullWidth Variant="Variant.Filled"
                                    OnClick="Submit" Class="login-btn">
                             <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
                                 @if (_processing)
