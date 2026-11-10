@@ -765,19 +765,23 @@
 
     private async Task StartEnrollmentAsync()
     {
+        if (_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
+        _startingEnrollment = true;
         if (_enrollmentForm != null)
         {
             await _enrollmentForm.ValidateAsync();
             if (!_enrollmentForm.IsValid)
+            {
+                _startingEnrollment = false;
                 return;
+            }
         }
         if (_totp?.IsEnabled == true && !IsSixDigitCode(_enrollmentRequest.CurrentTotpCode))
         {
             Snackbar.Add(SettingsMessages.AuthenticatorCodeRequired, Severity.Warning);
+            _startingEnrollment = false;
             return;
         }
-        if (_startingEnrollment || _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
-        _startingEnrollment = true;
         try
         {
             var response = await AuthService.StartTotpEnrollmentAsync(_enrollmentRequest);
@@ -796,14 +800,17 @@
 
     private async Task ConfirmEnrollmentAsync()
     {
+        if (_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
+        _confirmingEnrollment = true;
         if (_enrollmentConfirmForm != null)
         {
             await _enrollmentConfirmForm.ValidateAsync();
             if (!_enrollmentConfirmForm.IsValid)
+            {
+                _confirmingEnrollment = false;
                 return;
+            }
         }
-        if (_confirmingEnrollment || _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
-        _confirmingEnrollment = true;
         try
         {
             var response = await AuthService.ConfirmTotpEnrollmentAsync(_enrollmentConfirmRequest);
@@ -820,14 +827,17 @@
 
     private async Task RegenerateRecoveryAsync()
     {
+        if (_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
+        _regeneratingRecovery = true;
         if (_recoveryForm != null)
         {
             await _recoveryForm.ValidateAsync();
             if (!_recoveryForm.IsValid)
+            {
+                _regeneratingRecovery = false;
                 return;
+            }
         }
-        if (_regeneratingRecovery || _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
-        _regeneratingRecovery = true;
         try
         {
             var response = await AuthService.RegenerateTotpRecoveryCodesAsync(_recoveryRequest);
@@ -843,14 +853,17 @@
 
     private async Task DisableTotpAsync()
     {
+        if (_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
+        _disablingTotp = true;
         if (_disableForm != null)
         {
             await _disableForm.ValidateAsync();
             if (!_disableForm.IsValid)
+            {
+                _disablingTotp = false;
                 return;
+            }
         }
-        if (_disablingTotp || _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
-        _disablingTotp = true;
         try
         {
             var response = await AuthService.DisableTotpAsync(_disableRequest);
