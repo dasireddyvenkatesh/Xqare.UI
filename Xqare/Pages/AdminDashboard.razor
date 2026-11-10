@@ -1,4 +1,5 @@
 @page "/admin"
+@using Xqare.BusinessLayer.Constants.Messages
 @layout AuthenticatedLayout
 @using Microsoft.AspNetCore.Authorization
 @using Xqare.BusinessLayer.Classes.Authorization
@@ -165,7 +166,7 @@
         catch
         {
             _overview = null;
-            Snackbar.Add("The administration overview could not be loaded. Please try again.", Severity.Error);
+            Snackbar.Add(AdminMessages.OverviewLoadFailedRetry, Severity.Error);
         }
         finally
         {

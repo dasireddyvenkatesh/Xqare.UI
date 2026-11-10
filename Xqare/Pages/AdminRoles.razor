@@ -1,4 +1,5 @@
 @page "/admin/roles"
+@using Xqare.BusinessLayer.Constants.Messages
 @layout AuthenticatedLayout
 @using Microsoft.AspNetCore.Authorization
 @using Xqare.BusinessLayer.Classes.Authorization
@@ -567,7 +568,7 @@
         catch
         {
             _error = true;
-            Snackbar.Add("Roles could not be loaded. Please try again.", Severity.Error);
+            Snackbar.Add(RbacMessages.RolesLoadFailed, Severity.Error);
         }
         finally
         {
@@ -603,7 +604,7 @@
         catch
         {
             _permissionsLoadError = true;
-            Snackbar.Add("Permissions could not be loaded. Please try again.", Severity.Error);
+            Snackbar.Add(RbacMessages.PermissionsLoadFailedRetry, Severity.Error);
         }
         finally
         {
@@ -639,15 +640,15 @@
 
     private static string RenameDisabledReason(RoleResponse role) =>
         IsProtectedRole(role)
-            ? "System roles are protected and cannot be renamed."
-            : "Rename this custom role's display name.";
+            ? RbacMessages.SystemRoleRenameProtected
+            : RbacMessages.RenameCustomRoleTooltip;
 
     private static string DeleteDisabledReason(RoleResponse role) =>
         IsProtectedRole(role)
-            ? "System roles are protected and cannot be deleted."
+            ? RbacMessages.SystemRoleDeleteProtected
             : role.AssignedUsers > 0
-                ? "Remove all role assignments before deleting this role."
-                : "Delete this custom role.";
+                ? RbacMessages.RemoveAssignmentsBeforeDelete
+                : RbacMessages.DeleteCustomRoleTooltip;
 
     private void BeginRename(RoleResponse role)
     {
@@ -693,7 +694,7 @@
         }
         catch
         {
-            Snackbar.Add("The role could not be saved. Please try again.", Severity.Error);
+            Snackbar.Add(RbacMessages.RoleSaveFailedRetry, Severity.Error);
         }
         finally
         {
@@ -729,7 +730,7 @@
             _rolePermissions = new RolePermissionsResult
             {
                 IsSuccess = false,
-                Message = "Role permissions could not be loaded. Please try again."
+                Message = RbacMessages.RolePermissionsLoadFailedRetry
             };
         }
         finally
@@ -785,7 +786,7 @@
         catch
         {
             _permissionEditorLoadError = true;
-            Snackbar.Add("Role permissions could not be loaded. Please try again.", Severity.Error);
+            Snackbar.Add(RbacMessages.RolePermissionsLoadFailedRetry, Severity.Error);
         }
         finally
         {
@@ -840,7 +841,7 @@
         }
         catch
         {
-            Snackbar.Add("Role permissions could not be updated. Please try again.", Severity.Error);
+            Snackbar.Add(RbacMessages.RolePermissionsUpdateFailedRetry, Severity.Error);
         }
         finally
         {
@@ -890,7 +891,7 @@
         }
         catch
         {
-            Snackbar.Add("The role could not be deleted. Please try again.", Severity.Error);
+            Snackbar.Add(RbacMessages.RoleDeleteFailedRetry, Severity.Error);
         }
         finally
         {

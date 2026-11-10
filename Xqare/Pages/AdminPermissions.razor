@@ -1,4 +1,5 @@
 @page "/admin/permissions"
+@using Xqare.BusinessLayer.Constants.Messages
 @layout AuthenticatedLayout
 @using Microsoft.AspNetCore.Authorization
 @using Xqare.BusinessLayer.Classes.Authorization
@@ -236,7 +237,7 @@
         catch
         {
             _error = true;
-            Snackbar.Add("Permissions could not be loaded. Please try again.", Severity.Error);
+            Snackbar.Add(RbacMessages.PermissionsLoadFailedRetry, Severity.Error);
         }
         finally
         {
@@ -249,11 +250,11 @@
         try
         {
             await JS.InvokeVoidAsync("navigator.clipboard.writeText", code);
-            Snackbar.Add("Permission code copied.", Severity.Success);
+            Snackbar.Add(RbacMessages.PermissionCodeCopied, Severity.Success);
         }
         catch
         {
-            Snackbar.Add("Could not copy the permission code.", Severity.Warning);
+            Snackbar.Add(RbacMessages.PermissionCodeCopyFailed, Severity.Warning);
         }
     }
 }
