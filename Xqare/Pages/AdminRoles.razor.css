@@ -1,42 +1,13 @@
-.admin-roles-page {
-    min-height: 100%;
-    padding: clamp(12px, 1.5vw, 20px);
-    padding-block-end: max(var(--xq-space-6), env(safe-area-inset-bottom));
-    background: var(--xq-page-bg);
-    color: var(--xq-text-primary);
-}
-
 .admin-roles-page ::deep .admin-users-container {
     width: 100%;
     max-width: none;
     margin-inline: auto;
     padding-inline: 0;
 }
-
-.admin-roles-page .admin-users-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--xq-space-4);
-    margin: 0 16px var(--xq-space-6);
-}
-
 .admin-roles-page .admin-users-heading-copy {
     flex: 1 1 18rem;
     min-width: 0;
 }
-
-.admin-roles-page .admin-users-heading-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex: 0 0 auto;
-    flex-wrap: wrap;
-    gap: var(--xq-space-2);
-    margin-inline-start: auto;
-}
-
 .admin-roles-page ::deep .admin-page-title {
     margin: 0;
     color: var(--xq-navy) !important;
@@ -44,30 +15,11 @@
     letter-spacing: -.035em;
     line-height: 1.15;
 }
-
-.admin-roles-page ::deep .admin-page-subtitle {
-    margin-block-start: var(--xq-space-2);
-    color: var(--xq-text-secondary) !important;
-    max-width: 42rem;
-    line-height: 1.5;
-}
-
 .admin-roles-page ::deep .admin-refresh-button {
     min-width: 0;
     white-space: nowrap;
     text-transform: none;
 }
-
-.admin-roles-page ::deep .admin-users-card {
-    height: auto;
-    min-width: 0;
-    padding: var(--xq-padding-card-compact);
-    border: 1px solid var(--xq-border);
-    border-radius: var(--xq-card-radius);
-    background: var(--xq-surface);
-    box-shadow: 0 5px 18px rgba(15, 42, 68, .045);
-}
-
 .admin-roles-page .admin-section-heading,
 .admin-roles-page .admin-section-heading-left {
     display: flex;
@@ -97,25 +49,11 @@
     background: rgba(var(--xq-primary-rgb), .12);
     color: var(--xq-primary-hover);
 }
-
-.admin-roles-page ::deep .admin-card-title {
-    color: var(--xq-navy) !important;
-    font-weight: 750 !important;
-    line-height: 1.3;
-}
-
 .admin-roles-page ::deep .admin-card-subtitle {
     margin-block-start: var(--xq-space-1);
     color: var(--xq-text-secondary) !important;
     line-height: 1.4;
 }
-
-.admin-roles-page ::deep .admin-count-chip {
-    flex: 0 0 auto;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
 .admin-roles-page ::deep .admin-divider {
     margin-block: var(--xq-space-4) !important;
     border-color: var(--xq-border) !important;
@@ -244,26 +182,10 @@
     gap: var(--xq-space-2);
     margin-block-start: var(--xq-space-4);
 }
-
-.admin-roles-page ::deep .admin-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--xq-space-2);
-    padding: var(--xq-space-10) var(--xq-space-5);
-    background: var(--xq-surface-muted);
-    text-align: center;
-}
-
 .admin-roles-page ::deep .admin-empty-icon {
     color: var(--xq-text-muted);
     font-size: 2.5rem;
 }
-
-.admin-roles-page ::deep .admin-list-alert {
-    margin-block: var(--xq-space-3);
-}
-
 .admin-roles-page ::deep .admin-permission-module-heading {
     display: flex;
     align-items: center;
@@ -280,7 +202,6 @@
 .admin-roles-page ::deep .mud-button-root {
     text-transform: none;
 }
-
 
 .admin-roles-page .admin-create-permissions {
     display: flex;
@@ -319,7 +240,6 @@
 .admin-roles-page ::deep .admin-create-permissions-hint {
     line-height: 1.5;
 }
-
 
 .admin-roles-page .admin-role-permission-editor {
     display: flex;
