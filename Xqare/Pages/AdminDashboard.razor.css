@@ -1,11 +1,3 @@
-.admin-page {
-    min-height: 100%;
-    padding: clamp(12px, 1.5vw, 20px);
-    padding-block-end: max(var(--xq-space-6), env(safe-area-inset-bottom));
-    background: var(--xq-page-bg);
-    color: var(--xq-text-primary);
-}
-
 .admin-page ::deep .admin-container {
     width: 100%;
     max-width: none;
@@ -42,14 +34,6 @@
     letter-spacing: -.035em;
     line-height: 1.15;
 }
-
-.admin-page ::deep .admin-page-subtitle {
-    margin-block-start: var(--xq-space-2);
-    color: var(--xq-text-secondary) !important;
-    max-width: 42rem;
-    line-height: 1.5;
-}
-
 .admin-page ::deep .admin-refresh-button {
     min-width: 0;
     white-space: nowrap;
@@ -123,13 +107,6 @@
     background: rgba(245, 166, 35, .12);
     color: var(--xq-warning);
 }
-
-.admin-page ::deep .admin-card-title {
-    color: var(--xq-navy) !important;
-    font-weight: 750 !important;
-    line-height: 1.3;
-}
-
 .admin-page ::deep .admin-card-subtitle {
     margin-block-start: var(--xq-space-1);
     color: var(--xq-text-secondary) !important;
