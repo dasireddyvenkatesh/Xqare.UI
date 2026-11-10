@@ -223,15 +223,15 @@
 }
 
 
-/* Provider-branded social sign-in buttons. Keep the 2-column grid defined by MudGrid xs="6". */
-::deep .social-grid .social-btn {
-    width: 100%;
+/* Provider-branded social buttons. Explicitly override MudBlazor filled-button theme rules. */
+::deep .social-grid button.social-btn {
+    width: 100% !important;
     min-width: 0;
     min-height: 46px;
-    height: 46px;
-    border-radius: 10px;
-    border: 1px solid transparent;
-    text-transform: none;
+    height: 46px !important;
+    border-radius: 10px !important;
+    border: 1px solid transparent !important;
+    text-transform: none !important;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: .1px;
@@ -239,75 +239,83 @@
     transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease;
 }
 
-::deep .social-grid .social-btn:hover {
+::deep .social-grid button.social-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(15, 42, 68, .16);
 }
 
-::deep .social-grid .social-btn .mud-icon-root {
+::deep .social-grid button.social-btn .mud-icon-root {
     font-size: 20px;
 }
 
-::deep .social-grid .social-btn .mud-progress-circular {
+::deep .social-grid button.social-btn .mud-progress-circular {
     color: currentColor !important;
 }
 
-::deep .social-grid .social-btn:focus-visible {
+::deep .social-grid button.social-btn:focus-visible {
     outline: 2px solid var(--xq-auth-accent);
     outline-offset: 2px;
 }
 
-::deep .social-grid .social-btn:disabled {
+::deep .social-grid button.social-btn:disabled {
     opacity: .82;
     cursor: progress;
     box-shadow: none;
     transform: none;
 }
 
-/* Google: official white button treatment; preserve the Google mark's native colours. */
-::deep .social-grid .social-google {
-    background: #ffffff;
-    color: #3c4043;
-    border-color: #dadce0;
+/* Google: white surface with Google's multicolour brand mark. */
+::deep .social-grid button.social-btn.social-google {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #3c4043 !important;
+    border-color: #dadce0 !important;
 }
 
-::deep .social-grid .social-google:hover {
-    background: #f8faff;
-    border-color: #c6c9ce;
+::deep .social-grid button.social-btn.social-google:hover {
+    background: #f8faff !important;
+    background-color: #f8faff !important;
+    border-color: #c6c9ce !important;
 }
 
-/* GitHub: dark charcoal brand surface. */
-::deep .social-grid .social-github {
-    background: #24292f;
-    color: #ffffff;
-    border-color: #24292f;
+/* GitHub: dark charcoal surface. */
+::deep .social-grid button.social-btn.social-github {
+    background: #24292f !important;
+    background-color: #24292f !important;
+    color: #ffffff !important;
+    border-color: #24292f !important;
 }
 
-::deep .social-grid .social-github:hover {
-    background: #1f2328;
-    border-color: #1f2328;
+::deep .social-grid button.social-btn.social-github:hover {
+    background: #1f2328 !important;
+    background-color: #1f2328 !important;
+    border-color: #1f2328 !important;
 }
 
 /* LinkedIn: official brand blue. */
-::deep .social-grid .social-linkedin {
-    background: #0a66c2;
-    color: #ffffff;
-    border-color: #0a66c2;
+::deep .social-grid button.social-btn.social-linkedin {
+    background: #0a66c2 !important;
+    background-color: #0a66c2 !important;
+    color: #ffffff !important;
+    border-color: #0a66c2 !important;
 }
 
-::deep .social-grid .social-linkedin:hover {
-    background: #004182;
-    border-color: #004182;
+::deep .social-grid button.social-btn.social-linkedin:hover {
+    background: #004182 !important;
+    background-color: #004182 !important;
+    border-color: #004182 !important;
 }
 
-/* Twitter: retain the existing Twitter bird and use its recognizable blue. */
-::deep .social-grid .social-twitter {
-    background: #1da1f2;
-    color: #ffffff;
-    border-color: #1da1f2;
+/* X/Twitter: black brand surface with the existing provider icon. */
+::deep .social-grid button.social-btn.social-twitter {
+    background: #000000 !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
 }
 
-::deep .social-grid .social-twitter:hover {
-    background: #168bd2;
-    border-color: #168bd2;
+::deep .social-grid button.social-btn.social-twitter:hover {
+    background: #202124 !important;
+    background-color: #202124 !important;
+    border-color: #202124 !important;
 }
