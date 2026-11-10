@@ -314,29 +314,3 @@
 ::deep .external-auth-brand span {
     color: var(--xq-auth-accent);
 }
-
-@media (max-width: 600px) {
-    ::deep .social-grid {
-        margin-top: 20px;
-    }
-
-    ::deep .social-grid .social-btn {
-        min-height: 52px;
-        border-radius: 12px;
-    }
-
-    ::deep .external-auth-progress {
-        margin: 16px;
-        padding: 8px;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    ::deep .social-grid .social-btn {
-        transition: none;
-    }
-
-    ::deep .social-grid .social-btn:hover {
-        transform: none;
-    }
-}
