@@ -12,6 +12,22 @@
 
 <section>
 
+    @if (_isCompletingExternalLogin)
+    {
+        <MudGrid Class="login-wrapper" GutterSize="0">
+            <MudItem xs="12" Class="d-flex justify-center align-center">
+                <MudPaper Elevation="0" Class="auth-container">
+                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="3" Class="pa-8">
+                        <MudProgressCircular Size="Size.Large" Indeterminate="true" />
+                        <MudText Typo="Typo.h6">Completing your sign-in…</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Please wait while we securely verify your account.</MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    }
+    else
+    {
     <MudGrid Class="login-wrapper" GutterSize="0">
 
         <!-- LEFT PANEL -->
@@ -256,6 +272,7 @@
             </MudPaper>
         </MudItem>
     </MudGrid>
+    }
 </section>
 
 @code {
@@ -268,6 +285,7 @@
     VerifyMfaChallengeRequestValidator mfaValidator = new();
 
     private bool _processing = false;
+    private bool _isCompletingExternalLogin;
     private string? _activeProvider;
     bool isMfaStep = false;
     bool isRecoveryCodeStep = false;
@@ -446,21 +464,33 @@
         {
             query.TryGetValue("code", out var codeValue);
             query.TryGetValue("message", out var messageValue);
+            _isCompletingExternalLogin = true;
             Nav.NavigateTo("/login", forceLoad: false, replace: true);
 
-            var exchange = await AuthService.CompleteExternalLoginAsync(codeValue.ToString());
-            if (exchange.IsSuccess && exchange.RequiresMfa)
+            try
             {
-                mfaRequest = new VerifyMfaChallengeRequest { Factor = "totp" };
-                isMfaStep = true;
-                isRecoveryCodeStep = false;
-                Snackbar.Add(messageValue.ToString().Length > 0
-                    ? messageValue.ToString()
-                    : LoginMessages.AuthenticatorCodePrompt, Severity.Info);
+                var exchange = await AuthService.CompleteExternalLoginAsync(codeValue.ToString());
+                if (exchange.IsSuccess && exchange.RequiresMfa)
+                {
+                    mfaRequest = new VerifyMfaChallengeRequest { Factor = "totp" };
+                    isMfaStep = true;
+                    isRecoveryCodeStep = false;
+                    Snackbar.Add(messageValue.ToString().Length > 0
+                        ? messageValue.ToString()
+                        : LoginMessages.AuthenticatorCodePrompt, Severity.Info);
+                }
+                else
+                {
+                    Snackbar.Add(exchange.Message ?? ExternalLoginMessages.VerificationExpired, Severity.Error);
+                }
             }
-            else
+            catch
             {
-                Snackbar.Add(exchange.Message ?? ExternalLoginMessages.VerificationExpired, Severity.Error);
+                Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
+            }
+            finally
+            {
+                _isCompletingExternalLogin = false;
             }
 
             return;
@@ -473,17 +503,29 @@
             {
                 // Remove the one-time code from the address bar before exchanging it.
                 query.TryGetValue("code", out var codeValue);
+                _isCompletingExternalLogin = true;
                 Nav.NavigateTo("/login", forceLoad: false, replace: true);
 
-                var exchange = await AuthService.CompleteExternalLoginAsync(codeValue.ToString());
-                if (exchange.IsSuccess && !string.IsNullOrWhiteSpace(exchange.AccessToken))
+                try
                 {
-                    Snackbar.Add(ExternalLoginMessages.Success, Severity.Success);
-                    Nav.NavigateTo("/dashboard", replace: true);
+                    var exchange = await AuthService.CompleteExternalLoginAsync(codeValue.ToString());
+                    if (exchange.IsSuccess && !string.IsNullOrWhiteSpace(exchange.AccessToken))
+                    {
+                        Snackbar.Add(ExternalLoginMessages.Success, Severity.Success);
+                        Nav.NavigateTo("/dashboard", replace: true);
+                    }
+                    else
+                    {
+                        Snackbar.Add(exchange.Message ?? ExternalLoginMessages.GoogleExchangeFailed, Severity.Error);
+                    }
                 }
-                else
+                catch
                 {
-                    Snackbar.Add(exchange.Message ?? ExternalLoginMessages.GoogleExchangeFailed, Severity.Error);
+                    Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
+                }
+                finally
+                {
+                    _isCompletingExternalLogin = false;
                 }
 
                 return;
