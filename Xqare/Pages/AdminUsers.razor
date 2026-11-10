@@ -25,16 +25,10 @@
             <div class="admin-users-heading-actions">
                 <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
                            OnClick="LoadUsersAsync" Disabled="_loading" Class="admin-refresh-button">
-                    @if (_loading)
-                    {
-                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
-                        <span>Refreshing…</span>
-                    }
-                    else
-                    {
+                    <LoadingButtonContent IsLoading="_loading" LoadingText="Refreshing…">
                         <MudIcon Icon="@Icons.Material.Filled.Refresh" Class="mr-1" />
-                        <span>Refresh</span>
-                    }
+                        Refresh
+                    </LoadingButtonContent>
                 </MudButton>
             </div>
         </div>
@@ -124,15 +118,7 @@
                 <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
                     Users could not be loaded.
                     <MudButton Variant="Variant.Text" OnClick="LoadUsersAsync" Disabled="_loading">
-                        @if (_loading)
-                        {
-                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
-                            <span>Retrying…</span>
-                        }
-                        else
-                        {
-                            <span>Retry</span>
-                        }
+                        <LoadingButtonContent IsLoading="_loading" LoadingText="Retrying…">Retry</LoadingButtonContent>
                     </MudButton>
                 </MudAlert>
             }
@@ -211,15 +197,9 @@
                                                     <MudButton Color="Color.Error" Variant="Variant.Filled" Size="Size.Small"
                                                                Disabled="@_busyUsers.Contains(user.UserId)"
                                                                OnClick="@(() => ConfirmStatusChangeAsync(user))">
-                                                        @if (_busyUsers.Contains(user.UserId))
-                                                        {
-                                                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
-                                                            <span>@(user.IsActive ? "Disabling…" : "Enabling…")</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>@(user.IsActive ? "Yes, disable" : "Yes, enable")</span>
-                                                        }
+                                                        <LoadingButtonContent IsLoading="@_busyUsers.Contains(user.UserId)" LoadingText="@(user.IsActive ? "Disabling…" : "Enabling…")">
+                                                            @(user.IsActive ? "Yes, disable" : "Yes, enable")
+                                                        </LoadingButtonContent>
                                                     </MudButton>
                                                     <MudButton Variant="Variant.Text" Size="Size.Small"
                                                                Disabled="@_busyUsers.Contains(user.UserId)"
