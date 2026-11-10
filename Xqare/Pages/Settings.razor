@@ -243,7 +243,7 @@
                                                       @bind-Value="_enrollmentRequest.CurrentTotpCode" FullWidth="true" />
                                     }
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_startingEnrollment || RateLimits.IsBlocked("auth-security-ip"))" OnClick="StartEnrollmentAsync" Class="settings-primary">Continue</MudButton>
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_startingEnrollment || RateLimits.IsBlocked("auth-security-ip"))" OnClick="StartEnrollmentAsync" Class="settings-primary">@if (_startingEnrollment) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Preparing authenticator…</text> } else { <text>Continue</text> }</MudButton>
                                         <MudButton Variant="Variant.Text" Disabled="@(_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp)" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -263,7 +263,7 @@
                                                       For="@(() => _enrollmentConfirmRequest.Code)"
                                                       Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" FullWidth="true" />
                                         <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_confirmingEnrollment || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ConfirmEnrollmentAsync" Class="settings-primary">
-                                            Verify and enable
+                                            @if (_confirmingEnrollment) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Enabling authenticator…</text> } else { <text>Verify and enable</text> }
                                         </MudButton>
                                     </MudForm>
                                 }
@@ -280,7 +280,7 @@
                                                   Margin="Margin.Dense" MaxLength="6" For="@(() => _recoveryRequest.Code)"
                                                   @bind-Value="_recoveryRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_regeneratingRecovery || RateLimits.IsBlocked("auth-security-ip"))" OnClick="RegenerateRecoveryAsync" Class="settings-primary">Generate new codes</MudButton>
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_regeneratingRecovery || RateLimits.IsBlocked("auth-security-ip"))" OnClick="RegenerateRecoveryAsync" Class="settings-primary">@if (_regeneratingRecovery) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Generating codes…</text> } else { <text>Generate new codes</text> }</MudButton>
                                         <MudButton Variant="Variant.Text" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -302,7 +302,7 @@
                                                   Margin="Margin.Dense" MaxLength="6" For="@(() => _disableRequest.Code)"
                                                   @bind-Value="_disableRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="@(_disablingTotp || RateLimits.IsBlocked("auth-security-ip"))" OnClick="DisableTotpAsync">Disable authenticator</MudButton>
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="@(_disablingTotp || RateLimits.IsBlocked("auth-security-ip"))" OnClick="DisableTotpAsync">@if (_disablingTotp) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Disabling authenticator…</text> } else { <text>Disable authenticator</text> }</MudButton>
                                         <MudButton Variant="Variant.Text" Disabled="@(_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp)" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
