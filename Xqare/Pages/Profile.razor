@@ -140,7 +140,7 @@
                                                       AdornmentColor="Color.Secondary"
                                                       For="@(() => _edit.PhoneNumber)"
                                                       Value="_edit.PhoneNumber" ValueChanged="HandlePhoneNumberChanged"
-                                                      HelperText="Enter your 10-digit Indian mobile number only." />
+                                                      HelperText="@ProfileValidationMessages.PhoneHelper" />
                                     </MudItem>
                                     <MudItem xs="12">
                                         <MudTextField T="string" Label="About you" Variant="Variant.Outlined"

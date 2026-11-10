@@ -147,7 +147,7 @@
                                       Variant="Variant.Outlined"
                                       @bind-Value="registerRequest.FullName"
                                       For="@(() => registerRequest.FullName)"
-                                      HelperText="Please enter your legal name"
+                                      HelperText="@RegistrationValidationMessages.FullNameHelper"
                                       HelperTextOnFocus="true"
                                       Immediate="true" />
 
@@ -159,7 +159,7 @@
                                       Variant="Variant.Outlined"
                                       @bind-Value="registerRequest.Email"
                                       For="@(() => registerRequest.Email)"
-                                      HelperText="Please enter your personal email id"
+                                      HelperText="@RegistrationValidationMessages.EmailHelper"
                                       HelperTextOnFocus="true" />
 
                         <MudButton Disabled="@(_processing || isRegistrationRetryDisabled || RateLimits.IsBlocked("auth-otp-ip"))"
@@ -241,7 +241,7 @@
                                       Adornment="Adornment.End"
                                       AdornmentIcon="@(showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                                       OnAdornmentClick="TogglePassword"
-                                      HelperText="At least 8 characters, including uppercase, lowercase, a number and a symbol." />
+                                      HelperText="@RegistrationValidationMessages.PasswordRequirementsHelper" />
 
                         <MudTextField Label="Confirm Password"
                                       MaxLength="128"
