@@ -1,42 +1,13 @@
-.admin-permissions-page {
-    min-height: 100%;
-    padding: clamp(12px, 1.5vw, 20px);
-    padding-block-end: max(var(--xq-space-6), env(safe-area-inset-bottom));
-    background: var(--xq-page-bg);
-    color: var(--xq-text-primary);
-}
-
 .admin-permissions-page ::deep .admin-users-container {
     width: 100%;
     max-width: none;
     margin-inline: auto;
     padding-inline: 0;
 }
-
-.admin-permissions-page .admin-users-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--xq-space-4);
-    margin: 0 16px var(--xq-space-6);
-}
-
 .admin-permissions-page .admin-users-heading-copy {
     flex: 1 1 18rem;
     min-width: 0;
 }
-
-.admin-permissions-page .admin-users-heading-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex: 0 0 auto;
-    flex-wrap: wrap;
-    gap: var(--xq-space-2);
-    margin-inline-start: auto;
-}
-
 .admin-permissions-page ::deep .admin-page-title {
     margin: 0;
     color: var(--xq-navy) !important;
@@ -44,14 +15,6 @@
     letter-spacing: -.035em;
     line-height: 1.15;
 }
-
-.admin-permissions-page ::deep .admin-page-subtitle {
-    margin-block-start: var(--xq-space-2);
-    color: var(--xq-text-secondary) !important;
-    max-width: 42rem;
-    line-height: 1.5;
-}
-
 .admin-permissions-page ::deep .admin-refresh-button {
     min-width: 0;
     white-space: nowrap;
