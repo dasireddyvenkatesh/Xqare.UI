@@ -25,7 +25,7 @@
                 <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
                            StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadPermissionsAsync"
                            Disabled="_loading" Class="admin-refresh-button">
-                    Refresh
+                    @(_loading ? "Refreshing..." : "Refresh")
                 </MudButton>
             </div>
         </div>
@@ -81,7 +81,9 @@
             {
                 <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
                     Permissions could not be loaded.
-                    <MudButton Variant="Variant.Text" OnClick="LoadPermissionsAsync">Retry</MudButton>
+                    <MudButton Variant="Variant.Text" OnClick="LoadPermissionsAsync" Disabled="_loading">
+                        @(_loading ? "Retrying..." : "Retry")
+                    </MudButton>
                 </MudAlert>
             }
             else if (_permissions.Count == 0)
@@ -186,6 +188,7 @@
     private List<PermissionResponse> _permissions = new();
     private bool _loading = true;
     private bool _error;
+    private bool _loadInProgress;
     private string _search = string.Empty;
     private Guid? _expandedPermissionId;
 
@@ -220,6 +223,10 @@
 
     private async Task LoadPermissionsAsync()
     {
+        if (_loadInProgress)
+            return;
+
+        _loadInProgress = true;
         _loading = true;
         _error = false;
         try
@@ -242,6 +249,7 @@
         finally
         {
             _loading = false;
+            _loadInProgress = false;
         }
     }
 
