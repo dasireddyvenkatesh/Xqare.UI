@@ -177,7 +177,7 @@
                             @if (_processing)
                             {
                                 <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                <MudText>Processing...</MudText>
+                                <MudText>Sending message...</MudText>
                             }
                             else
                             {
@@ -267,15 +267,18 @@
 
     async Task Submit()
     {
-        await _form.ValidateAsync();
-
-        if (!_form.IsValid)
+        if (_processing)
             return;
 
         _processing = true;
 
         try
         {
+            await _form.ValidateAsync();
+
+            if (!_form.IsValid)
+                return;
+
             var response = await ContactUsService.SendContactUsMessageAsync(_model);
 
             if (response.IsSuccess)
@@ -298,6 +301,5 @@
         {
             _processing = false;
         }
-        
     }
 }
