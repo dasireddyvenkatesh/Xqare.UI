@@ -110,7 +110,7 @@
                     <!-- SOCIAL 2x2 -->
                     <MudGrid Class="social-grid mt-6" Spacing="2">
                         <MudItem xs="6" sm="6">
-                            <MudButton FullWidth Class="social-btn"
+                            <MudButton FullWidth Class="social-btn social-google"
                                        StartIcon="@Icons.Custom.Brands.Google"
                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked("auth-login-ip"))'
                                        OnClick='@(() => LoginWithProviderAsync("google"))'>
@@ -118,7 +118,7 @@
                             </MudButton>
                         </MudItem>
                         <MudItem xs="6" sm="6">
-                            <MudButton FullWidth Class="social-btn"
+                            <MudButton FullWidth Class="social-btn social-github"
                                        StartIcon="@Icons.Custom.Brands.GitHub"
                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked("auth-login-ip"))'
                                        OnClick='@(() => LoginWithProviderAsync("github"))'>
@@ -126,7 +126,7 @@
                             </MudButton>
                         </MudItem>
                         <MudItem xs="6" sm="6">
-                            <MudButton FullWidth Class="social-btn"
+                            <MudButton FullWidth Class="social-btn social-linkedin"
                                        StartIcon="@Icons.Custom.Brands.LinkedIn"
                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked("auth-login-ip"))'
                                        OnClick='@(() => LoginWithProviderAsync("linkedin"))'>
@@ -134,7 +134,7 @@
                             </MudButton>
                         </MudItem>
                         <MudItem xs="6" sm="6">
-                            <MudButton FullWidth Class="social-btn"
+                            <MudButton FullWidth Class="social-btn social-twitter"
                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked("auth-login-ip"))'
                                        StartIcon="@Icons.Custom.Brands.Twitter"
                                        OnClick='@(() => LoginWithProviderAsync("twitter"))'>
