@@ -176,7 +176,7 @@
                                 @if (_processing)
                                 {
                                     <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <MudText>Processing...</MudText>
+                                    <MudText>@(isOtpStep ? "Verifying your email…" : "Creating your account…")</MudText>
                                 }
                                 else if (isRegistrationRetryDisabled)
                                 {
