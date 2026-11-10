@@ -70,7 +70,7 @@
                     }
                     else
                     {
-                        Send verification code
+                        <text>Send verification code</text>
                     }
                 </MudButton>
             </MudForm>
@@ -107,28 +107,28 @@
                 <MudItem xs="6">
                     <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Google"
                                Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("google"))">
-                        @if (_busy && _activeProvider == "google") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> Connecting... }
+                        @if (_busy && _activeProvider == "google") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> <text>Connecting...</text> }
                         else { <text>Google</text> }
                     </MudButton>
                 </MudItem>
                 <MudItem xs="6">
                     <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.GitHub"
                                Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("github"))">
-                        @if (_busy && _activeProvider == "github") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> Connecting... }
+                        @if (_busy && _activeProvider == "github") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> <text>Connecting...</text> }
                         else { <text>GitHub</text> }
                     </MudButton>
                 </MudItem>
                 <MudItem xs="6">
                     <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.LinkedIn"
                                Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("linkedin"))">
-                        @if (_busy && _activeProvider == "linkedin") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> Connecting... }
+                        @if (_busy && _activeProvider == "linkedin") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> <text>Connecting...</text> }
                         else { <text>LinkedIn</text> }
                     </MudButton>
                 </MudItem>
                 <MudItem xs="6">
                     <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Twitter"
                                Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("twitter"))">
-                        @if (_busy && _activeProvider == "twitter") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> Connecting... }
+                        @if (_busy && _activeProvider == "twitter") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> <text>Connecting...</text> }
                         else { <text>Twitter</text> }
                     </MudButton>
                 </MudItem>
