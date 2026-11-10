@@ -177,7 +177,7 @@
                             </MudButton>
                         </div>
 
-                        <MudButton Disabled="@(_processing || RateLimits.IsBlocked(isMfaStep ? "auth-otp-ip" : "auth-login-ip"))"
+                        <MudButton Disabled="@(_processing || !string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked(isMfaStep ? "auth-otp-ip" : "auth-login-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
