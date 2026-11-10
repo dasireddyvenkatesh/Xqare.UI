@@ -87,36 +87,37 @@
 
                     <!-- SOCIAL -->
                     <MudGrid Class="social-grid mt-6" Spacing="2">
-                        <MudItem xs="12" sm="6">
-                            <MudButton FullWidth Class="social-btn social-google"
-                                       StartIcon='@(_activeProvider == "google" ? null : Icons.Custom.Brands.Google)'
+                        <MudItem xs="6" sm="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.Google"
                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
                                        OnClick='@(() => LoginWithProviderAsync("google"))'>
-                                <LoadingButtonContent IsLoading='@(_activeProvider == "google")' LoadingText="Connecting to Google…">Google</LoadingButtonContent>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "google")' LoadingText="Connecting…">Google</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudButton FullWidth Class="social-btn social-github"
-                                       StartIcon='@(_activeProvider == "github" ? null : Icons.Custom.Brands.GitHub)'
+                        <MudItem xs="6" sm="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.GitHub"
                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
                                        OnClick='@(() => LoginWithProviderAsync("github"))'>
-                                <LoadingButtonContent IsLoading='@(_activeProvider == "github")' LoadingText="Connecting to GitHub…">GitHub</LoadingButtonContent>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "github")' LoadingText="Connecting…">GitHub</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudButton FullWidth Class="social-btn social-linkedin"
-                                       StartIcon='@(_activeProvider == "linkedin" ? null : Icons.Custom.Brands.LinkedIn)'
+                        <MudItem xs="6" sm="6">
+                            <MudButton FullWidth Class="social-btn"
+                                       StartIcon="@Icons.Custom.Brands.LinkedIn"
                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
                                        OnClick='@(() => LoginWithProviderAsync("linkedin"))'>
-                                <LoadingButtonContent IsLoading='@(_activeProvider == "linkedin")' LoadingText="Connecting to LinkedIn…">LinkedIn</LoadingButtonContent>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "linkedin")' LoadingText="Connecting…">LinkedIn</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudButton FullWidth Class="social-btn social-x"
+                        <MudItem xs="6" sm="6">
+                            <MudButton FullWidth Class="social-btn"
                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
+                                       StartIcon="@Icons.Custom.Brands.Twitter"
                                        OnClick='@(() => LoginWithProviderAsync("twitter"))'>
-                                <LoadingButtonContent IsLoading='@(_activeProvider == "twitter")' LoadingText="Connecting to X…">
-                                    <span class="x-brand-mark">𝕏</span><span>X</span>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "twitter")' LoadingText="Connecting…">
+                                    Twitter
                                 </LoadingButtonContent>
                             </MudButton>
                         </MudItem>
@@ -340,6 +341,7 @@
 
         _activeProvider = provider;
         await InvokeAsync(StateHasChanged);
+        await Task.Yield();
 
         try
         {
