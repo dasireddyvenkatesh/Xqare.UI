@@ -66,9 +66,18 @@
                     @(_profile?.Message ?? "Check your connection and try again.")
                 </MudText>
                 <MudButton Color="Color.Primary" Variant="Variant.Filled"
-                           StartIcon="@Icons.Material.Filled.Refresh"
-                           OnClick="LoadProfileAsync" Class="profile-primary-button">
-                    Try again
+                           OnClick="LoadProfileAsync" Disabled="@(_loading || _saving)"
+                           Class="profile-primary-button">
+                    @if (_loading)
+                    {
+                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                        <span>Retrying…</span>
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Refresh" Class="mr-2" />
+                        <span>Try again</span>
+                    }
                 </MudButton>
             </MudPaper>
         }
@@ -317,6 +326,7 @@
 
 @code {
     private bool _loading = true;
+    private bool _profileLoadInProgress;
     private bool _editing;
     private bool _saving;
     private MyProfileResponse? _profile;
@@ -355,6 +365,10 @@
 
     private async Task LoadProfileAsync()
     {
+        if (_profileLoadInProgress || _saving)
+            return;
+
+        _profileLoadInProgress = true;
         _loading = true;
 
         try
@@ -373,6 +387,7 @@
         finally
         {
             _loading = false;
+            _profileLoadInProgress = false;
         }
     }
 
