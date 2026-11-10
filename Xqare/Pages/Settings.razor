@@ -55,7 +55,7 @@
                         {
                             <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">@_connectedAccountsError</MudAlert>
                             <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="LoadConnectedAccountsAsync" Disabled="_connectedAccountsLoading" Class="mt-3">
-                                @(_connectedAccountsLoading ? "Retrying..." : "Retry")
+                                <LoadingButtonContent IsLoading="_connectedAccountsLoading" LoadingText="Retrying…">Retry</LoadingButtonContent>
                             </MudButton>
                         }
                         else if (_connectedAccounts != null)
@@ -81,15 +81,7 @@
                                         <MudButton Variant="Variant.Outlined" Color="Color.Primary"
                                                    Disabled="@(!string.IsNullOrEmpty(_connectingProvider) || RateLimits.IsBlocked("auth-security-ip"))"
                                                    OnClick="@(() => ConnectProviderAsync(provider))">
-                                            @if (_connectingProvider == provider)
-                                            {
-                                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                                                <text>Connecting to @provider…</text>
-                                            }
-                                            else
-                                            {
-                                                <text>Connect @provider</text>
-                                            }
+                                            <LoadingButtonContent IsLoading="@(_connectingProvider == provider)" LoadingText="@($"Connecting to {provider}…")">Connect @provider</LoadingButtonContent>
                                         </MudButton>
                                     }
                                 }
@@ -110,15 +102,7 @@
                                         <MudButton Variant="Variant.Filled" Color="Color.Error"
                                                    Disabled="@(_disconnectingProvider || RateLimits.IsBlocked("auth-security-ip") || string.IsNullOrWhiteSpace(_disconnectPassword))"
                                                    OnClick="DisconnectProviderAsync">
-                                            @if (_disconnectingProvider)
-                                            {
-                                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                                                <text>Disconnecting…</text>
-                                            }
-                                            else
-                                            {
-                                                <text>Confirm disconnect</text>
-                                            }
+                                            <LoadingButtonContent IsLoading="_disconnectingProvider" LoadingText="Disconnecting…">Confirm disconnect</LoadingButtonContent>
                                         </MudButton>
                                         <MudButton Variant="Variant.Text" Disabled="_disconnectingProvider" OnClick="CancelDisconnect">
                                             Cancel
@@ -135,15 +119,7 @@
                                 <div class="settings-form-actions">
                                     <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_sendingPasswordSetupLink || RateLimits.IsBlocked("auth-recovery-ip"))"
                                                OnClick="SendPasswordSetupLinkAsync" Class="settings-primary">
-                                        @if (_sendingPasswordSetupLink)
-                                        {
-                                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                                            <text>Sending setup link…</text>
-                                        }
-                                        else
-                                        {
-                                            <text>Set password</text>
-                                        }
+                                        <LoadingButtonContent IsLoading="_sendingPasswordSetupLink" LoadingText="Sending setup link…">Set password</LoadingButtonContent>
                                     </MudButton>
                                 </div>
                             }
@@ -171,7 +147,7 @@
                         {
                             <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">@_totpError</MudAlert>
                             <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="LoadTotpAsync" Disabled="_totpLoading" Class="mt-3">
-                                @(_totpLoading ? "Retrying..." : "Retry")
+                                <LoadingButtonContent IsLoading="_totpLoading" LoadingText="Retrying…">Retry</LoadingButtonContent>
                             </MudButton>
                         }
                         else if (_totp == null || !_totp.IsSuccess)
@@ -247,7 +223,7 @@
                                                       @bind-Value="_enrollmentRequest.CurrentTotpCode" FullWidth="true" />
                                     }
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_startingEnrollment || RateLimits.IsBlocked("auth-security-ip"))" OnClick="StartEnrollmentAsync" Class="settings-primary">@if (_startingEnrollment) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Preparing authenticator…</text> } else { <text>Continue</text> }</MudButton>
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_startingEnrollment || RateLimits.IsBlocked("auth-security-ip"))" OnClick="StartEnrollmentAsync" Class="settings-primary"><LoadingButtonContent IsLoading="_startingEnrollment" LoadingText="Preparing authenticator…">Continue</LoadingButtonContent></MudButton>
                                         <MudButton Variant="Variant.Text" Disabled="@(_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp)" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -267,7 +243,7 @@
                                                       For="@(() => _enrollmentConfirmRequest.Code)"
                                                       Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" FullWidth="true" />
                                         <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_confirmingEnrollment || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ConfirmEnrollmentAsync" Class="settings-primary">
-                                            @if (_confirmingEnrollment) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Enabling authenticator…</text> } else { <text>Verify and enable</text> }
+                                            <LoadingButtonContent IsLoading="_confirmingEnrollment" LoadingText="Enabling authenticator…">Verify and enable</LoadingButtonContent>
                                         </MudButton>
                                     </MudForm>
                                 }
@@ -284,7 +260,7 @@
                                                   Margin="Margin.Dense" MaxLength="6" For="@(() => _recoveryRequest.Code)"
                                                   @bind-Value="_recoveryRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_regeneratingRecovery || RateLimits.IsBlocked("auth-security-ip"))" OnClick="RegenerateRecoveryAsync" Class="settings-primary">@if (_regeneratingRecovery) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Generating codes…</text> } else { <text>Generate new codes</text> }</MudButton>
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_regeneratingRecovery || RateLimits.IsBlocked("auth-security-ip"))" OnClick="RegenerateRecoveryAsync" Class="settings-primary"><LoadingButtonContent IsLoading="_regeneratingRecovery" LoadingText="Generating codes…">Generate new codes</LoadingButtonContent></MudButton>
                                         <MudButton Variant="Variant.Text" Disabled="@IsAuthenticatorActionBusy" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -306,7 +282,7 @@
                                                   Margin="Margin.Dense" MaxLength="6" For="@(() => _disableRequest.Code)"
                                                   @bind-Value="_disableRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="@(_disablingTotp || RateLimits.IsBlocked("auth-security-ip"))" OnClick="DisableTotpAsync">@if (_disablingTotp) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Disabling authenticator…</text> } else { <text>Disable authenticator</text> }</MudButton>
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="@(_disablingTotp || RateLimits.IsBlocked("auth-security-ip"))" OnClick="DisableTotpAsync"><LoadingButtonContent IsLoading="_disablingTotp" LoadingText="Disabling authenticator…">Disable authenticator</LoadingButtonContent></MudButton>
                                         <MudButton Variant="Variant.Text" Disabled="@(_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp)" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -398,7 +374,7 @@
                                         else
                                         {
                                             <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" Disabled="@(IsSessionActionBusy || RateLimits.IsBlocked("auth-security-ip"))"
-                                                       OnClick="@(() => RevokeSessionAsync(session))">@if (_revokingSessionId == session.SessionId) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> <text> Revoking…</text> } else { <text>Revoke</text> }</MudButton>
+                                                       OnClick="@(() => RevokeSessionAsync(session))"><LoadingButtonContent IsLoading="@(_revokingSessionId == session.SessionId)" LoadingText="Revoking…">Revoke</LoadingButtonContent></MudButton>
                                         }
                                     </div>
                                     <MudDivider />
@@ -408,7 +384,7 @@
                             {
                                 <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="@(IsSessionActionBusy || RateLimits.IsBlocked("auth-security-ip"))"
                                            Class="settings-revoke-others" OnClick="RevokeOtherSessionsAsync">
-                                    @if (_revokingOtherSessions) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Signing out devices…</text> } else { <text>Sign out other devices</text> }
+                                    <LoadingButtonContent IsLoading="_revokingOtherSessions" LoadingText="Signing out devices…">Sign out other devices</LoadingButtonContent>
                                 </MudButton>
                             }
                         }
@@ -439,7 +415,7 @@
                             At least 8 characters, with uppercase, lowercase, a number and a symbol.
                         </MudText>
                         <div class="settings-form-actions">
-                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_changingPassword || IsSessionRevocationActive || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ChangePasswordAsync" Class="settings-primary">@if (_changingPassword) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Changing password…</text> } else { <text>Change password</text> }</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_changingPassword || IsSessionRevocationActive || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ChangePasswordAsync" Class="settings-primary"><LoadingButtonContent IsLoading="_changingPassword" LoadingText="Changing password…">Change password</LoadingButtonContent></MudButton>
                         </div>
                     </MudPaper>
                 </MudItem>
@@ -467,7 +443,7 @@
                                 Are you sure you want to log out from this device?
                             </MudAlert>
                             <div class="settings-form-actions">
-                                <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_loggingOut" OnClick="LogoutAsync">@if (_loggingOut) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Logging out…</text> } else { <text>Yes, log out</text> }</MudButton>
+                                <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_loggingOut" OnClick="LogoutAsync"><LoadingButtonContent IsLoading="_loggingOut" LoadingText="Logging out…">Yes, log out</LoadingButtonContent></MudButton>
                                 <MudButton Variant="Variant.Text" OnClick="() => _confirmLogout = false">Cancel</MudButton>
                             </div>
                         }
