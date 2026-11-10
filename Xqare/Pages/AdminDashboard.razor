@@ -24,7 +24,7 @@
                 <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
                            StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadAsync"
                            Disabled="_loading" Class="admin-refresh-button">
-                    @(_loading ? "Refreshing..." : "Refresh")
+                    <LoadingButtonContent IsLoading="_loading" LoadingText="Refreshing...">Refresh</LoadingButtonContent>
                 </MudButton>
             </div>
         </div>
