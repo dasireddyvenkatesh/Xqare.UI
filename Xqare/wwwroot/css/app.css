@@ -533,142 +533,8 @@ h1:focus {
     clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%);
 }
 
-/* Shared login and registration page styles. Scoped to the public auth pages. */
-.xq-auth-page .left-panel {
-    background: linear-gradient(135deg, var(--xq-auth-hero-start), var(--xq-auth-hero-end));
-    color: var(--xq-text-inverse);
-    display: flex;
-    padding: var(--xq-padding-auth-hero);
-    padding-top: var(--xq-padding-auth-hero-top);
-}
-
-.xq-auth-page .left-content {
-    max-width: 480px;
-    text-align: center;
-}
-
-.xq-auth-page .logo-text {
-    font-size: 28px;
-    font-weight: 800;
-}
-
-.xq-auth-page .hero-title {
-    font-size: 30px;
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-.xq-auth-page .hero-sub {
-    opacity: .85;
-}
-
-.xq-auth-page .stat-number {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--xq-auth-highlight);
-}
-
-.xq-auth-page .stat-label {
-    font-size: 13px;
-    opacity: .8;
-}
-
-.xq-auth-page .right-panel {
-    background: var(--xq-auth-panel-bg);
-    display: flex;
-    justify-content: center;
-    min-width: 0;
-    box-sizing: border-box;
-    padding: var(--xq-padding-auth-panel-block) var(--xq-padding-auth-panel-inline);
-}
-
-.xq-auth-page .mud-grid-item-md-6.right-panel {
-    padding-left: 35px;
-}
-
-.xq-auth-page .auth-container {
-    width: 100%;
-    max-width: 420px;
-    min-width: 0;
-    box-sizing: border-box;
-    background-color: transparent;
-}
-
-.xq-auth-page .auth-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--xq-navy-deep);
-    text-align: center;
-}
-
-.xq-auth-page .auth-subtitle {
-    font-size: 14px;
-    color: var(--xq-text-secondary);
-    text-align: center;
-}
-
-.xq-auth-page .social-grid .mud-button-root {
-    border-radius: 10px;
-    border: 1px solid var(--xq-auth-input-border);
-    background: var(--xq-surface);
-    text-transform: none;
-    font-weight: 600;
-    height: 44px;
-}
-
-.xq-auth-page .divider-text {
-    font-size: 11px;
-    color: var(--xq-auth-muted);
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.xq-auth-page .divider-line-1 {
-    margin-right: 10px;
-    width: auto;
-}
-
-.xq-auth-page .divider-line-2 {
-    margin-left: 10px;
-    width: auto;
-}
-
-.xq-auth-page .mud-input-root {
-    border-radius: 10px;
-}
-
-.xq-auth-page .mud-input-outlined-border {
-    border-color: var(--xq-auth-input-border) !important;
-}
-
-.xq-auth-page .mud-input-root:hover .mud-input-outlined-border {
-    border-color: var(--xq-auth-accent) !important;
-}
-
-.xq-auth-page .resend-btn {
-    color: var(--xq-auth-accent);
-    font-weight: 600;
-}
-
-.xq-auth-page .back-btn {
-    color: var(--xq-text-secondary);
-    font-weight: 600;
-}
-
-.xq-auth-page .security-text {
-    margin-top: 18px;
-    font-size: 13px;
-    color: var(--xq-text-secondary);
-    text-align: center;
-}
-
-.xq-auth-page .mobile-logo {
-    font-size: 24px;
-    font-weight: 800;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
+/* Shared provider button styling for login and registration. */
+/* Provider-branded social buttons. Explicitly override MudBlazor filled-button theme rules. */
 .xq-auth-page .social-grid button.social-btn {
     width: 100% !important;
     min-width: 0;
@@ -709,6 +575,7 @@ h1:focus {
     transform: none;
 }
 
+/* Google: white surface with Google's multicolour brand mark. */
 .xq-auth-page .social-grid button.social-btn.social-google {
     background: #ffffff !important;
     background-color: #ffffff !important;
@@ -722,6 +589,7 @@ h1:focus {
     border-color: #c6c9ce !important;
 }
 
+/* GitHub: dark charcoal surface. */
 .xq-auth-page .social-grid button.social-btn.social-github {
     background: #24292f !important;
     background-color: #24292f !important;
@@ -735,6 +603,7 @@ h1:focus {
     border-color: #1f2328 !important;
 }
 
+/* LinkedIn: official brand blue. */
 .xq-auth-page .social-grid button.social-btn.social-linkedin {
     background: #0a66c2 !important;
     background-color: #0a66c2 !important;
@@ -748,6 +617,7 @@ h1:focus {
     border-color: #004182 !important;
 }
 
+/* X/Twitter: black brand surface with the existing provider icon. */
 .xq-auth-page .social-grid button.social-btn.social-twitter {
     background: #000000 !important;
     background-color: #000000 !important;
