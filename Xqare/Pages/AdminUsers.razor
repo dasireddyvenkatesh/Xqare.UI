@@ -24,9 +24,17 @@
             </div>
             <div class="admin-users-heading-actions">
                 <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
-                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadUsersAsync"
-                           Disabled="_loading" Class="admin-refresh-button">
-                    Refresh
+                           OnClick="LoadUsersAsync" Disabled="_loading" Class="admin-refresh-button">
+                    @if (_loading)
+                    {
+                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                        <span>Refreshing…</span>
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Refresh" Class="mr-1" />
+                        <span>Refresh</span>
+                    }
                 </MudButton>
             </div>
         </div>
@@ -115,7 +123,17 @@
             {
                 <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
                     Users could not be loaded.
-                    <MudButton Variant="Variant.Text" OnClick="LoadUsersAsync">Retry</MudButton>
+                    <MudButton Variant="Variant.Text" OnClick="LoadUsersAsync" Disabled="_loading">
+                        @if (_loading)
+                        {
+                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                            <span>Retrying…</span>
+                        }
+                        else
+                        {
+                            <span>Retry</span>
+                        }
+                    </MudButton>
                 </MudAlert>
             }
             else if (_users.Count == 0)
@@ -193,7 +211,15 @@
                                                     <MudButton Color="Color.Error" Variant="Variant.Filled" Size="Size.Small"
                                                                Disabled="@_busyUsers.Contains(user.UserId)"
                                                                OnClick="@(() => ConfirmStatusChangeAsync(user))">
-                                                        @(user.IsActive ? "Yes, disable" : "Yes, enable")
+                                                        @if (_busyUsers.Contains(user.UserId))
+                                                        {
+                                                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                                                            <span>@(user.IsActive ? "Disabling…" : "Enabling…")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>@(user.IsActive ? "Yes, disable" : "Yes, enable")</span>
+                                                        }
                                                     </MudButton>
                                                     <MudButton Variant="Variant.Text" Size="Size.Small"
                                                                Disabled="@_busyUsers.Contains(user.UserId)"
@@ -390,9 +416,19 @@
         await LoadUsersAsync();
     }
 
-    private void BeginStatusChange(Guid userId) => _confirmStatusUserId = userId;
+    private void BeginStatusChange(Guid userId)
+    {
+        if (_busyUsers.Contains(userId) || _confirmStatusUserId.HasValue)
+            return;
 
-    private void CancelStatusChange() => _confirmStatusUserId = null;
+        _confirmStatusUserId = userId;
+    }
+
+    private void CancelStatusChange()
+    {
+        if (_confirmStatusUserId.HasValue && !_busyUsers.Contains(_confirmStatusUserId.Value))
+            _confirmStatusUserId = null;
+    }
 
     private async Task ConfirmStatusChangeAsync(AdminUserListItemResponse user)
     {
