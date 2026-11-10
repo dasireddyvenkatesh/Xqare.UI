@@ -265,3 +265,11 @@
     box-shadow: none;
 }
 
+
+
+/* Provider logos keep their familiar brand colours; button surfaces stay neutral. */
+::deep .social-google .mud-icon-root { color: #4285f4; }
+::deep .social-github .mud-icon-root { color: #24292f; }
+::deep .social-linkedin .mud-icon-root { color: #0a66c2; }
+::deep .social-twitter .mud-icon-root { color: #1da1f2; }
+
