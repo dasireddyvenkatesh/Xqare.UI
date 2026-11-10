@@ -54,7 +54,9 @@
                         @if (_connectedAccountsError != null)
                         {
                             <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">@_connectedAccountsError</MudAlert>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="LoadConnectedAccountsAsync" Class="mt-3">Retry</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="LoadConnectedAccountsAsync" Disabled="_connectedAccountsLoading" Class="mt-3">
+                                @(_connectedAccountsLoading ? "Retrying..." : "Retry")
+                            </MudButton>
                         }
                         else if (_connectedAccounts != null)
                         {
@@ -168,7 +170,9 @@
                         @if (_totpError != null)
                         {
                             <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">@_totpError</MudAlert>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="LoadTotpAsync" Class="mt-3">Retry</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="LoadTotpAsync" Disabled="_totpLoading" Class="mt-3">
+                                @(_totpLoading ? "Retrying..." : "Retry")
+                            </MudButton>
                         }
                         else if (_totp == null || !_totp.IsSuccess)
                         {
@@ -485,6 +489,8 @@
     private bool _disablingTotp;
     private bool _changingPassword;
     private bool _sessionsLoading;
+    private bool _connectedAccountsLoading;
+    private bool _totpLoading;
     private bool IsSessionRevocationActive => _revokingSessionId.HasValue || _revokingOtherSessions;
     private bool IsSessionActionBusy => _sessionsLoading || IsSessionRevocationActive || _changingPassword;
     private bool IsAuthenticatorActionBusy =>
@@ -580,6 +586,10 @@
 
     private async Task LoadConnectedAccountsAsync()
     {
+        if (_connectedAccountsLoading)
+            return;
+
+        _connectedAccountsLoading = true;
         _connectedAccountsError = null;
         try
         {
@@ -597,6 +607,10 @@
         {
             _connectedAccounts = null;
             _connectedAccountsError = SettingsMessages.ConnectedAccountsLoadFailed;
+        }
+        finally
+        {
+            _connectedAccountsLoading = false;
         }
     }
 
@@ -699,6 +713,10 @@
 
     private async Task LoadTotpAsync()
     {
+        if (_totpLoading)
+            return;
+
+        _totpLoading = true;
         try
         {
             _totp = await AuthService.GetTotpStatusAsync();
@@ -707,6 +725,10 @@
         catch
         {
             _totpError = SettingsMessages.AuthenticatorStatusLoadFailed;
+        }
+        finally
+        {
+            _totpLoading = false;
         }
     }
 
@@ -720,6 +742,9 @@
 
     private async Task LoadSessionsAsync()
     {
+        if (_sessionsLoading)
+            return;
+
         _sessionsLoading = true;
         _sessionsError = null;
         try
