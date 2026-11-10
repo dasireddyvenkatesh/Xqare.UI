@@ -632,7 +632,7 @@ h1:focus {
 }
 
 /* Shared admin page styling. Page-specific layouts remain in their isolated stylesheets. */
-:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) ) {
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) {
     min-height: 100%;
     padding: clamp(12px, 1.5vw, 20px);
     padding-block-end: max(var(--xq-space-6), env(safe-area-inset-bottom));
@@ -640,7 +640,7 @@ h1:focus {
     color: var(--xq-text-primary);
 }
 
-:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) ) .admin-page-title {
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-page-title {
     margin: 0;
     color: var(--xq-navy) !important;
     font-weight: 800 !important;
@@ -648,14 +648,14 @@ h1:focus {
     line-height: 1.15;
 }
 
-:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) ) .admin-page-subtitle {
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-page-subtitle {
     margin-block-start: var(--xq-space-2);
     color: var(--xq-text-secondary) !important;
     max-width: 42rem;
     line-height: 1.5;
 }
 
-:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) ) .admin-refresh-button {
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-refresh-button {
     min-width: 0;
     white-space: nowrap;
     text-transform: none;
