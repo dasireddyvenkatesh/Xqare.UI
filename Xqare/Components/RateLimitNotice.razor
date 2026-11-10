@@ -1,12 +1,13 @@
 @using Xqare.BusinessLayer.Services.Common
+@using Xqare.BusinessLayer.Constants.Messages
 @implements IDisposable
 @inject RateLimitState RateLimits
 
 @if (RemainingSeconds > 0)
 {
     <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mt-3 mb-3">
-        Too many requests. You can try again in <strong>@FormatCountdown(RemainingSeconds)</strong>.
-        This is a temporary network protection limit; it is not an account lockout.
+        @RateLimitMessages.TooManyRequests <strong>@FormatCountdown(RemainingSeconds)</strong>.
+        @RateLimitMessages.TemporaryNetworkProtection
     </MudAlert>
 }
 

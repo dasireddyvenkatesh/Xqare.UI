@@ -2,6 +2,7 @@ namespace Xqare.BusinessLayer.Constants.Messages;
 
 public static class SettingsMessages
 {
+    public const string ProviderConnected = "The provider has been connected.";
     public const string AuthenticatorStatusUnavailable = "Authenticator status is unavailable.";
     public const string ConnectedAccountsLoadFailed = "Unable to retrieve connected sign-in methods. Please retry.";
     public const string ProviderConnectFailed = "Unable to start provider connection. Please try again.";

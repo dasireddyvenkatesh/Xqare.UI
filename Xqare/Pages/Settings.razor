@@ -499,7 +499,7 @@
                 var succeeded = string.Equals(linkStatus.ToString(), "success", StringComparison.OrdinalIgnoreCase);
                 _pendingOAuthMessage = query.TryGetValue("message", out var linkMessage)
                     ? linkMessage.ToString()
-                    : succeeded ? "The provider has been connected." : "The provider could not be connected.";
+                    : succeeded ? SettingsMessages.ProviderConnected : SettingsMessages.ProviderConnectFailed;
                 _pendingOAuthSeverity = succeeded ? Severity.Success : Severity.Error;
             }
 
