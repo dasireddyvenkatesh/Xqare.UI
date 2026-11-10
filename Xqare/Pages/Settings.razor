@@ -70,7 +70,7 @@
                                     {
                                         <MudChip T="string" Color="Color.Success" Variant="Variant.Outlined">@provider connected</MudChip>
                                         <MudButton Variant="Variant.Outlined" Color="Color.Error"
-                                                   Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip") || !_connectedAccounts.HasPassword)"
+                                                   Disabled="@(_disconnectingProvider || RateLimits.IsBlocked("auth-security-ip") || !_connectedAccounts.HasPassword)"
                                                    OnClick="@(() => BeginDisconnect(provider))">
                                             Disconnect
                                         </MudButton>
@@ -78,9 +78,17 @@
                                     else
                                     {
                                         <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                                                   Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))"
+                                                   Disabled="@(!string.IsNullOrEmpty(_connectingProvider) || RateLimits.IsBlocked("auth-security-ip"))"
                                                    OnClick="@(() => ConnectProviderAsync(provider))">
-                                            Connect @provider
+                                            @if (_connectingProvider == provider)
+                                            {
+                                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                                <text>Connecting to @provider…</text>
+                                            }
+                                            else
+                                            {
+                                                <text>Connect @provider</text>
+                                            }
                                         </MudButton>
                                     }
                                 }
@@ -99,11 +107,19 @@
                                                   MaxLength="128" FullWidth="true" />
                                     <div class="settings-form-actions">
                                         <MudButton Variant="Variant.Filled" Color="Color.Error"
-                                                   Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip") || string.IsNullOrWhiteSpace(_disconnectPassword))"
+                                                   Disabled="@(_disconnectingProvider || RateLimits.IsBlocked("auth-security-ip") || string.IsNullOrWhiteSpace(_disconnectPassword))"
                                                    OnClick="DisconnectProviderAsync">
-                                            Confirm disconnect
+                                            @if (_disconnectingProvider)
+                                            {
+                                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                                <text>Disconnecting…</text>
+                                            }
+                                            else
+                                            {
+                                                <text>Confirm disconnect</text>
+                                            }
                                         </MudButton>
-                                        <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="CancelDisconnect">
+                                        <MudButton Variant="Variant.Text" Disabled="_disconnectingProvider" OnClick="CancelDisconnect">
                                             Cancel
                                         </MudButton>
                                     </div>
@@ -454,6 +470,8 @@
 @code {
     private bool _loading = true;
     private bool _busy;
+    private string? _connectingProvider;
+    private bool _disconnectingProvider;
     private bool _sessionsLoading;
     private ConnectedAccountsResponse? _connectedAccounts;
     private string? _connectedAccountsError;
@@ -568,7 +586,10 @@
 
     private async Task ConnectProviderAsync(string provider)
     {
-        _busy = true;
+        if (!string.IsNullOrEmpty(_connectingProvider))
+            return;
+
+        _connectingProvider = provider;
         try
         {
             var response = await AuthService.ConnectExternalAccountAsync(provider);
@@ -581,7 +602,7 @@
         }
         finally
         {
-            _busy = false;
+            _connectingProvider = null;
         }
     }
 
@@ -606,7 +627,10 @@
             return;
         }
 
-        _busy = true;
+        if (_disconnectingProvider)
+            return;
+
+        _disconnectingProvider = true;
         try
         {
             var response = await AuthService.DisconnectExternalAccountAsync(
@@ -626,7 +650,7 @@
         }
         finally
         {
-            _busy = false;
+            _disconnectingProvider = false;
         }
     }
 
