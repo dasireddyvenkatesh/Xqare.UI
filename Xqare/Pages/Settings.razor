@@ -244,8 +244,8 @@
                                                       @bind-Value="_enrollmentRequest.CurrentTotpCode" FullWidth="true" />
                                     }
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="StartEnrollmentAsync" Class="settings-primary">Continue</MudButton>
-                                        <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_startingEnrollment || RateLimits.IsBlocked("auth-security-ip"))" OnClick="StartEnrollmentAsync" Class="settings-primary">Continue</MudButton>
+                                        <MudButton Variant="Variant.Text" Disabled="@(_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp)" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
                                 @if (_enrollment?.IsSuccess == true)
@@ -263,7 +263,7 @@
                                         <MudTextField T="string" Label="Authenticator code" @bind-Value="_enrollmentConfirmRequest.Code"
                                                       For="@(() => _enrollmentConfirmRequest.Code)"
                                                       Variant="Variant.Outlined" Margin="Margin.Dense" MaxLength="6" FullWidth="true" />
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ConfirmEnrollmentAsync" Class="settings-primary">
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_confirmingEnrollment || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ConfirmEnrollmentAsync" Class="settings-primary">
                                             Verify and enable
                                         </MudButton>
                                     </MudForm>
@@ -281,7 +281,7 @@
                                                   Margin="Margin.Dense" MaxLength="6" For="@(() => _recoveryRequest.Code)"
                                                   @bind-Value="_recoveryRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="RegenerateRecoveryAsync" Class="settings-primary">Generate new codes</MudButton>
+                                        <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_regeneratingRecovery || RateLimits.IsBlocked("auth-security-ip"))" OnClick="RegenerateRecoveryAsync" Class="settings-primary">Generate new codes</MudButton>
                                         <MudButton Variant="Variant.Text" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -303,7 +303,7 @@
                                                   Margin="Margin.Dense" MaxLength="6" For="@(() => _disableRequest.Code)"
                                                   @bind-Value="_disableRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
-                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="DisableTotpAsync">Disable authenticator</MudButton>
+                                        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="@(_disablingTotp || RateLimits.IsBlocked("auth-security-ip"))" OnClick="DisableTotpAsync">Disable authenticator</MudButton>
                                         <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
@@ -481,6 +481,10 @@
     private string? _connectingProvider;
     private bool _disconnectingProvider;
     private bool _sendingPasswordSetupLink;
+    private bool _startingEnrollment;
+    private bool _confirmingEnrollment;
+    private bool _regeneratingRecovery;
+    private bool _disablingTotp;
     private bool _sessionsLoading;
     private ConnectedAccountsResponse? _connectedAccounts;
     private string? _connectedAccountsError;
@@ -772,7 +776,8 @@
             Snackbar.Add(SettingsMessages.AuthenticatorCodeRequired, Severity.Warning);
             return;
         }
-        _busy = true;
+        if (_startingEnrollment || _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
+        _startingEnrollment = true;
         try
         {
             var response = await AuthService.StartTotpEnrollmentAsync(_enrollmentRequest);
@@ -785,7 +790,7 @@
         }
         finally
         {
-            _busy = false;
+            _startingEnrollment = false;
         }
     }
 
@@ -797,7 +802,8 @@
             if (!_enrollmentConfirmForm.IsValid)
                 return;
         }
-        _busy = true;
+        if (_confirmingEnrollment || _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
+        _confirmingEnrollment = true;
         try
         {
             var response = await AuthService.ConfirmTotpEnrollmentAsync(_enrollmentConfirmRequest);
@@ -809,7 +815,7 @@
             _enrollment = null;
             await LoadTotpAsync();
         }
-        finally { _busy = false; }
+        finally { _confirmingEnrollment = false; }
     }
 
     private async Task RegenerateRecoveryAsync()
@@ -820,7 +826,8 @@
             if (!_recoveryForm.IsValid)
                 return;
         }
-        _busy = true;
+        if (_regeneratingRecovery || _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
+        _regeneratingRecovery = true;
         try
         {
             var response = await AuthService.RegenerateTotpRecoveryCodesAsync(_recoveryRequest);
@@ -831,7 +838,7 @@
             ClosePanels();
             await LoadTotpAsync();
         }
-        finally { _busy = false; }
+        finally { _regeneratingRecovery = false; }
     }
 
     private async Task DisableTotpAsync()
@@ -842,7 +849,8 @@
             if (!_disableForm.IsValid)
                 return;
         }
-        _busy = true;
+        if (_disablingTotp || _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp) return;
+        _disablingTotp = true;
         try
         {
             var response = await AuthService.DisableTotpAsync(_disableRequest);
@@ -852,7 +860,7 @@
             _recoveryCodes.Clear();
             await LoadTotpAsync();
         }
-        finally { _busy = false; }
+        finally { _disablingTotp = false; }
     }
 
     private async Task ChangePasswordAsync()
