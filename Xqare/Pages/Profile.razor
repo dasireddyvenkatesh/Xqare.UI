@@ -33,9 +33,18 @@
                     </MudChip>
                 }
                 <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
-                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadProfileAsync"
+                           OnClick="LoadProfileAsync"
                            Disabled="_loading || _saving" Class="profile-refresh-button">
-                    Refresh
+                    @if (_loading)
+                    {
+                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                        <span>Refreshing…</span>
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Refresh" Class="mr-1" />
+                        <span>Refresh</span>
+                    }
                 </MudButton>
             </div>
         </div>
