@@ -1,24 +1,135 @@
-::deep .login-wrapper {
+﻿::deep .login-wrapper {
     min-height: 100vh;
 }
 
-::deep .logo-text span {
+::deep .left-panel {
+    background: linear-gradient(135deg, var(--xq-auth-hero-start), var(--xq-auth-hero-end));
+    color: var(--xq-text-inverse);
+    display: flex;
+    padding: var(--xq-padding-auth-hero);
+    padding-top: var(--xq-padding-auth-hero-top);
+}
+
+::deep .left-content {
+    max-width: 480px;
+    text-align: center;
+}
+
+::deep .logo-text {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+    ::deep .logo-text span {
         color: var(--xq-auth-highlight);
     }
 
-::deep .hero-title span {
+::deep .hero-title {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+    ::deep .hero-title span {
         color: var(--xq-auth-highlight);
     }
 
-::deep .auth-subtitle span {
+::deep .hero-sub {
+    opacity: .85;
+}
+
+::deep .stat-number {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--xq-auth-highlight);
+}
+
+::deep .stat-label {
+    font-size: 13px;
+    opacity: .8;
+}
+
+::deep .right-panel {
+    background: var(--xq-auth-panel-bg);
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--xq-padding-auth-panel-block) var(--xq-padding-auth-panel-inline);
+}
+
+::deep .mud-grid-item-md-6.right-panel {
+    padding-left: 35px;
+}
+
+::deep .auth-container {
+    width: 100%;
+    max-width: 420px;
+    min-width: 0;
+    box-sizing: border-box;
+    background-color: transparent;
+}
+
+::deep .auth-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--xq-navy-deep);
+    text-align: center;
+}
+
+::deep .auth-subtitle {
+    font-size: 14px;
+    color: var(--xq-text-secondary);
+    text-align: center;
+}
+
+    ::deep .auth-subtitle span {
         color: var(--xq-auth-accent);
         font-weight: 600;
     }
 
-::deep .social-grid .mud-button-root:hover {
+::deep .social-grid .mud-button-root {
+    border-radius: 10px;
+    border: 1px solid var(--xq-auth-input-border);
+    background: var(--xq-surface);
+    text-transform: none;
+    font-weight: 600;
+    height: 44px;
+}
+
+    ::deep .social-grid .mud-button-root:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(15,42,68,.08);
     }
+
+::deep .divider-text {
+    font-size: 11px;
+    color: var(--xq-auth-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+::deep .divider-line-1 {
+    margin-right: 10px;
+    width: auto;
+}
+
+::deep .divider-line-2 {
+    margin-left: 10px;
+    width: auto;
+}
+
+::deep .mud-input-root {
+    border-radius: 10px;
+}
+
+::deep .mud-input-outlined-border {
+    border-color: var(--xq-auth-input-border) !important;
+}
+
+::deep .mud-input-root:hover .mud-input-outlined-border {
+    border-color: var(--xq-auth-accent) !important;
+}
 
 ::deep .login-btn {
     margin-top: 20px;
@@ -33,6 +144,30 @@
     ::deep .login-btn:hover {
         background: var(--xq-auth-accent-hover);
     }
+
+::deep .resend-btn {
+    color: var(--xq-auth-accent);
+    font-weight: 600;
+}
+
+::deep .back-btn {
+    color: var(--xq-text-secondary);
+    font-weight: 600;
+}
+
+::deep .security-text {
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--xq-text-secondary);
+    text-align: center;
+}
+
+::deep .mobile-logo {
+    font-size: 24px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+}
 
 ::deep .mobile-logo span {
     color: var(--xq-auth-accent);
@@ -53,6 +188,7 @@
     min-width: 0;
     padding: 4px 0;
 }
+
 
 ::deep .mfa-help-link {
     display: block;
