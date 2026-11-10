@@ -92,36 +92,36 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Google"
-                                        Disabled='@RateLimits.IsBlocked("auth-login-ip")'
-                                       OnClick="@AuthService.LoginWithGoogle">
-                                Google
+                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked("auth-login-ip"))'
+                                       OnClick='@(() => LoginWithProviderAsync("google"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "google")' LoadingText="Connecting to Google…">Google</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.GitHub"
-                                        Disabled='@RateLimits.IsBlocked("auth-login-ip")'
-                                       OnClick="@AuthService.LoginWithGitHub">
-                                GitHub
+                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked("auth-login-ip"))'
+                                       OnClick='@(() => LoginWithProviderAsync("github"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "github")' LoadingText="Connecting to GitHub…">GitHub</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.LinkedIn"
-                                        Disabled='@RateLimits.IsBlocked("auth-login-ip")'
-                                       OnClick="@AuthService.LoginWithLinkedIn">
-                                LinkedIn
+                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked("auth-login-ip"))'
+                                       OnClick='@(() => LoginWithProviderAsync("linkedin"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "linkedin")' LoadingText="Connecting to LinkedIn…">LinkedIn</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Twitter"
-                                        Disabled='@RateLimits.IsBlocked("auth-login-ip")'
-                                       OnClick="@AuthService.LoginWithTwitter">
-                                Twitter
+                                        Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked("auth-login-ip"))'
+                                       OnClick='@(() => LoginWithProviderAsync("twitter"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "twitter")' LoadingText="Connecting to Twitter…">Twitter</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
                     </MudGrid>
@@ -268,6 +268,7 @@
     VerifyMfaChallengeRequestValidator mfaValidator = new();
 
     private bool _processing = false;
+    private string? _activeProvider;
     bool isMfaStep = false;
     bool isRecoveryCodeStep = false;
     bool showPassword;
@@ -278,6 +279,42 @@
     void TogglePassword() => showPassword = !showPassword;
 
     private Task HandleRateLimitTick() => InvokeAsync(StateHasChanged);
+
+    private async Task LoginWithProviderAsync(string provider)
+    {
+        if (!string.IsNullOrWhiteSpace(_activeProvider) || RateLimits.IsBlocked("auth-login-ip"))
+            return;
+
+        _activeProvider = provider;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            switch (provider)
+            {
+                case "google":
+                    await AuthService.LoginWithGoogle();
+                    break;
+                case "github":
+                    await AuthService.LoginWithGitHub();
+                    break;
+                case "linkedin":
+                    await AuthService.LoginWithLinkedIn();
+                    break;
+                case "twitter":
+                    await AuthService.LoginWithTwitter();
+                    break;
+            }
+        }
+        catch
+        {
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
+        }
+        finally
+        {
+            _activeProvider = null;
+        }
+    }
 
     async Task Submit()
     {
