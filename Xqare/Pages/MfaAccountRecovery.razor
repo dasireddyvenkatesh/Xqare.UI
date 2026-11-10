@@ -63,8 +63,15 @@
                 <MudCheckBox T="bool" @bind-Value="_passwordless" Color="Color.Primary" Label="I use Google, GitHub, LinkedIn or Twitter and don't have an XQARE password" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))"
                            OnClick="RequestRecovery" Class="recovery-primary">
-                    @if (_busy) { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> }
-                    Send verification code
+                    @if (_busy)
+                    {
+                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                        @_busyText
+                    }
+                    else
+                    {
+                        Send verification code
+                    }
                 </MudButton>
             </MudForm>
         }
@@ -80,7 +87,10 @@
                               InputType="InputType.Text" Immediate="true"
                               Variant="Variant.Outlined" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
-                           OnClick="VerifyEmailCode" Class="recovery-primary">Verify email</MudButton>
+                           OnClick="VerifyEmailCode" Class="recovery-primary">
+                    @if (_busy) { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> @_busyText }
+                    else { <text>Verify email</text> }
+                </MudButton>
                 <MudButton FullWidth Variant="Variant.Text" Color="Color.Secondary" Disabled="_busy"
                            OnClick="BackToRequest">Use a different email</MudButton>
             </MudForm>
@@ -94,12 +104,36 @@
                 Choose the same provider you previously linked. A new provider or an account with a matching email cannot be used.
             </MudText>
             <MudGrid Spacing="2">
-                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Google" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("google"))">Google</MudButton></MudItem>
-                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.GitHub" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("github"))">GitHub</MudButton></MudItem>
-                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.LinkedIn" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("linkedin"))">LinkedIn</MudButton></MudItem>
-                <MudItem xs="6"><MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Twitter" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("twitter"))">Twitter</MudButton></MudItem>
+                <MudItem xs="6">
+                    <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Google"
+                               Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("google"))">
+                        @if (_busy && _activeProvider == "google") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> Connecting... }
+                        else { <text>Google</text> }
+                    </MudButton>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.GitHub"
+                               Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("github"))">
+                        @if (_busy && _activeProvider == "github") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> Connecting... }
+                        else { <text>GitHub</text> }
+                    </MudButton>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.LinkedIn"
+                               Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("linkedin"))">
+                        @if (_busy && _activeProvider == "linkedin") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> Connecting... }
+                        else { <text>LinkedIn</text> }
+                    </MudButton>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Twitter"
+                               Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("twitter"))">
+                        @if (_busy && _activeProvider == "twitter") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> Connecting... }
+                        else { <text>Twitter</text> }
+                    </MudButton>
+                </MudItem>
             </MudGrid>
-            <MudButton FullWidth Variant="Variant.Text" Color="Color.Secondary" OnClick="RestartRecovery">Start over</MudButton>
+            <MudButton FullWidth Variant="Variant.Text" Color="Color.Secondary" Disabled="_busy" OnClick="RestartRecovery">Start over</MudButton>
         }
         else if (_step == 3 && _enrollment != null)
         {
@@ -119,7 +153,10 @@
                               InputMode="InputMode.numeric" InputType="InputType.Text"
                               Immediate="true" Variant="Variant.Outlined" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
-                           OnClick="CompleteRecovery" Class="recovery-primary">Confirm new authenticator</MudButton>
+                           OnClick="CompleteRecovery" Class="recovery-primary">
+                    @if (_busy) { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> @_busyText }
+                    else { <text>Confirm new authenticator</text> }
+                </MudButton>
             </MudForm>
         }
         else if (_step == 4)
@@ -176,6 +213,8 @@
     private bool _passwordless;
     private bool _showPassword;
     private bool _busy;
+    private string _busyText = "Processing...";
+    private string? _activeProvider;
     private bool _savedCodes;
     private int _step;
     private string? _error;
@@ -202,6 +241,8 @@
     {
         if (_busy || _form == null) return;
         _busy = true;
+        _busyText = "Sending verification code...";
+        _activeProvider = null;
         _error = null;
         try
         {
@@ -230,13 +271,15 @@
         {
             _error = MfaRecoveryMessages.StartFailed;
         }
-        finally { _busy = false; }
+        finally { _busy = false; _busyText = "Processing..."; }
     }
 
     private async Task VerifyEmailCode()
     {
         if (_busy || _form == null) return;
         _busy = true;
+        _busyText = "Verifying email...";
+        _activeProvider = null;
         _error = null;
         try
         {
@@ -276,13 +319,15 @@
         {
             _error = MfaRecoveryMessages.EmailVerificationFailed;
         }
-        finally { _busy = false; }
+        finally { _busy = false; _busyText = "Processing..."; }
     }
 
     private async Task ContinueWithProvider(string provider)
     {
         if (_busy || string.IsNullOrWhiteSpace(_emailProof)) return;
         _busy = true;
+        _activeProvider = provider;
+        _busyText = $"Connecting to {provider}...";
         _error = null;
         try
         {
@@ -294,7 +339,7 @@
         {
             _error = MfaRecoveryMessages.ProviderOpenFailed;
         }
-        finally { _busy = false; }
+        finally { _busy = false; _busyText = "Processing..."; _activeProvider = null; }
     }
 
     private async Task StartEnrollmentAsync()
@@ -306,6 +351,8 @@
         }
 
         _busy = true;
+        _activeProvider = null;
+        _busyText = "Preparing your new authenticator...";
         _error = null;
         try
         {
@@ -322,13 +369,15 @@
         {
             _error = MfaRecoveryMessages.AuthenticatorSetupRetryFailed;
         }
-        finally { _busy = false; }
+        finally { _busy = false; _busyText = "Processing..."; _activeProvider = null; }
     }
 
     private async Task CompleteRecovery()
     {
         if (_busy || _form == null) return;
         _busy = true;
+        _busyText = "Confirming your new authenticator...";
+        _activeProvider = null;
         _error = null;
         try
         {
@@ -354,7 +403,7 @@
         {
             _error = MfaRecoveryMessages.CompletionFailed;
         }
-        finally { _busy = false; }
+        finally { _busy = false; _busyText = "Processing..."; }
     }
 
     private async Task BackToRequest()
