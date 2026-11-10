@@ -179,23 +179,7 @@
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
                                    Class="register-btn">
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
-
-                                @if (_processing)
-                                {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <MudText>@(isOtpStep ? "Verifying your email…" : "Creating your account…")</MudText>
-                                }
-                                else if (isRegistrationRetryDisabled)
-                                {
-                                    <MudText>Try again in @FormatCountdown(secondsRemaining)</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Register</MudText>
-                                }
-
-                            </MudStack>
+                            <LoadingButtonContent IsLoading="_processing" LoadingText='@(isOtpStep ? "Verifying your email…" : "Creating your account…")'>@(isRegistrationRetryDisabled ? $"Try again in {FormatCountdown(secondsRemaining)}" : "Register")</LoadingButtonContent>
                         </MudButton>
 
                         @if (ShowNoCardNote)
@@ -289,23 +273,7 @@
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
                                    Class="register-btn">
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
-
-                                @if (_processing)
-                                {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <MudText>Processing...</MudText>
-                                }
-                                else if (isOtpLocked)
-                                {
-                                    <MudText>Locked for @FormatCountdown(secondsRemaining)</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Verify OTP →</MudText>
-                                }
-
-                            </MudStack>
+                            <LoadingButtonContent IsLoading="_processing" LoadingText="Processing…">@(isOtpLocked ? $"Locked for {FormatCountdown(secondsRemaining)}" : "Verify OTP →")</LoadingButtonContent>
                         </MudButton>
 
                     </MudForm>

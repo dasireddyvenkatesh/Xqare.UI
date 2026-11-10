@@ -35,16 +35,10 @@
                 <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
                            OnClick="LoadProfileAsync"
                            Disabled="_loading || _saving" Class="profile-refresh-button">
-                    @if (_loading)
-                    {
-                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
-                        <span>Refreshing…</span>
-                    }
-                    else
-                    {
+                    <LoadingButtonContent IsLoading="_loading" LoadingText="Refreshing…">
                         <MudIcon Icon="@Icons.Material.Filled.Refresh" Class="mr-1" />
-                        <span>Refresh</span>
-                    }
+                        Refresh
+                    </LoadingButtonContent>
                 </MudButton>
             </div>
         </div>
@@ -68,16 +62,10 @@
                 <MudButton Color="Color.Primary" Variant="Variant.Filled"
                            OnClick="LoadProfileAsync" Disabled="@(_loading || _saving)"
                            Class="profile-primary-button">
-                    @if (_loading)
-                    {
-                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
-                        <span>Retrying…</span>
-                    }
-                    else
-                    {
+                    <LoadingButtonContent IsLoading="_loading" LoadingText="Retrying…">
                         <MudIcon Icon="@Icons.Material.Filled.Refresh" Class="mr-2" />
-                        <span>Try again</span>
-                    }
+                        Try again
+                    </LoadingButtonContent>
                 </MudButton>
             </MudPaper>
         }
@@ -177,16 +165,10 @@
                                     <MudButton Variant="Variant.Filled" Color="Color.Primary"
                                                Disabled="_saving" OnClick="SaveProfileAsync"
                                                Class="profile-primary-button">
-                                        @if (_saving)
-                                        {
-                                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
-                                            <span>Saving</span>
-                                        }
-                                        else
-                                        {
+                                        <LoadingButtonContent IsLoading="_saving" LoadingText="Saving…">
                                             <MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" />
-                                            <span>Save changes</span>
-                                        }
+                                            Save changes
+                                        </LoadingButtonContent>
                                     </MudButton>
                                 </div>
                             </MudForm>

@@ -211,19 +211,7 @@
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
                                    Class="login-btn">
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
-
-                                @if (_processing)
-                                {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <MudText>Signing in…</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Sign In →</MudText>
-                                }
-
-                            </MudStack>
+                            <LoadingButtonContent IsLoading="_processing" LoadingText="Signing in…">Sign In →</LoadingButtonContent>
                         </MudButton>
                         <MudText Class="security-text">
                             🔒 Your data is protected with enterprise-grade encryption
@@ -267,17 +255,7 @@
                         </MudButton>
                         <MudButton Disabled="@(_processing || RateLimits.IsBlocked("auth-otp-ip"))" FullWidth Variant="Variant.Filled"
                                    OnClick="Submit" Class="login-btn">
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
-                                @if (_processing)
-                                {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <MudText>Verifying...</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Verify and Sign In →</MudText>
-                                }
-                            </MudStack>
+                            <LoadingButtonContent IsLoading="_processing" LoadingText="Verifying…">Verify and Sign In →</LoadingButtonContent>
                         </MudButton>
                     </MudForm>
                 }

@@ -272,16 +272,10 @@
                                                 <MudButton Variant="Variant.Filled" Color="Color.Primary"
                                                            Disabled="@(!Guid.TryParse(_selectedRoleId, out _) || _assignmentBusy)"
                                                            OnClick="AssignSelectedRoleAsync" FullWidth="true">
-                                                    @if (_assignmentBusy && !_confirmRemoveRoleId.HasValue)
-                                                    {
-                                                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
-                                                        <span>Assigning role…</span>
-                                                    }
-                                                    else
-                                                    {
+                                                    <LoadingButtonContent IsLoading="@(_assignmentBusy && !_confirmRemoveRoleId.HasValue)" LoadingText="Assigning role…">
                                                         <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="mr-2" />
-                                                        <span>Assign role</span>
-                                                    }
+                                                        Assign role
+                                                    </LoadingButtonContent>
                                                 </MudButton>
                                             </MudItem>
                                         </MudGrid>
@@ -357,15 +351,7 @@
                                                     <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
                                                                Disabled="_assignmentBusy"
                                                                OnClick="@(() => RemoveRoleAsync(assignment.RoleId, assignment.RoleName))">
-                                                        @if (_assignmentBusy)
-                                                        {
-                                                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
-                                                            <span>Removing role…</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>Confirm remove</span>
-                                                        }
+                                                        <LoadingButtonContent IsLoading="_assignmentBusy" LoadingText="Removing role…">Confirm remove</LoadingButtonContent>
                                                     </MudButton>
                                                     <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
                                                                Disabled="_assignmentBusy" OnClick="CancelRemoveRole">

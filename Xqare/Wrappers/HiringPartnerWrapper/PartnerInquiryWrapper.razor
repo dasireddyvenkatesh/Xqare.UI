@@ -165,19 +165,7 @@
                                    StartIcon="@(!_processing ? Icons.Material.Filled.Send : null)"
                                    Size="Size.Large">
 
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
-
-                                @if (_processing)
-                                {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <MudText>Submitting inquiry...</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Submit Partnership Inquiry</MudText>
-                                }
-
-                            </MudStack>
+                            <LoadingButtonContent IsLoading="_processing" LoadingText="Submitting inquiry…">Submit Partnership Inquiry</LoadingButtonContent>
 
                         </MudButton>
 

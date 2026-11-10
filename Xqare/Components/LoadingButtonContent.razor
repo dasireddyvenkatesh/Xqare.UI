@@ -1,9 +1,9 @@
 @if (IsLoading)
 {
-    <MudStack Direction="Row" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="1">
+    <span class="loading-button-content" role="status" aria-live="polite">
         <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-        <MudText>@LoadingText</MudText>
-    </MudStack>
+        <span class="loading-button-text">@LoadingText</span>
+    </span>
 }
 else
 {
