@@ -210,6 +210,15 @@
 }
 
 
+.google-brand-icon {
+    display: inline-block;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
 /* Provider-branded social buttons. Explicitly override MudBlazor filled-button theme rules. */
 ::deep .social-grid button.social-btn {
     width: 100% !important;
