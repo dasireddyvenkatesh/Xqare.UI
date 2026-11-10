@@ -436,7 +436,7 @@
                             At least 8 characters, with uppercase, lowercase, a number and a symbol.
                         </MudText>
                         <div class="settings-form-actions">
-                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ChangePasswordAsync" Class="settings-primary">Change password</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_changingPassword || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ChangePasswordAsync" Class="settings-primary">@if (_changingPassword) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Changing password…</text> } else { <text>Change password</text> }</MudButton>
                         </div>
                     </MudPaper>
                 </MudItem>
@@ -876,23 +876,25 @@
         finally { _disablingTotp = false; }
     }
 
+    private bool _changingPassword;
     private async Task ChangePasswordAsync()
     {
-        if (_passwordForm != null)
-        {
-            await _passwordForm.ValidateAsync();
-            if (!_passwordForm.IsValid) return;
-        }
-        _busy = true;
+        if (_changingPassword) return;
+        _changingPassword = true;
         try
         {
+            if (_passwordForm != null)
+            {
+                await _passwordForm.ValidateAsync();
+                if (!_passwordForm.IsValid) return;
+            }
             var response = await AuthService.ChangePasswordAsync(_password);
             Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
             if (!response.IsSuccess) return;
             _password = new();
             await LoadSessionsAsync();
         }
-        finally { _busy = false; }
+        finally { _changingPassword = false; }
     }
 
     private async Task RevokeSessionAsync(ActiveSessionDto session)
