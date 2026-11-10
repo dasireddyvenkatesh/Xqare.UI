@@ -370,7 +370,7 @@
                                         }
                                         else
                                         {
-                                            <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" Disabled="_busy"
+                                            <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))"
                                                        OnClick="@(() => RevokeSessionAsync(session))">Revoke</MudButton>
                                         }
                                     </div>
@@ -379,7 +379,7 @@
                             </div>
                             @if (_sessions.Any(x => !x.IsCurrentSession))
                             {
-                                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="_busy"
+                                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))"
                                            Class="settings-revoke-others" OnClick="RevokeOtherSessionsAsync">
                                     Sign out other devices
                                 </MudButton>
