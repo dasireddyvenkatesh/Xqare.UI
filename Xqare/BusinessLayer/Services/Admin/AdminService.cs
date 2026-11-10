@@ -1,3 +1,4 @@
+using Xqare.BusinessLayer.Constants.Messages;
 using System.Text.Json;
 using Xqare.BusinessLayer.DTO.Admin;
 using Xqare.BusinessLayer.Interfaces.Admin;
@@ -20,7 +21,7 @@ namespace Xqare.BusinessLayer.Services.Admin
             return response.Data ?? new AdminOverviewResponse
             {
                 IsSuccess = false,
-                Message = ExtractMessage(response.ErrorMessage) ?? "The administration overview could not be loaded."
+                Message = ExtractMessage(response.ErrorMessage) ?? AdminMessages.OverviewLoadFailed
             };
         }
 
@@ -52,7 +53,7 @@ namespace Xqare.BusinessLayer.Services.Admin
             return response.Data ?? new AdminUsersResponse
             {
                 IsSuccess = false,
-                Message = ExtractMessage(response.ErrorMessage) ?? "Users could not be loaded."
+                Message = ExtractMessage(response.ErrorMessage) ?? AdminMessages.UsersLoadFailed
             };
         }
 
@@ -71,7 +72,7 @@ namespace Xqare.BusinessLayer.Services.Admin
             return response.Data ?? new AdminUserActionResponse
             {
                 IsSuccess = false,
-                Message = ExtractMessage(response.ErrorMessage) ?? "The account status could not be updated."
+                Message = ExtractMessage(response.ErrorMessage) ?? AdminMessages.AccountStatusUpdateFailed
             };
         }
 

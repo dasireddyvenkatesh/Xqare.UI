@@ -1,3 +1,4 @@
+using Xqare.BusinessLayer.Constants.Messages;
 using System.Text.Json;
 using Xqare.BusinessLayer.DTO.Rbac;
 using Xqare.BusinessLayer.Interfaces.Common;
@@ -22,7 +23,7 @@ namespace Xqare.BusinessLayer.Services.Rbac
                 : new RbacRolesResult
                 {
                     IsSuccess = false,
-                    Message = ExtractMessage(response.ErrorMessage) ?? "Roles could not be loaded."
+                    Message = ExtractMessage(response.ErrorMessage) ?? RbacMessages.RolesLoadFailed
                 };
         }
 
@@ -34,7 +35,7 @@ namespace Xqare.BusinessLayer.Services.Rbac
                 : new RbacRolesResult
                 {
                     IsSuccess = false,
-                    Message = ExtractMessage(response.ErrorMessage) ?? "Assignable roles could not be loaded."
+                    Message = ExtractMessage(response.ErrorMessage) ?? RbacMessages.AssignableRolesLoadFailed
                 };
         }
 
@@ -46,7 +47,7 @@ namespace Xqare.BusinessLayer.Services.Rbac
                 : new PermissionsResult
                 {
                     IsSuccess = false,
-                    Message = ExtractMessage(response.ErrorMessage) ?? "Permissions could not be loaded."
+                    Message = ExtractMessage(response.ErrorMessage) ?? RbacMessages.PermissionsLoadFailed
                 };
         }
 
@@ -60,7 +61,7 @@ namespace Xqare.BusinessLayer.Services.Rbac
                 : new RolePermissionsResult
                 {
                     IsSuccess = false,
-                    Message = ExtractMessage(response.ErrorMessage) ?? "Role permissions could not be loaded."
+                    Message = ExtractMessage(response.ErrorMessage) ?? RbacMessages.RolePermissionsLoadFailed
                 };
         }
 
@@ -68,35 +69,35 @@ namespace Xqare.BusinessLayer.Services.Rbac
         {
             var response = await _api.PostAsync<CreateRoleRequest, RbacOperationResponse>(
                 "api/admin/rbac/roles", request);
-            return response.Data ?? Failure(response.ErrorMessage, "The role could not be created.");
+            return response.Data ?? Failure(response.ErrorMessage, RbacMessages.RoleCreateFailed);
         }
 
         public async Task<RbacOperationResponse> UpdateRoleAsync(Guid roleId, UpdateRoleRequest request)
         {
             var response = await _api.PutAsync<UpdateRoleRequest, RbacOperationResponse>(
                 $"api/admin/rbac/roles/{roleId:D}", request);
-            return response.Data ?? Failure(response.ErrorMessage, "The role could not be updated.");
+            return response.Data ?? Failure(response.ErrorMessage, RbacMessages.RoleUpdateFailed);
         }
 
         public async Task<RbacOperationResponse> DeleteRoleAsync(Guid roleId)
         {
             var response = await _api.DeleteAsync<RbacOperationResponse>(
                 $"api/admin/rbac/roles/{roleId:D}");
-            return response.Data ?? Failure(response.ErrorMessage, "The role could not be deleted.");
+            return response.Data ?? Failure(response.ErrorMessage, RbacMessages.RoleDeleteFailed);
         }
 
         public async Task<RbacOperationResponse> AssignRoleAsync(RoleAssignmentRequest request)
         {
             var response = await _api.PostAsync<RoleAssignmentRequest, RbacOperationResponse>(
                 "api/admin/rbac/assignments", request);
-            return response.Data ?? Failure(response.ErrorMessage, "The role could not be assigned.");
+            return response.Data ?? Failure(response.ErrorMessage, RbacMessages.RoleAssignFailed);
         }
 
         public async Task<RbacOperationResponse> RemoveRoleAsync(RoleAssignmentRequest request)
         {
             var response = await _api.DeleteAsync<RoleAssignmentRequest, RbacOperationResponse>(
                 "api/admin/rbac/assignments", request);
-            return response.Data ?? Failure(response.ErrorMessage, "The role assignment could not be removed.");
+            return response.Data ?? Failure(response.ErrorMessage, RbacMessages.RoleRemoveFailed);
         }
 
         public async Task<RbacOperationResponse> SetRolePermissionsAsync(Guid roleId, List<string> permissionCodes)
@@ -104,7 +105,7 @@ namespace Xqare.BusinessLayer.Services.Rbac
             var request = new { PermissionCodes = permissionCodes };
             var response = await _api.PutAsync<object, RbacOperationResponse>(
                 $"api/admin/rbac/roles/{roleId:D}/permissions", request);
-            return response.Data ?? Failure(response.ErrorMessage, "Role permissions could not be updated.");
+            return response.Data ?? Failure(response.ErrorMessage, RbacMessages.RolePermissionsUpdateFailed);
         }
 
         private static RbacOperationResponse Failure(string? payload, string fallback)
