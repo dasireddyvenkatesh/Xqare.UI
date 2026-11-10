@@ -54,8 +54,7 @@
                         @if (_connectedAccountsError != null)
                         {
                             <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">@_connectedAccountsError</MudAlert>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Disabled="_busy"
-                                       OnClick="LoadConnectedAccountsAsync" Class="mt-3">Retry</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="LoadConnectedAccountsAsync" Class="mt-3">Retry</MudButton>
                         }
                         else if (_connectedAccounts != null)
                         {
@@ -304,7 +303,7 @@
                                                   @bind-Value="_disableRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
                                         <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="@(_disablingTotp || RateLimits.IsBlocked("auth-security-ip"))" OnClick="DisableTotpAsync">Disable authenticator</MudButton>
-                                        <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="ClosePanels">Cancel</MudButton>
+                                        <MudButton Variant="Variant.Text" Disabled="@(_startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp)" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
                             </MudPaper>
@@ -394,8 +393,8 @@
                                         }
                                         else
                                         {
-                                            <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))"
-                                                       OnClick="@(() => RevokeSessionAsync(session))">Revoke</MudButton>
+                                            <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" Disabled="@(_revokingSessionId.HasValue || _revokingOtherSessions || RateLimits.IsBlocked("auth-security-ip"))"
+                                                       OnClick="@(() => RevokeSessionAsync(session))">@if (_revokingSessionId == session.SessionId) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> <text> Revoking…</text> } else { <text>Revoke</text> }</MudButton>
                                         }
                                     </div>
                                     <MudDivider />
@@ -403,9 +402,9 @@
                             </div>
                             @if (_sessions.Any(x => !x.IsCurrentSession))
                             {
-                                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="@(_busy || RateLimits.IsBlocked("auth-security-ip"))"
+                                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="@(_revokingOtherSessions || _revokingSessionId.HasValue || RateLimits.IsBlocked("auth-security-ip"))"
                                            Class="settings-revoke-others" OnClick="RevokeOtherSessionsAsync">
-                                    Sign out other devices
+                                    @if (_revokingOtherSessions) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Signing out devices…</text> } else { <text>Sign out other devices</text> }
                                 </MudButton>
                             }
                         }
@@ -464,7 +463,7 @@
                                 Are you sure you want to log out from this device?
                             </MudAlert>
                             <div class="settings-form-actions">
-                                <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="LogoutAsync">Yes, log out</MudButton>
+                                <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="_loggingOut" OnClick="LogoutAsync">@if (_loggingOut) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Logging out…</text> } else { <text>Yes, log out</text> }</MudButton>
                                 <MudButton Variant="Variant.Text" OnClick="() => _confirmLogout = false">Cancel</MudButton>
                             </div>
                         }
@@ -477,7 +476,6 @@
 
 @code {
     private bool _loading = true;
-    private bool _busy;
     private string? _connectingProvider;
     private bool _disconnectingProvider;
     private bool _sendingPasswordSetupLink;
