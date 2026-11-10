@@ -485,6 +485,7 @@
     private bool _confirmingEnrollment;
     private bool _regeneratingRecovery;
     private bool _disablingTotp;
+    private bool _changingPassword;
     private bool _sessionsLoading;
     private ConnectedAccountsResponse? _connectedAccounts;
     private string? _connectedAccountsError;
@@ -876,7 +877,6 @@
         finally { _disablingTotp = false; }
     }
 
-    private bool _changingPassword;
     private async Task ChangePasswordAsync()
     {
         if (_changingPassword) return;
@@ -897,33 +897,40 @@
         finally { _changingPassword = false; }
     }
 
+    private Guid? _revokingSessionId;
+    private bool _revokingOtherSessions;
+    private bool _loggingOut;
+
     private async Task RevokeSessionAsync(ActiveSessionDto session)
     {
-        _busy = true;
+        if (_revokingSessionId.HasValue || _revokingOtherSessions) return;
+        _revokingSessionId = session.SessionId;
         try
         {
             var response = await AuthService.RevokeSessionAsync(session.SessionId);
             Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
             if (response.IsSuccess) await LoadSessionsAsync();
         }
-        finally { _busy = false; }
+        finally { _revokingSessionId = null; }
     }
 
     private async Task RevokeOtherSessionsAsync()
     {
-        _busy = true;
+        if (_revokingOtherSessions || _revokingSessionId.HasValue) return;
+        _revokingOtherSessions = true;
         try
         {
             var response = await AuthService.RevokeOtherSessionsAsync();
             Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
             if (response.IsSuccess) await LoadSessionsAsync();
         }
-        finally { _busy = false; }
+        finally { _revokingOtherSessions = false; }
     }
 
     private async Task LogoutAsync()
     {
-        _busy = true;
+        if (_loggingOut) return;
+        _loggingOut = true;
         await AuthService.Logout();
     }
 
