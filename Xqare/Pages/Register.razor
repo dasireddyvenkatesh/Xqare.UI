@@ -166,7 +166,7 @@
                                       HelperText="@RegistrationValidationMessages.EmailHelper"
                                       HelperTextOnFocus="true" />
 
-                        <MudButton Disabled="@(_processing || isRegistrationRetryDisabled || RateLimits.IsBlocked("auth-otp-ip"))"
+                        <MudButton Disabled="@(_processing || !string.IsNullOrWhiteSpace(_activeProvider) || isRegistrationRetryDisabled || RateLimits.IsBlocked("auth-otp-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
