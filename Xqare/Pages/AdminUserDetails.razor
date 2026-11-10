@@ -244,6 +244,16 @@
                                     @if (_rolesLoading)
                                     {
                                         <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Loading available roles…</MudText>
+                                    }
+                                    else if (_rolesLoadError)
+                                    {
+                                        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">
+                                            Available roles could not be loaded.
+                                            <MudButton Variant="Variant.Text" Size="Size.Small" Disabled="_rolesLoading" OnClick="LoadAssignableRolesAsync">
+                                                @(_rolesLoading ? "Retrying..." : "Retry")
+                                            </MudButton>
+                                        </MudAlert>
                                     }
                                     else if (AvailableRoles.Any())
                                     {
@@ -381,6 +391,8 @@
     private bool _loading = true;
     private List<RoleResponse> _roles = new();
     private bool _rolesLoading;
+    private bool _rolesLoadError;
+    private int _detailsRequestVersion;
     private bool _assignmentBusy;
     private Guid? _confirmRemoveRoleId;
     private string? _selectedRoleId;
@@ -393,17 +405,25 @@
 
     private async Task LoadAssignableRolesAsync()
     {
+        if (_rolesLoading || _assignmentBusy)
+            return;
+
         _rolesLoading = true;
+        _rolesLoadError = false;
         try
         {
             var result = await RbacService.GetAssignableRolesAsync();
             if (result.IsSuccess)
                 _roles = result.Roles;
             else
+            {
+                _rolesLoadError = true;
                 Snackbar.Add(result.Message, Severity.Error);
+            }
         }
         catch
         {
+            _rolesLoadError = true;
             Snackbar.Add(RbacMessages.AvailableRolesLoadFailed, Severity.Error);
         }
         finally
@@ -512,18 +532,37 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        var requestVersion = Interlocked.Increment(ref _detailsRequestVersion);
         _loading = true;
+        _user = null;
+        _selectedRoleId = null;
+        _confirmRemoveRoleId = null;
         try
         {
-            _user = await AdminService.GetUserDetailsAsync(UserId);
+            var user = await AdminService.GetUserDetailsAsync(UserId);
+            if (requestVersion != _detailsRequestVersion)
+                return;
+
+            _user = user;
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (requestVersion != _detailsRequestVersion)
+                return;
+
             var canManageAssignments = await AuthorizationService.AuthorizeAsync(
                 authState.User, null, PermissionPolicies.RbacAssignmentsManage);
 
-            if (canManageAssignments.Succeeded)
+            if (requestVersion == _detailsRequestVersion && canManageAssignments.Succeeded)
                 await LoadAssignableRolesAsync();
         }
-        catch { _user = null; }
-        finally { _loading = false; }
+        catch
+        {
+            if (requestVersion == _detailsRequestVersion)
+                _user = null;
+        }
+        finally
+        {
+            if (requestVersion == _detailsRequestVersion)
+                _loading = false;
+        }
     }
 }
