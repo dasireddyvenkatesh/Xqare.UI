@@ -344,8 +344,8 @@
                                     @Math.Min(_sessions.Count, 2) of 2 devices
                                 </MudChip>
                                 <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small"
-                                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadSessionsAsync"
-                                           Disabled="_sessionsLoading">
+                                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="RefreshSessionsAsync"
+                                           Disabled="@IsSessionActionBusy">
                                     Refresh
                                 </MudButton>
                             </div>
@@ -393,7 +393,7 @@
                                         }
                                         else
                                         {
-                                            <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" Disabled="@(_revokingSessionId.HasValue || _revokingOtherSessions || RateLimits.IsBlocked("auth-security-ip"))"
+                                            <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" Disabled="@(IsSessionActionBusy || RateLimits.IsBlocked("auth-security-ip"))"
                                                        OnClick="@(() => RevokeSessionAsync(session))">@if (_revokingSessionId == session.SessionId) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> <text> Revoking…</text> } else { <text>Revoke</text> }</MudButton>
                                         }
                                     </div>
@@ -402,7 +402,7 @@
                             </div>
                             @if (_sessions.Any(x => !x.IsCurrentSession))
                             {
-                                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="@(_revokingOtherSessions || _revokingSessionId.HasValue || RateLimits.IsBlocked("auth-security-ip"))"
+                                <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="@(IsSessionActionBusy || RateLimits.IsBlocked("auth-security-ip"))"
                                            Class="settings-revoke-others" OnClick="RevokeOtherSessionsAsync">
                                     @if (_revokingOtherSessions) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Signing out devices…</text> } else { <text>Sign out other devices</text> }
                                 </MudButton>
@@ -435,7 +435,7 @@
                             At least 8 characters, with uppercase, lowercase, a number and a symbol.
                         </MudText>
                         <div class="settings-form-actions">
-                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_changingPassword || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ChangePasswordAsync" Class="settings-primary">@if (_changingPassword) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Changing password…</text> } else { <text>Change password</text> }</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_changingPassword || IsSessionRevocationActive || RateLimits.IsBlocked("auth-security-ip"))" OnClick="ChangePasswordAsync" Class="settings-primary">@if (_changingPassword) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Changing password…</text> } else { <text>Change password</text> }</MudButton>
                         </div>
                     </MudPaper>
                 </MudItem>
@@ -485,6 +485,8 @@
     private bool _disablingTotp;
     private bool _changingPassword;
     private bool _sessionsLoading;
+    private bool IsSessionRevocationActive => _revokingSessionId.HasValue || _revokingOtherSessions;
+    private bool IsSessionActionBusy => _sessionsLoading || IsSessionRevocationActive || _changingPassword;
     private bool IsAuthenticatorActionBusy =>
         _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp;
     private ConnectedAccountsResponse? _connectedAccounts;
@@ -708,6 +710,14 @@
         }
     }
 
+    private Task RefreshSessionsAsync()
+    {
+        if (IsSessionActionBusy)
+            return Task.CompletedTask;
+
+        return LoadSessionsAsync();
+    }
+
     private async Task LoadSessionsAsync()
     {
         _sessionsLoading = true;
@@ -894,7 +904,7 @@
 
     private async Task ChangePasswordAsync()
     {
-        if (_changingPassword) return;
+        if (_changingPassword || IsSessionRevocationActive) return;
         _changingPassword = true;
         try
         {
@@ -918,7 +928,7 @@
 
     private async Task RevokeSessionAsync(ActiveSessionDto session)
     {
-        if (_revokingSessionId.HasValue || _revokingOtherSessions) return;
+        if (IsSessionActionBusy) return;
         _revokingSessionId = session.SessionId;
         try
         {
@@ -931,7 +941,7 @@
 
     private async Task RevokeOtherSessionsAsync()
     {
-        if (_revokingOtherSessions || _revokingSessionId.HasValue) return;
+        if (IsSessionActionBusy) return;
         _revokingOtherSessions = true;
         try
         {
