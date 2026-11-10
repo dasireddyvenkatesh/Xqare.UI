@@ -630,3 +630,135 @@ h1:focus {
     background-color: #202124 !important;
     border-color: #202124 !important;
 }
+
+/* Shared admin page styling. Page-specific layouts remain in their isolated stylesheets. */
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) {
+    min-height: 100%;
+    padding: clamp(12px, 1.5vw, 20px);
+    padding-block-end: max(var(--xq-space-6), env(safe-area-inset-bottom));
+    background: var(--xq-page-bg);
+    color: var(--xq-text-primary);
+}
+
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-page-title {
+    margin: 0;
+    color: var(--xq-navy) !important;
+    font-weight: 800 !important;
+    letter-spacing: -.035em;
+    line-height: 1.15;
+}
+
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-page-subtitle {
+    margin-block-start: var(--xq-space-2);
+    color: var(--xq-text-secondary) !important;
+    max-width: 42rem;
+    line-height: 1.5;
+}
+
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-refresh-button {
+    min-width: 0;
+    white-space: nowrap;
+    text-transform: none;
+}
+
+.admin-page, .admin-users-page, .admin-roles-page .admin-card-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 2.65rem;
+    width: 2.65rem;
+    height: 2.65rem;
+    border: 1px solid rgba(var(--xq-primary-rgb), .2);
+    border-radius: .875rem;
+    background: rgba(var(--xq-primary-rgb), .12);
+    color: var(--xq-primary-hover);
+}
+
+.admin-page, .admin-users-page, .admin-roles-page .admin-card-title {
+    color: var(--xq-navy) !important;
+    font-weight: 750 !important;
+    line-height: 1.3;
+}
+
+.admin-page, .admin-users-page, .admin-roles-page .admin-card-subtitle {
+    margin-block-start: var(--xq-space-1);
+    color: var(--xq-text-secondary) !important;
+    line-height: 1.4;
+}
+
+.admin-users-page, .admin-roles-page, .admin-permissions-page .admin-users-container {
+    width: 100%;
+    max-width: none;
+    margin-inline: auto;
+    padding-inline: 0;
+}
+
+.admin-users-page, .admin-roles-page .admin-users-card {
+    height: auto;
+    min-width: 0;
+    padding: var(--xq-padding-card-compact);
+    border: 1px solid var(--xq-border);
+    border-radius: var(--xq-card-radius);
+    background: var(--xq-surface);
+    box-shadow: 0 5px 18px rgba(15, 42, 68, .045);
+}
+
+.admin-users-page, .admin-roles-page .admin-count-chip {
+    flex: 0 0 auto;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-users-page, .admin-roles-page .admin-divider {
+    margin-block: var(--xq-space-4) !important;
+    border-color: var(--xq-border) !important;
+}
+
+.admin-users-page, .admin-roles-page .admin-field-label {
+    color: var(--xq-text-secondary) !important;
+    font-size: .68rem !important;
+    font-weight: 800 !important;
+    letter-spacing: .06em;
+}
+
+.admin-users-page, .admin-roles-page .admin-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--xq-space-2);
+    padding: var(--xq-space-10) var(--xq-space-5);
+    background: var(--xq-surface-muted);
+    text-align: center;
+}
+
+.admin-users-page, .admin-roles-page .admin-empty-icon {
+    color: var(--xq-text-muted);
+    font-size: 2.5rem;
+}
+
+.admin-users-page, .admin-roles-page .admin-list-alert {
+    margin-block: var(--xq-space-3);
+}
+
+.admin-roles-page, .admin-permissions-page .admin-users-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--xq-space-4);
+    margin: 0 16px var(--xq-space-6);
+}
+
+.admin-roles-page, .admin-permissions-page .admin-users-heading-copy {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+
+.admin-roles-page, .admin-permissions-page .admin-users-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: var(--xq-space-2);
+    margin-inline-start: auto;
+}
