@@ -63,15 +63,7 @@
                 <MudCheckBox T="bool" @bind-Value="_passwordless" Color="Color.Primary" Label="I use Google, GitHub, LinkedIn or Twitter and don't have an XQARE password" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))"
                            OnClick="RequestRecovery" Class="recovery-primary">
-                    @if (_busy)
-                    {
-                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
-                        @_busyText
-                    }
-                    else
-                    {
-                        <text>Send verification code</text>
-                    }
+                    <LoadingButtonContent IsLoading="_busy" LoadingText="@_busyText">Send verification code</LoadingButtonContent>
                 </MudButton>
             </MudForm>
         }
@@ -88,8 +80,7 @@
                               Variant="Variant.Outlined" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
                            OnClick="VerifyEmailCode" Class="recovery-primary">
-                    @if (_busy) { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> @_busyText }
-                    else { <text>Verify email</text> }
+                    <LoadingButtonContent IsLoading="_busy" LoadingText="@_busyText">Verify email</LoadingButtonContent>
                 </MudButton>
                 <MudButton FullWidth Variant="Variant.Text" Color="Color.Secondary" Disabled="_busy"
                            OnClick="BackToRequest">Use a different email</MudButton>
@@ -107,29 +98,25 @@
                 <MudItem xs="6">
                     <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Google"
                                Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("google"))">
-                        @if (_busy && _activeProvider == "google") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> <text>Connecting...</text> }
-                        else { <text>Google</text> }
+                        <LoadingButtonContent IsLoading="@(_busy && _activeProvider == "google")" LoadingText="Connecting...">Google</LoadingButtonContent>
                     </MudButton>
                 </MudItem>
                 <MudItem xs="6">
                     <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.GitHub"
                                Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("github"))">
-                        @if (_busy && _activeProvider == "github") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> <text>Connecting...</text> }
-                        else { <text>GitHub</text> }
+                        <LoadingButtonContent IsLoading="@(_busy && _activeProvider == "github")" LoadingText="Connecting...">GitHub</LoadingButtonContent>
                     </MudButton>
                 </MudItem>
                 <MudItem xs="6">
                     <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.LinkedIn"
                                Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("linkedin"))">
-                        @if (_busy && _activeProvider == "linkedin") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> <text>Connecting...</text> }
-                        else { <text>LinkedIn</text> }
+                        <LoadingButtonContent IsLoading="@(_busy && _activeProvider == "linkedin")" LoadingText="Connecting...">LinkedIn</LoadingButtonContent>
                     </MudButton>
                 </MudItem>
                 <MudItem xs="6">
                     <MudButton FullWidth Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Twitter"
                                Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))" OnClick="@(() => ContinueWithProvider("twitter"))">
-                        @if (_busy && _activeProvider == "twitter") { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> <text>Connecting...</text> }
-                        else { <text>Twitter</text> }
+                        <LoadingButtonContent IsLoading="@(_busy && _activeProvider == "twitter")" LoadingText="Connecting...">Twitter</LoadingButtonContent>
                     </MudButton>
                 </MudItem>
             </MudGrid>
@@ -154,8 +141,7 @@
                               Immediate="true" Variant="Variant.Outlined" />
                 <MudButton FullWidth Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy"
                            OnClick="CompleteRecovery" Class="recovery-primary">
-                    @if (_busy) { <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" /> @_busyText }
-                    else { <text>Confirm new authenticator</text> }
+                    <LoadingButtonContent IsLoading="_busy" LoadingText="@_busyText">Confirm new authenticator</LoadingButtonContent>
                 </MudButton>
             </MudForm>
         }
