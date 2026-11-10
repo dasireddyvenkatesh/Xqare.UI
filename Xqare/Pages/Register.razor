@@ -90,33 +90,37 @@
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Google"
-                                       OnClick="@AuthService.LoginWithGoogle">
+                                       Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
+                                       OnClick='@(() => LoginWithProviderAsync("google"))'>
 
-                                Google
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "google")' LoadingText="Connecting to Google…">Google</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.GitHub"
-                                       OnClick="@AuthService.LoginWithGitHub">
-                                GitHub
+                                       Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
+                                       OnClick='@(() => LoginWithProviderAsync("github"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "github")' LoadingText="Connecting to GitHub…">GitHub</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.LinkedIn"
-                                       OnClick="@AuthService.LoginWithLinkedIn">
-                                LinkedIn
+                                       Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
+                                       OnClick='@(() => LoginWithProviderAsync("linkedin"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "linkedin")' LoadingText="Connecting to LinkedIn…">LinkedIn</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
 
                         <MudItem xs="6">
                             <MudButton FullWidth Class="social-btn"
                                        StartIcon="@Icons.Custom.Brands.Twitter"
-                                       OnClick="@AuthService.LoginWithTwitter">
-                                Twitter
+                                       Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
+                                       OnClick='@(() => LoginWithProviderAsync("twitter"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "twitter")' LoadingText="Connecting to Twitter…">Twitter</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
                     </MudGrid>
@@ -319,6 +323,7 @@
     RegistrationOtpRequestValidator registrationOtpValidator = new();
 
     private bool _processing = false;
+    private string? _activeProvider;
     bool isOtpStep = false;
     bool showPassword;
     bool showConfirmPassword;
@@ -330,6 +335,42 @@
     Timer timer = new();
 
     private Task HandleRateLimitTick() => InvokeAsync(StateHasChanged);
+
+    private async Task LoginWithProviderAsync(string provider)
+    {
+        if (!string.IsNullOrWhiteSpace(_activeProvider))
+            return;
+
+        _activeProvider = provider;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            switch (provider)
+            {
+                case "google":
+                    await AuthService.LoginWithGoogle();
+                    break;
+                case "github":
+                    await AuthService.LoginWithGitHub();
+                    break;
+                case "linkedin":
+                    await AuthService.LoginWithLinkedIn();
+                    break;
+                case "twitter":
+                    await AuthService.LoginWithTwitter();
+                    break;
+            }
+        }
+        catch
+        {
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
+        }
+        finally
+        {
+            _activeProvider = null;
+        }
+    }
 
     void TogglePassword() => showPassword = !showPassword;
     void ToggleConfirmPassword() => showConfirmPassword = !showConfirmPassword;
