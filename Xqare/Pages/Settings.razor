@@ -132,9 +132,17 @@
                                     Password sign-in is not enabled for this account. You can establish a password using a secure reset link sent to your verified email address.
                                 </MudAlert>
                                 <div class="settings-form-actions">
-                                    <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_busy || RateLimits.IsBlocked("auth-recovery-ip"))"
+                                    <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(_sendingPasswordSetupLink || RateLimits.IsBlocked("auth-recovery-ip"))"
                                                OnClick="SendPasswordSetupLinkAsync" Class="settings-primary">
-                                        Set password
+                                        @if (_sendingPasswordSetupLink)
+                                        {
+                                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                            <text>Sending setup link…</text>
+                                        }
+                                        else
+                                        {
+                                            <text>Set password</text>
+                                        }
                                     </MudButton>
                                 </div>
                             }
@@ -472,6 +480,7 @@
     private bool _busy;
     private string? _connectingProvider;
     private bool _disconnectingProvider;
+    private bool _sendingPasswordSetupLink;
     private bool _sessionsLoading;
     private ConnectedAccountsResponse? _connectedAccounts;
     private string? _connectedAccountsError;
@@ -659,7 +668,10 @@
         if (_connectedAccounts == null || string.IsNullOrWhiteSpace(_connectedAccounts.Email))
             return;
 
-        _busy = true;
+        if (_sendingPasswordSetupLink)
+            return;
+
+        _sendingPasswordSetupLink = true;
         try
         {
             var response = await AuthService.ForgotPasswordAsync(
@@ -672,7 +684,7 @@
         }
         finally
         {
-            _busy = false;
+            _sendingPasswordSetupLink = false;
         }
     }
 
