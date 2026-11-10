@@ -206,9 +206,9 @@
                                     </MudAlert>
                                 }
                                 <div class="settings-actions">
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ShowRecovery" StartIcon="@Icons.Material.Filled.Key">Recovery codes</MudButton>
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="BeginEnrollment" StartIcon="@Icons.Material.Filled.Sync">Replace authenticator</MudButton>
-                                    <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="ShowDisable" StartIcon="@Icons.Material.Filled.RemoveCircleOutline">Disable</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@IsAuthenticatorActionBusy" OnClick="ShowRecovery" StartIcon="@Icons.Material.Filled.Key">Recovery codes</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Disabled="@IsAuthenticatorActionBusy" OnClick="BeginEnrollment" StartIcon="@Icons.Material.Filled.Sync">Replace authenticator</MudButton>
+                                    <MudButton Variant="Variant.Text" Color="Color.Error" Disabled="@IsAuthenticatorActionBusy" OnClick="ShowDisable" StartIcon="@Icons.Material.Filled.RemoveCircleOutline">Disable</MudButton>
                                 </div>
                             }
                             else
@@ -216,7 +216,7 @@
                                 <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="settings-alert">
                                     Add an authenticator to require a one-time code after your password when signing in.
                                 </MudAlert>
-                                <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(!_totp.CanEnroll)"
+                                <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(!_totp.CanEnroll || IsAuthenticatorActionBusy)"
                                            OnClick="BeginEnrollment" Class="settings-primary">
                                     Set up authenticator
                                 </MudButton>
@@ -281,7 +281,7 @@
                                                   @bind-Value="_recoveryRequest.Code" FullWidth="true" />
                                     <div class="settings-form-actions">
                                         <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled="@(_regeneratingRecovery || RateLimits.IsBlocked("auth-security-ip"))" OnClick="RegenerateRecoveryAsync" Class="settings-primary">@if (_regeneratingRecovery) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> <text>Generating codes…</text> } else { <text>Generate new codes</text> }</MudButton>
-                                        <MudButton Variant="Variant.Text" OnClick="ClosePanels">Cancel</MudButton>
+                                        <MudButton Variant="Variant.Text" Disabled="@IsAuthenticatorActionBusy" OnClick="ClosePanels">Cancel</MudButton>
                                     </div>
                                 </MudForm>
                             </MudPaper>
@@ -325,7 +325,7 @@
                                         <span class="settings-recovery-code">@recoveryCode</span>
                                     }
                                 </div>
-                                <MudButton Variant="Variant.Filled" Color="Color.Warning" Class="settings-primary" OnClick="DismissRecoveryCodes">I have saved these codes</MudButton>
+                                <MudButton Variant="Variant.Filled" Color="Color.Warning" Class="settings-primary" Disabled="@IsAuthenticatorActionBusy" OnClick="DismissRecoveryCodes">I have saved these codes</MudButton>
                             </MudPaper>
                         }
                     </MudPaper>
@@ -485,6 +485,8 @@
     private bool _disablingTotp;
     private bool _changingPassword;
     private bool _sessionsLoading;
+    private bool IsAuthenticatorActionBusy =>
+        _startingEnrollment || _confirmingEnrollment || _regeneratingRecovery || _disablingTotp;
     private ConnectedAccountsResponse? _connectedAccounts;
     private string? _connectedAccountsError;
     private string? _pendingOAuthMessage;
@@ -734,6 +736,8 @@
 
     private void BeginEnrollment()
     {
+        if (IsAuthenticatorActionBusy) return;
+
         ClosePanels();
         _showEnrollment = true;
         _enrollment = null;
@@ -743,6 +747,8 @@
 
     private void ShowRecovery()
     {
+        if (IsAuthenticatorActionBusy) return;
+
         ClosePanels();
         _showRecovery = true;
         _recoveryRequest = new();
@@ -750,6 +756,8 @@
 
     private void ShowDisable()
     {
+        if (IsAuthenticatorActionBusy) return;
+
         ClosePanels();
         _showDisable = true;
         _disableRequest = new();
