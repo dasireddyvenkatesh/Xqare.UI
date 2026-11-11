@@ -1,0 +1,106 @@
+.community-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: calc(100dvh - 64px);
+    box-sizing: border-box;
+    background: var(--xq-page-bg);
+}
+
+.community-content {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding: clamp(14px, 3vw, 36px);
+    box-sizing: border-box;
+}
+
+.community-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: clamp(420px, calc(100dvh - 190px), 640px);
+    overflow: hidden;
+    padding: clamp(40px, 7vw, 88px) clamp(22px, 8vw, 104px);
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: clamp(20px, 2.2vw, 32px);
+    color: #FFFFFF;
+    text-align: center;
+    background:
+        radial-gradient(circle at 18% 12%, rgba(245, 166, 35, 0.16), transparent 34%),
+        radial-gradient(circle at 84% 88%, rgba(74, 125, 163, 0.2), transparent 38%),
+        linear-gradient(135deg, #102E49 0%, #0F2A44 55%, #1A3754 100%);
+    box-shadow: 0 22px 56px rgba(15, 42, 68, 0.14);
+}
+
+.community-hero::before {
+    position: absolute;
+    top: 0;
+    left: 12%;
+    width: 76%;
+    height: 2px;
+    content: "";
+    background: linear-gradient(90deg, transparent, var(--xq-primary), transparent);
+}
+
+.community-eyebrow {
+    margin: 0 0 clamp(18px, 2.4vw, 28px);
+    color: #F5B400;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.community-title {
+    max-width: 1000px;
+    margin: 0;
+    color: #FFFFFF;
+    font-size: clamp(2rem, 5.2vw, 4.5rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.08;
+    text-wrap: balance;
+}
+
+.community-description {
+    max-width: 760px;
+    margin: clamp(20px, 2.5vw, 30px) 0 0;
+    color: rgba(238, 244, 250, 0.86);
+    font-size: clamp(1rem, 1.65vw, 1.2rem);
+    font-weight: 400;
+    line-height: 1.8;
+    text-wrap: pretty;
+}
+
+.community-coming-soon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: clamp(30px, 4vw, 44px);
+    padding: 13px 22px;
+    border: 1px solid rgba(245, 180, 0, 0.42);
+    border-radius: 999px;
+    color: #FFD36E;
+    background: rgba(245, 180, 0, 0.1);
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.community-status-dot {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
+    border-radius: 50%;
+    background: #F5B400;
+    box-shadow: 0 0 0 4px rgba(245, 180, 0, 0.13);
+}

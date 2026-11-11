@@ -10,7 +10,7 @@
 ::deep .action-card {
     flex: 1;
     min-width: 220px;
-    background: #ffffff;
+    background: var(--xq-surface);
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.05);
@@ -23,13 +23,13 @@
     ::deep .action-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        border-color: rgba(251, 191, 36, 0.3);
+        border-color: rgba(var(--xq-primary-rgb), 0.3);
     }
 
 /* Icon */
 ::deep .action-icon {
     font-size: 32px;
-    color: #f5a623;
+    color: var(--xq-primary);
     margin-bottom: 10px;
 }
 
@@ -41,5 +41,5 @@
 
 /* Description */
 ::deep .action-desc {
-    color: #6b7280;
+    color: var(--xq-text-secondary);
 }

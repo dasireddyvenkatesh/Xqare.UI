@@ -1,3 +1,4 @@
+@using Xqare.BusinessLayer.Constants.Messages
 ﻿@using MudBlazor
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.PartnerShip
@@ -36,6 +37,8 @@
 
                     <MudItem xs="12" md="6">
                         <MudTextField Label="Company Name"
+                                      Required="true"
+                                      MaxLength="100"
                                       Variant="Variant.Outlined"
                                       Immediate="true"
                                       Disabled="_processing"
@@ -45,6 +48,8 @@
 
                     <MudItem xs="12" md="6">
                         <MudTextField Label="Contact Person"
+                                      Required="true"
+                                      MaxLength="100"
                                       Variant="Variant.Outlined"
                                       Disabled="_processing"
                                       @bind-Value="_model.ContactPerson"
@@ -53,6 +58,8 @@
 
                     <MudItem xs="12" md="6">
                         <MudTextField Label="Work Email"
+                                      Required="true"
+                                      MaxLength="256"
                                       Variant="Variant.Outlined"
                                       InputType="InputType.Email"
                                       Disabled="_processing"
@@ -75,6 +82,7 @@
 
                     <MudItem xs="12" md="6">
                         <MudTextField Label="Company Website"
+                                      MaxLength="2048"
                                       Variant="Variant.Outlined"
                                       Disabled="_processing"
                                       @bind-Value="_model.CompanyWebsite"
@@ -82,6 +90,7 @@
                     </MudItem>
                     <MudItem xs="12" md="6">
                         <MudSelect Label="Company Size"
+                                   Required="true"
                                    Variant="Variant.Outlined"
                                    Disabled="_processing"
                                    @bind-Value="_model.CompanySize"
@@ -101,6 +110,7 @@
 
                         <MudSelect T="string"
                                    Label="Industry"
+                                   Required="true"
                                    Variant="Variant.Outlined"
                                    Disabled="_processing"
                                    @bind-Value="_model.Industry"
@@ -119,6 +129,8 @@
                     <MudItem xs="12">
 
                         <MudTextField Label="Roles You're Hiring For"
+                                      Required="true"
+                                      MaxLength="300"
                                       Variant="Variant.Outlined"
                                       Disabled="_processing"
                                       @bind-Value="_model.Roles"
@@ -131,6 +143,8 @@
                     <MudItem xs="12">
 
                         <MudTextField Label="Additional Details"
+                                      Required="true"
+                                      MaxLength="2000"
                                       Variant="Variant.Outlined"
                                       Lines="4"
                                       TextArea="true"
@@ -151,19 +165,7 @@
                                    StartIcon="@(!_processing ? Icons.Material.Filled.Send : null)"
                                    Size="Size.Large">
 
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
-
-                                @if (_processing)
-                                {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <MudText>Processing...</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Submit Partnership Inquiry</MudText>
-                                }
-
-                            </MudStack>
+                            <LoadingButtonContent IsLoading="_processing" LoadingText="Submitting inquiry…">Submit Partnership Inquiry</LoadingButtonContent>
 
                         </MudButton>
 
@@ -194,36 +196,51 @@
     bool _processing = false;
 
     List<string> _companySizes = new()
-{
-"1-50",
-"51-200",
-"201-500",
-"501-1000",
-"1000+"
-};
+    {
+        "1-50",
+        "51-200",
+        "201-500",
+        "501-1000",
+        "1000+"
+    };
 
     List<string> _industries = new()
-{
-"Information Technology",
-"Finance",
-"Healthcare",
-"Retail",
-"Education",
-"Manufacturing",
-"Consulting",
-"Other"
-};
+    {
+        "Information Technology",
+        "Finance",
+        "Healthcare",
+        "Retail",
+        "Education",
+        "Manufacturing",
+        "Consulting",
+        "Other"
+    };
+
     async Task SubmitInquiry()
     {
-        await _form.ValidateAsync();
-
-        if (!_form.IsValid)
+        if (_processing)
             return;
 
         _processing = true;
 
         try
         {
+            // Normalize user input before validation and submission.
+            _model.CompanyName = _model.CompanyName?.Trim() ?? string.Empty;
+            _model.ContactPerson = _model.ContactPerson?.Trim() ?? string.Empty;
+            _model.Email = _model.Email?.Trim() ?? string.Empty;
+            _model.Phone = _model.Phone?.Trim() ?? string.Empty;
+            _model.CompanyWebsite = _model.CompanyWebsite?.Trim() ?? string.Empty;
+            _model.CompanySize = _model.CompanySize?.Trim() ?? string.Empty;
+            _model.Industry = _model.Industry?.Trim() ?? string.Empty;
+            _model.Roles = _model.Roles?.Trim() ?? string.Empty;
+            _model.Details = _model.Details?.Trim() ?? string.Empty;
+
+            await _form.ValidateAsync();
+
+            if (!_form.IsValid)
+                return;
+
             var response = await PartnershipService.SubmitInquiryAsync(_model);
 
             if (response.IsSuccess)
@@ -240,7 +257,7 @@
         }
         catch
         {
-            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
         }
         finally
         {

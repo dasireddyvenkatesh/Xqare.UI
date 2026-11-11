@@ -4,10 +4,10 @@
 }
 
 ::deep.insights-card {
-    background: #ffffff;
+    background: var(--xq-surface);
     border-radius: 16px;
     padding: 20px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--xq-border);
     box-shadow: 0 4px 14px rgba(0,0,0,0.05);
 }
 
@@ -26,7 +26,7 @@
 
 /* View all */
 ::deep .view-all {
-    color: #f59e0b;
+    color: var(--xq-primary);
     font-weight: 500;
     cursor: pointer;
 }
@@ -43,7 +43,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 14px 0;
-    border-top: 1px solid #f1f3f7;
+    border-top: 1px solid var(--xq-border-subtle);
     cursor: pointer;
     transition: background 0.2s ease;
 }
@@ -55,17 +55,17 @@
 
     /* Hover */
     ::deep .insight-item:hover {
-        background: #f9fafb;
+        background: var(--xq-surface-hover);
     }
 
 /* Title */
 ::deep .insight-title {
     font-weight: 500;
-    color: #1f2937;
+    color: var(--xq-text-primary);
 }
 
 /* Description */
 ::deep .insight-desc {
     font-size: 14px;
-    color: #6b7280;
+    color: var(--xq-text-secondary);
 }

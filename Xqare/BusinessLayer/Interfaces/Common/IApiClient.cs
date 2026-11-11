@@ -8,10 +8,21 @@ namespace Xqare.BusinessLayer.Interfaces.Common
 
         Task<ApiResponse<TResponse>> PostAsync<TRequest, TResponse>(string url, TRequest data);
 
+        Task<ApiResponse<TResponse>> PostAnonymousAsync<TRequest, TResponse>(string url, TRequest data);
+
         Task<ApiResponse<TResponse>> PutAsync<TRequest, TResponse>(string url, TRequest data);
 
         Task<ApiResponse<bool>> DeleteAsync(string url);
 
-        Task CookieCredential<TResponse>(string url);
+        Task<ApiResponse<TResponse>> DeleteAsync<TResponse>(string url);
+
+        Task<ApiResponse<TResponse>> DeleteAsync<TRequest, TResponse>(string url, TRequest data);
+
+        Task<ApiResponse<TResponse>> CookieCredential<TResponse>(string url);
+
+        // Shares the same serialized refresh flow used by requests that receive 401.
+        Task<SessionRestoreOutcome> RestoreSessionAsync();
+        void ResetRefreshState();
+        void RejectRefreshState();
     }
 }

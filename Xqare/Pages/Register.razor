@@ -1,4 +1,7 @@
 ﻿@page "/register"
+@using Xqare.BusinessLayer.Constants.Messages
+@inject RateLimitState RateLimits
+@implements IDisposable
 @using System.Timers
 @using MudBlazor
 @using Xqare.BusinessLayer.DTO
@@ -9,7 +12,7 @@
 @inject NavigationManager Nav
 @inject IAuthService AuthService
 
-<section>
+<section class="xq-auth-page">
 
     <MudGrid Class="login-wrapper" GutterSize="0">
 
@@ -75,56 +78,72 @@
 
                 <MudText Class="auth-subtitle">
                     Already have an account?
-                    <MudButton Href="/Login">Sign in</MudButton>
+                    <MudButton Href="/login">Sign in</MudButton>
                 </MudText>
+                <RateLimitNotice Policy="auth-otp-ip" OnTick="HandleRateLimitTick" />
 
                 @if (!isOtpStep)
                 {
 
                     <!-- SOCIAL -->
-                    <MudGrid Class="social-grid mt-6">
-                        <MudItem xs="6">
-                            <MudButton FullWidth Class="social-btn"
-                                       StartIcon="@Icons.Custom.Brands.Google"
-                                       OnClick="RegisterWithGoogle">
-
-                                Google
+                    <MudGrid Class="social-grid mt-6" Spacing="2">
+                        <MudItem xs="6" sm="6">
+                            <MudButton FullWidth Class="social-btn social-google"
+                           Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
+                           OnClick='@(() => LoginWithProviderAsync("google"))'>
+                        <span class="social-google-content">
+                            @if (_activeProvider != "google")
+                            {
+                                <span class="google-icon-stack" aria-hidden="true">
+                                    <MudIcon Icon="@Icons.Custom.Brands.Google" Class="google-icon-layer google-icon-red" />
+                                    <MudIcon Icon="@Icons.Custom.Brands.Google" Class="google-icon-layer google-icon-yellow" />
+                                    <MudIcon Icon="@Icons.Custom.Brands.Google" Class="google-icon-layer google-icon-green" />
+                                    <MudIcon Icon="@Icons.Custom.Brands.Google" Class="google-icon-layer google-icon-blue" />
+                                </span>
+                            }
+                            <LoadingButtonContent IsLoading='@(_activeProvider == "google")' LoadingText="Connecting…">Google</LoadingButtonContent>
+                        </span>
+                    </MudButton>
+                        </MudItem>
+                        <MudItem xs="6" sm="6">
+                            <MudButton FullWidth Class="social-btn social-github"
+                                       StartIcon='@(_activeProvider == "github" ? null : Icons.Custom.Brands.GitHub)'
+                                       Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
+                                       OnClick='@(() => LoginWithProviderAsync("github"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "github")' LoadingText="Connecting…">GitHub</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
-
-                        <MudItem xs="6">
-                            <MudButton FullWidth Class="social-btn"
-                                       StartIcon="@Icons.Custom.Brands.GitHub">
-                                GitHub
+                        <MudItem xs="6" sm="6">
+                            <MudButton FullWidth Class="social-btn social-linkedin"
+                                       StartIcon='@(_activeProvider == "linkedin" ? null : Icons.Custom.Brands.LinkedIn)'
+                                       Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
+                                       OnClick='@(() => LoginWithProviderAsync("linkedin"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "linkedin")' LoadingText="Connecting…">LinkedIn</LoadingButtonContent>
                             </MudButton>
                         </MudItem>
-
-                        <MudItem xs="6">
-                            <MudButton FullWidth Class="social-btn"
-                                       StartIcon="@Icons.Custom.Brands.LinkedIn">
-                                LinkedIn
-                            </MudButton>
-                        </MudItem>
-
-                        <MudItem xs="6">
-                            <MudButton FullWidth Class="social-btn"
-                                       StartIcon="@Icons.Custom.Brands.Twitter">
-                                Twitter
+                        <MudItem xs="6" sm="6">
+                            <MudButton FullWidth Class="social-btn social-twitter"
+                                       Disabled='@(!string.IsNullOrWhiteSpace(_activeProvider))'
+                                       StartIcon='@(_activeProvider == "twitter" ? null : Icons.Custom.Brands.Twitter)'
+                                       OnClick='@(() => LoginWithProviderAsync("twitter"))'>
+                                <LoadingButtonContent IsLoading='@(_activeProvider == "twitter")' LoadingText="Connecting…">
+                                    Twitter
+                                </LoadingButtonContent>
                             </MudButton>
                         </MudItem>
                     </MudGrid>
 
                     <!-- DIVIDER -->
                     <MudGrid Class="mt-6 mb-6 align-center">
-                        <MudItem xs="5">
+                        <MudItem xs="3">
                             <MudDivider Class="divider-line-1" />
                         </MudItem>
-                        <MudItem xs="2">
+                        <MudItem xs="6">
                             <MudText Class="divider-text d-flex justify-center">
                                 OR SIGN UP WITH EMAIL
                             </MudText>
                         </MudItem>
-                        <MudItem xs="5">
+                        <MudItem xs="3">
                             <MudDivider Class="divider-line-2" />
                         </MudItem>
                     </MudGrid>
@@ -132,61 +151,35 @@
                     <!-- FORM -->
                     <MudForm @ref="form"
                              Model="registerRequest"
-                             Validation="validationRules.ToMudValidator()"
-                             OnValidSubmit="Submit">
+                             Validation="validationRules.ToMudValidator()">
 
                         <MudTextField Label="Full Name"
+                                      MaxLength="100"
+                                      AutoComplete="name"
                                       Variant="Variant.Outlined"
                                       @bind-Value="registerRequest.FullName"
                                       For="@(() => registerRequest.FullName)"
-                                      HelperText="Please enter your legal name"
+                                      HelperText="@RegistrationValidationMessages.FullNameHelper"
                                       HelperTextOnFocus="true"
                                       Immediate="true" />
 
                         <MudTextField Label="Email Address"
+                                      MaxLength="256"
+                                      AutoComplete="email"
+                                      Immediate="true"
                                       InputType="InputType.Email"
                                       Variant="Variant.Outlined"
                                       @bind-Value="registerRequest.Email"
                                       For="@(() => registerRequest.Email)"
-                                      HelperText="Please enter your personal email id"
+                                      HelperText="@RegistrationValidationMessages.EmailHelper"
                                       HelperTextOnFocus="true" />
 
-                        <MudTextField Label="Password"
-                                      Variant="Variant.Outlined"
-                                      InputType="@(showPassword? InputType.Text: InputType.Password)"
-                                      @bind-Value="registerRequest.Password"
-                                      For="@(() => registerRequest.Password)"
-                                      Adornment="Adornment.End"
-                                      AdornmentIcon="@(showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                                      OnAdornmentClick="TogglePassword" />
-
-                        <MudTextField Label="Confirm Password"
-                                      Variant="Variant.Outlined"
-                                      InputType="@(showConfirmPassword? InputType.Text: InputType.Password)"
-                                      @bind-Value="registerRequest.ConfirmPassword"
-                                      For="@(() => registerRequest.ConfirmPassword)"
-                                      Adornment="Adornment.End"
-                                      AdornmentIcon="@(showConfirmPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                                      OnAdornmentClick="ToggleConfirmPassword" />
-
-                        <MudButton Disabled="@_processing"
+                        <MudButton Disabled="@(_processing || !string.IsNullOrWhiteSpace(_activeProvider) || isRegistrationRetryDisabled || RateLimits.IsBlocked("auth-otp-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
                                    Class="register-btn">
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
-
-                                @if (_processing)
-                                {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <MudText>Processing...</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Register</MudText>
-                                }
-
-                            </MudStack>
+                            <LoadingButtonContent IsLoading="_processing" LoadingText='@(isOtpStep ? "Verifying your email…" : "Creating your account…")'>@(isRegistrationRetryDisabled ? $"Try again in {FormatCountdown(secondsRemaining)}" : "Register")</LoadingButtonContent>
                         </MudButton>
 
                         @if (ShowNoCardNote)
@@ -197,7 +190,10 @@
                         }
 
                         <MudText Class="signup-text">
-                            By signing up, you agree to our Terms of Service & Privacy Policy
+                            By signing up, you agree to our
+                            <MudLink Href="/terms" Class="signup-link">Terms of Service</MudLink>
+                            and
+                            <MudLink Href="/privacy" Class="signup-link">Privacy Policy</MudLink>.
                         </MudText>
 
                     </MudForm>
@@ -207,18 +203,18 @@
                     <!-- OTP FORM -->
                     <MudForm @ref="form"
                              Model="otpRequest"
-                             Validation="otpValidator.ToMudValidator()"
-                             OnValidSubmit="Submit"
+                             Validation="registrationOtpValidator.ToMudValidator()"
                              Class="mt-6">
 
                         <MudButton Variant="Variant.Text"
                                    OnClick="BackToRegister"
                                    Class="back-btn">
-                            ← Back to login
+                            ← Back to registration
                         </MudButton>
 
-                        <MudTextField Label="Email"
-                                      Value="registerRequest.Email"
+                        <MudTextField Label="Email" MaxLength="256"
+                                      Value="otpRequest.Email"
+                                      For="@(() => otpRequest.Email)"
                                       Variant="Variant.Outlined"
                                       ReadOnly="true" />
 
@@ -227,16 +223,44 @@
                                       @bind-Value="otpRequest.OtpCode"
                                       For="@(() => otpRequest.OtpCode)"
                                       MaxLength="6"
+                                      AutoComplete="one-time-code"
                                       Immediate="true"
                                       InputMode="InputMode.numeric" />
 
+                        <MudTextField Label="Set Password"
+                                      MaxLength="128"
+                                      AutoComplete="new-password"
+                                      Variant="Variant.Outlined"
+                                      InputType="@(showPassword ? InputType.Text : InputType.Password)"
+                                      @bind-Value="otpRequest.Password"
+                                      For="@(() => otpRequest.Password)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="TogglePassword"
+                                      HelperText="@RegistrationValidationMessages.PasswordRequirementsHelper" />
+
+                        <MudTextField Label="Confirm Password"
+                                      MaxLength="128"
+                                      AutoComplete="new-password"
+                                      Variant="Variant.Outlined"
+                                      InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
+                                      @bind-Value="otpRequest.ConfirmPassword"
+                                      For="@(() => otpRequest.ConfirmPassword)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(showConfirmPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                      OnAdornmentClick="ToggleConfirmPassword" />
+
                         <MudButton Variant="Variant.Text"
-                                   Disabled="@isResendDisabled"
+                                   Disabled="@(_processing || _resending || isResendDisabled || RateLimits.IsBlocked("auth-otp-ip"))"
                                    OnClick="ResendOtp"
                                    Class="resend-btn">
-                            @if (isResendDisabled)
+                            @if (_resending)
                             {
-                                <span>Resend in @secondsRemaining s</span>
+                                <span>Sending...</span>
+                            }
+                            else if (isResendDisabled)
+                            {
+                                <span>Resend in @FormatCountdown(secondsRemaining)</span>
                             }
                             else
                             {
@@ -244,24 +268,12 @@
                             }
                         </MudButton>
 
-                        <MudButton Disabled="@_processing"
+                        <MudButton Disabled="@(_processing || isOtpLocked || RateLimits.IsBlocked("auth-otp-ip"))"
                                    FullWidth
                                    Variant="Variant.Filled"
                                    OnClick="Submit"
                                    Class="register-btn">
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
-
-                                @if (_processing)
-                                {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <MudText>Processing...</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Verify OTP →</MudText>
-                                }
-
-                            </MudStack>
+                            <LoadingButtonContent IsLoading="_processing" LoadingText="Processing…">@(isOtpLocked ? $"Locked for {FormatCountdown(secondsRemaining)}" : "Verify OTP →")</LoadingButtonContent>
                         </MudButton>
 
                     </MudForm>
@@ -281,73 +293,156 @@
 
     MudForm form = new();
     RegisterRequest registerRequest = new();
-    VerifyEmailOtpRequest otpRequest = new();
+    VerifyRegisterEmailOtpRequest otpRequest = new();
 
     RegisterRequestValidator validationRules = new();
-    OtpRequestValidator otpValidator = new();
+    RegistrationOtpRequestValidator registrationOtpValidator = new();
 
     private bool _processing = false;
+    private string? _activeProvider;
     bool isOtpStep = false;
     bool showPassword;
     bool showConfirmPassword;
     bool isResendDisabled = true;
-    int secondsRemaining = 30;
+    bool isRegistrationRetryDisabled;
+    bool _resending;
+    bool isOtpLocked;
+    int secondsRemaining = 60;
     Timer timer = new();
+
+    private Task HandleRateLimitTick() => InvokeAsync(StateHasChanged);
+
+    private async Task LoginWithProviderAsync(string provider)
+    {
+        if (!string.IsNullOrWhiteSpace(_activeProvider))
+            return;
+
+        _activeProvider = provider;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            switch (provider)
+            {
+                case "google":
+                    await AuthService.LoginWithGoogle();
+                    break;
+                case "github":
+                    await AuthService.LoginWithGitHub();
+                    break;
+                case "linkedin":
+                    await AuthService.LoginWithLinkedIn();
+                    break;
+                case "twitter":
+                    await AuthService.LoginWithTwitter();
+                    break;
+            }
+        }
+        catch
+        {
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
+        }
+        finally
+        {
+            _activeProvider = null;
+        }
+    }
 
     void TogglePassword() => showPassword = !showPassword;
     void ToggleConfirmPassword() => showConfirmPassword = !showConfirmPassword;
 
     async Task Submit()
     {
-        await form.ValidateAsync();
-
-        if (!form.IsValid)
+        // Guard against repeated submissions while a request is in progress.
+        if (_processing)
             return;
 
         _processing = true;
-
         try
         {
+            await form.ValidateAsync();
+            if (!form.IsValid)
+                return;
 
             if (!isOtpStep)
             {
-                // STEP 1: REGISTER
+                // STEP 1: Create a pending account and request email verification.
                 var response = await AuthService.RegisterAsync(registerRequest);
+
+                if (response.RequiresEmailVerification && response.CanVerifyExistingOtp)
+                {
+                    otpRequest = new VerifyRegisterEmailOtpRequest
+                    {
+                        Email = string.IsNullOrWhiteSpace(response.Email)
+                            ? registerRequest.Email
+                            : response.Email
+                    };
+
+                    isOtpStep = true;
+                    Snackbar.Add(
+                        response.Message ?? RegistrationMessages.VerificationCodeSentPrompt,
+                        response.IsSuccess ? Severity.Info : Severity.Warning);
+
+                    StartTimer(response.RetryAfterSeconds ?? 60);
+                    return;
+                }
 
                 if (!response.IsSuccess)
                 {
-                    Snackbar.Add(response.Message, Severity.Error);
+                    Snackbar.Add(response.Message ?? RegistrationMessages.StartFailed, Severity.Error);
+
+                    // If delivery failed or the OTP is locked, keep the user on the
+                    // registration step and use the server-provided retry interval.
+                    if (response.RetryAfterSeconds is > 0)
+                        StartTimer(response.RetryAfterSeconds.Value);
+
                     return;
                 }
 
-                if (response.RequiresEmailVerification)
-                {
-                    otpRequest.Email = registerRequest.Email;
-                    isOtpStep = true;
-
-                    Snackbar.Add(response.Message);
-                    StartTimer();
-                    return;
-                }
+                Snackbar.Add(
+                    response.Message ?? RegistrationMessages.CompletionFailed,
+                    Severity.Error);
             }
             else
             {
-                // STEP 2: VERIFY OTP
-                var otpResponse = await AuthService.VerifyOtpAsync(otpRequest);
+                // STEP 2: VERIFY OTP and establish an authenticated session on the API.
+                var otpResponse = await AuthService.VerifyRegistrationOtpAsync(otpRequest);
 
                 if (!otpResponse.IsSuccess)
                 {
-                    Snackbar.Add("Invalid OTP", Severity.Error);
+                    Snackbar.Add(otpResponse.Message ?? RegistrationMessages.OtpVerificationFailed, Severity.Error);
+
+                    if (otpResponse.RetryAfterSeconds is > 0)
+                    {
+                        isOtpLocked = true;
+                        StartTimer(otpResponse.RetryAfterSeconds.Value);
+                    }
+
                     return;
                 }
 
-                Snackbar.Add("Registration successful", Severity.Success);
+                if (otpResponse.RequiresMfa)
+                {
+                    var message = Uri.EscapeDataString(otpResponse.Message ?? string.Empty);
+                    Nav.NavigateTo($"/login?mfa=required&message={message}");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(otpResponse.AccessToken))
+                {
+                    Snackbar.Add(otpResponse.Message ?? RegistrationMessages.SessionMissing, Severity.Error);
+                    Nav.NavigateTo("/login");
+                    return;
+                }
+
+                Snackbar.Add(otpResponse.Message ?? RegistrationMessages.Success, Severity.Success);
                 Nav.NavigateTo("/dashboard");
             }
         }
         catch
         {
-            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
         }
         finally
         {
@@ -357,26 +452,63 @@
 
     async Task ResendOtp()
     {
-        var response = await AuthService.ResendOtpAsync(registerRequest.Email);
+        if (_processing || _resending || isResendDisabled)
+            return;
 
-        if (response)
+        _resending = true;
+        try
         {
-            Snackbar.Add("OTP resent", Severity.Success);
-            StartTimer();
+            var response = await AuthService.ResendOtpAsync(registerRequest.Email);
+            Snackbar.Add(response.Message, response.IsSuccess ? Severity.Success : Severity.Error);
+
+            if (response.CanVerifyExistingOtp)
+            {
+                StartTimer(response.RetryAfterSeconds ?? 60);
+                return;
+            }
+
+            // No usable OTP remains (for example, delivery failed or the address is
+            // temporarily locked). Return to the registration step and retry only after
+            // the API's cooldown has elapsed.
+            if (response.RetryAfterSeconds is > 0)
+            {
+                isOtpStep = false;
+                otpRequest = new VerifyRegisterEmailOtpRequest();
+                StartTimer(response.RetryAfterSeconds.Value);
+            }
         }
-        else
+        catch
         {
-            Snackbar.Add("Failed to resend OTP", Severity.Error);
+            Snackbar.Add(RegistrationMessages.ResendFailed, Severity.Error);
         }
-
-
+        finally
+        {
+            _resending = false;
+        }
     }
 
-    void StartTimer()
+    private static string FormatCountdown(int totalSeconds)
     {
-        isResendDisabled = true;
-        secondsRemaining = 30;
+        var hours = totalSeconds / 3600;
+        var minutes = (totalSeconds % 3600) / 60;
+        var seconds = totalSeconds % 60;
 
+        if (hours > 0)
+            return $"{hours}h {minutes:D2}m";
+
+        if (minutes > 0)
+            return $"{minutes}m {seconds:D2}s";
+
+        return $"{seconds}s";
+    }
+
+    void StartTimer(int durationSeconds = 60)
+    {
+        secondsRemaining = Math.Clamp(durationSeconds, 1, 86400);
+        isResendDisabled = isOtpStep;
+        isRegistrationRetryDisabled = !isOtpStep;
+
+        timer?.Stop();
         timer?.Dispose();
 
         timer = new Timer(1000);
@@ -388,11 +520,16 @@
     {
         InvokeAsync(() =>
         {
-            if (secondsRemaining > 0)
+            if (secondsRemaining > 1)
+            {
                 secondsRemaining--;
+            }
             else
             {
+                secondsRemaining = 0;
                 isResendDisabled = false;
+                isRegistrationRetryDisabled = false;
+                isOtpLocked = false;
                 timer.Stop();
             }
 
@@ -403,25 +540,25 @@
     void BackToRegister()
     {
         isOtpStep = false;
-        otpRequest = new();
+        otpRequest = new VerifyRegisterEmailOtpRequest();
+
+        timer?.Stop();
+        timer?.Dispose();
+        isResendDisabled = false;
+        isRegistrationRetryDisabled = false;
+        isOtpLocked = false;
     }
 
-    async Task RegisterWithGoogle()
-    {
-        await AuthService.LoginWithGoogle();
-    }
-    async Task RegisterWithGitHub()
-    {
-        await AuthService.LoginWithGitHub();
-    }
 
-    async Task RegisterWithLinkedIn()
-    {
-        await AuthService.LoginWithLinkedIn();
-    }
 
-    async Task RegisterWithTwitter()
+
+    public void Dispose()
     {
-        await AuthService.LoginWithTwitter();
+        if (timer is null)
+            return;
+
+        timer.Elapsed -= OnTimerTick;
+        timer.Stop();
+        timer.Dispose();
     }
 }

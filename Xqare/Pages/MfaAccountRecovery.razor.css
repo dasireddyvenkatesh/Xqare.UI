@@ -1,0 +1,180 @@
+::deep .login-wrapper {
+    min-height: 100vh;
+}
+
+::deep .left-panel {
+    background: linear-gradient(135deg, var(--xq-auth-hero-start), var(--xq-auth-hero-end));
+    color: var(--xq-text-inverse);
+    display: flex;
+    padding: var(--xq-padding-auth-hero);
+    padding-top: var(--xq-padding-auth-hero-top);
+}
+
+::deep .left-content {
+    max-width: 480px;
+    text-align: center;
+}
+
+::deep .logo-text {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+::deep .logo-text span {
+    color: var(--xq-auth-highlight);
+}
+
+::deep .mobile-logo span {
+    color: var(--xq-auth-accent);
+}
+
+::deep .hero-title {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+::deep .hero-title span {
+    color: var(--xq-auth-highlight);
+}
+
+::deep .hero-sub {
+    opacity: .85;
+}
+
+::deep .right-panel {
+    background: var(--xq-auth-panel-bg);
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--xq-padding-auth-panel-block) var(--xq-padding-auth-panel-inline);
+}
+
+::deep .mud-grid-item-md-6.right-panel {
+    padding-left: 35px;
+}
+
+::deep .recovery-auth-container {
+    width: 100%;
+    max-width: 500px;
+    min-width: 0;
+    box-sizing: border-box;
+    background-color: transparent;
+}
+
+::deep .mobile-logo {
+    font-size: 24px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+::deep .auth-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--xq-navy-deep);
+    text-align: center;
+}
+
+::deep .auth-subtitle {
+    font-size: 14px;
+    color: var(--xq-text-secondary);
+    text-align: center;
+}
+
+::deep .recovery-intro {
+    max-width: 440px;
+    margin: 8px auto 22px;
+}
+
+::deep .recovery-stepper {
+    margin-bottom: 24px;
+    background: transparent;
+}
+
+::deep .mud-input-root {
+    border-radius: 10px;
+}
+
+::deep .mud-input-outlined-border {
+    border-color: var(--xq-auth-input-border) !important;
+}
+
+::deep .mud-input-root:hover .mud-input-outlined-border {
+    border-color: var(--xq-auth-accent) !important;
+}
+
+::deep .recovery-primary {
+    min-height: 48px;
+    margin-top: 20px;
+    border-radius: 10px;
+    background: var(--xq-auth-accent);
+    color: var(--xq-text-inverse);
+    font-weight: 700;
+    text-transform: none;
+}
+
+::deep .recovery-primary:hover {
+    background: var(--xq-auth-accent-hover);
+}
+
+::deep .recovery-auth-container .mud-button-text {
+    text-transform: none;
+    font-weight: 600;
+}
+
+::deep .recovery-auth-container .mud-button-text-primary {
+    color: var(--xq-auth-accent);
+}
+
+::deep .recovery-auth-container .mud-button-text-secondary {
+    color: var(--xq-text-secondary);
+}
+
+.recovery-qr {
+    display: flex;
+    justify-content: center;
+    padding: 18px;
+    margin: 12px auto;
+    border: 1px solid var(--xq-auth-input-border);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.recovery-qr img {
+    width: 210px;
+    height: 210px;
+    object-fit: contain;
+}
+
+::deep .recovery-secret {
+    padding: 12px;
+    margin: 8px 0 14px;
+    border: 1px dashed var(--xq-auth-input-border);
+    border-radius: 8px;
+    text-align: center;
+    overflow-wrap: anywhere;
+    font-family: monospace;
+    letter-spacing: .08em;
+}
+
+.recovery-codes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid var(--xq-auth-input-border);
+    border-radius: 10px;
+    background: var(--xq-auth-panel-bg);
+}
+
+::deep .recovery-code {
+    padding: 8px;
+    border-radius: 6px;
+    background: var(--xq-surface);
+    text-align: center;
+    font-family: monospace;
+    font-weight: 700;
+    letter-spacing: .04em;
+}

@@ -1,46 +1,16 @@
-﻿@page "/dashboard"
+@page "/dashboard"
+@layout AuthenticatedLayout
 @using Xqare.Wrappers.DashboardWrapper
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 
-<MudBreakpointProvider OnBreakpointChanged="OnBreakpointChanged">
-
-    <section class="layout"> 
-            <SidebarWrapper _sidebarOpen="@_sidebar" />
-
-        <MudContainer class="main">
-
-            @if (IsShow)
-            {
-                <TopbarWrapper />
-            }
-            <WelcomeWrapper></WelcomeWrapper>
-            <QuickActionsWrapper></QuickActionsWrapper>
-            <ProgressWrapper></ProgressWrapper>
-            <InsightsWrapper></InsightsWrapper>
-            <LaunchWrapper></LaunchWrapper>
-
-        </MudContainer>
-
-    </section>
-</MudBreakpointProvider>
-
-@code {
-    private bool _sidebar;
-
-    void OnBreakpointChanged(Breakpoint breakpoint)
-    {
-        if (breakpoint < Breakpoint.Md)
-        {
-            _sidebar = false;
-        }
-        else
-        {
-            _sidebar = true;
-        }
-
-        StateHasChanged();
-    }
-
-    public bool IsShow = false;
-}
+<PageTitle>Dashboard | XQARE</PageTitle>
+<section class="dashboard-page">
+    <MudContainer MaxWidth="MaxWidth.False" Class="dashboard-content">
+        <WelcomeWrapper />
+        <QuickActionsWrapper />
+        <ProgressWrapper />
+        <InsightsWrapper />
+        <LaunchWrapper />
+    </MudContainer>
+</section>

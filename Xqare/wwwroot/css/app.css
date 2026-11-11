@@ -1,46 +1,170 @@
+/* =========================================================
+   XQARE GLOBAL DESIGN TOKENS
+   Shared palette for page-level CSS and MudBlazor theme.
+   Keep the matching values in Theme/XqareTheme.cs aligned.
+   ========================================================= */
+:root {
+    /* Typography */
+    --xq-font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+
+    /* Brand */
+    --xq-primary: #F5A623;
+    --xq-primary-hover: #E99A12;
+    --xq-navy: #1A2540;
+    --xq-navy-deep: #0F2A44;
+    --xq-navy-alt: #243B5B;
+
+    /* Surfaces */
+    --xq-page-bg: #F5F7FB;
+    --xq-surface: #FFFFFF;
+    --xq-surface-muted: #F8FAFC;
+    --xq-border: #E5EAF0;
+
+    /* Typography colors */
+    --xq-text-primary: #1F2937;
+    --xq-text-secondary: #64748B;
+
+    /* Semantic states */
+    --xq-success: #16A34A;
+    --xq-warning: #F5A623;
+    --xq-error: #DC2626;
+    --xq-info: #2563EB;
+
+    /* Shared component shape */
+    --xq-card-radius: 14px;
+
+    /* Spacing scale: 1 unit = 4px */
+    --xq-space-1: 0.25rem;
+    --xq-space-2: 0.5rem;
+    --xq-space-3: 0.75rem;
+    --xq-space-4: 1rem;
+    --xq-space-5: 1.25rem;
+    --xq-space-6: 1.5rem;
+    --xq-space-8: 2rem;
+    --xq-space-10: 2.5rem;
+    --xq-space-12: 3rem;
+    --xq-space-16: 4rem;
+    --xq-space-20: 5rem;
+    --xq-space-32: 8rem;
+
+    /* Semantic padding tokens */
+    --xq-padding-auth-panel-block: clamp(var(--xq-space-6), 6vh, var(--xq-space-20));
+    --xq-padding-auth-panel-inline: var(--xq-space-5);
+    --xq-padding-auth-hero: var(--xq-space-20);
+    --xq-padding-auth-hero-top: clamp(var(--xq-space-12), 12vh, var(--xq-space-32));
+    --xq-padding-card: clamp(var(--xq-space-5), 4vw, var(--xq-space-10));
+    --xq-padding-card-compact: var(--xq-space-5);
+    --xq-padding-legal-hero-block: clamp(var(--xq-space-10), 6vw, var(--xq-space-20));
+    --xq-padding-control-inline: 0.625rem;
+
+    /* Reusable palette details and alpha variants */
+    --xq-primary-rgb: 245, 166, 35;
+    --xq-white-rgb: 255, 255, 255;
+    --xq-text-inverse: #FFFFFF;
+    --xq-text-muted: #9CA3AF;
+    --xq-navy-gradient-mid: #22345A;
+    --xq-navy-gradient-deep: #223A5F;
+    --xq-border-subtle: #F1F3F7;
+    --xq-surface-hover: #F9FAFB;
+
+    /* Shared authenticated navigation and shell */
+    --xq-brand-gold: #f5b400;
+    --xq-sidebar-text: #aab6ca;
+    --xq-sidebar-muted: #71809d;
+    --xq-sidebar-subtle: #8796ae;
+    --xq-sidebar-strong: #e6edf6;
+    --xq-mobile-action: #52647a;
+    --xq-shell-border: #e6ebf1;
+    --xq-shell-shadow: rgba(26, 37, 64, 0.05);
+    --xq-sidebar-hover: rgba(255, 255, 255, 0.07);
+    --xq-sidebar-active-shadow: rgba(245, 166, 35, 0.16);
+    --xq-sidebar-divider: rgba(255, 255, 255, 0.09);
+    --xq-sidebar-outline: rgba(255, 255, 255, 0.06);
+
+    /* Legal pages: preserve the established page-specific navy and text shades. */
+    --xq-legal-hero-bg: #1A3754;
+    --xq-privacy-hero-bg: #1f3f5b;
+    --xq-legal-heading: #1A3754;
+    --xq-legal-accent: #F5B400;
+    --xq-legal-text-terms: #444;
+    --xq-legal-text: #555;
+
+    /* Public shared shell: preserve the existing header and footer palette. */
+    --xq-public-header-start: #0f2a44;
+    --xq-public-header-end: #1b3a57;
+    --xq-public-header-scrolled: #1a3856;
+    --xq-public-nav-text: #dbe6f1;
+    --xq-public-nav-hover: #f4b400;
+    --xq-public-cta-bg: #f5b400;
+    --xq-public-cta-text: #000000;
+    --xq-public-backdrop: rgba(0, 0, 0, 0.5);
+    --xq-public-drawer-shadow: rgba(0, 0, 0, 0.4);
+    --xq-public-drawer-border: rgba(255, 255, 255, 0.1);
+    --xq-footer-bg: #132f4c;
+    --xq-footer-link: rgba(255, 255, 255, 0.7);
+    --xq-footer-divider: rgba(255, 255, 255, 0.1);
+
+    /* Auth pages: preserve the existing split-panel palette. */
+    --xq-auth-hero-start: #1e3a5f;
+    --xq-auth-hero-end: #0f2a44;
+    --xq-auth-highlight: #fbbf24;
+    --xq-auth-panel-bg: #f9fafb;
+    --xq-auth-accent: #f59e0b;
+    --xq-auth-accent-hover: #d97706;
+    --xq-auth-input-border: #e2e8f0;
+    --xq-auth-muted: #94a3b8;
+
+    /* Public marketing sections: retain established component-specific colors. */
+    --xq-marketing-cta-start: #1e3a56;
+    --xq-marketing-cta-end: #243f5e;
+    --xq-marketing-cta-glow-strong: rgba(244, 180, 0, 0.4);
+    --xq-marketing-cta-glow-soft: rgba(244, 180, 0, 0.3);
+    --xq-promo-bg: #da9b2f;
+    --xq-promo-register-bg: #0f2a44;
+    --xq-promo-register-hover: #0b1f33;
+    --xq-mentors-section-bg: #f9f8f6;
+    --xq-mentors-card-border: #e2e8f0;
+    --xq-mentors-avatar-border: #fbbf24;
+    --xq-mentors-cta-hover: #f59e0b;
+    --xq-how-section-bg: #f8fafc;
+    --xq-marketing-subtitle: #6b7a90;
+    --xq-marketing-card-border: #eef2f7;
+    --xq-marketing-highlight: #f59e0b;
+    --xq-offer-section-warm: rgba(218, 155, 47, 0.12);
+    --xq-offer-section-cool: rgba(23, 51, 79, 0.08);
+    --xq-offer-timer-bg: #1e3a5f;
+    --xq-offer-timer-hover: #16304d;
+
+    /* Loading screen: retain the established navy/gold appearance. */
+    --xq-loader-navy-start: #102E49;
+    --xq-loader-navy-mid: #0B2035;
+    --xq-loader-navy-end: #091827;
+    --xq-loader-glow: rgba(42, 76, 101, 0.55);
+    --xq-loader-gold: var(--xq-brand-gold);
+    --xq-loader-subtitle: #c3d3e1;
+    --xq-loader-track: rgba(255, 255, 255, 0.15);
+    --xq-loader-gold-glow: rgba(245, 180, 0, 0.25);
+}
+
 
 html,
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--xq-font-family);
 }
 
 h1:focus {
     outline: none;
 }
 
-a,
-.btn-link {
-    color: #0071c1;
-}
-
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
 .btn:focus,
 .btn:active:focus,
-.btn-link.nav-link:focus,
 .form-control:focus,
 .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem var(--xq-surface), 0 0 0 0.25rem var(--xq-navy);
 }
 
 .content {
     padding-top: 1.1rem;
-}
-
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
-}
-
-.invalid {
-    outline: 1px solid red;
-}
-
-.validation-message {
-    color: red;
 }
 
 /* Blazor error notification */
@@ -93,8 +217,8 @@ a,
     box-sizing: border-box;
     overflow: hidden;
     padding: 24px;
-    color: #fff;
-    background: radial-gradient( circle at 50% 42%, rgba(42, 76, 101, 0.55), transparent 52% ), linear-gradient( 145deg, #102E49 0%, #0B2035 60%, #091827 100% );
+    color: var(--xq-text-inverse);
+    background: radial-gradient(circle at 50% 42%, var(--xq-loader-glow), transparent 52%), linear-gradient(145deg, var(--xq-loader-navy-start) 0%, var(--xq-loader-navy-mid) 60%, var(--xq-loader-navy-end) 100%);
 }
 
 .xqare-loader-content {
@@ -109,8 +233,8 @@ a,
 }
 
 .xqare-brand {
-    color: #fff;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: var(--xq-text-inverse);
+    font-family: var(--xq-font-family);
     font-size: clamp(2rem, 7vw, 2.6rem);
     font-weight: 800;
     line-height: 1.15;
@@ -119,7 +243,7 @@ a,
 
 .xqare-brand-subtitle {
     margin-top: 9px;
-    color: #c3d3e1;
+    color: var(--xq-loader-subtitle);
     font-size: 0.9rem;
     letter-spacing: 0.06em;
 }
@@ -151,15 +275,15 @@ a,
         }
 
             .xqare-progress-wrap .loading-progress circle:first-child {
-                stroke: rgba(255, 255, 255, 0.15);
+                stroke: var(--xq-loader-track);
             }
 
             .xqare-progress-wrap .loading-progress circle:last-child {
-                stroke: #f5b400;
+                stroke: var(--xq-loader-gold);
                 stroke-linecap: round;
                 stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
                 transition: stroke-dasharray 100ms linear;
-                filter: drop-shadow(0 0 4px rgba(245, 180, 0, 0.25));
+                filter: drop-shadow(0 0 4px var(--xq-loader-gold-glow));
             }
 
     /* Actual Blazor percentage */
@@ -170,7 +294,7 @@ a,
         place-items: center;
         margin: 0;
         padding: 0;
-        color: #fff;
+        color: var(--xq-text-inverse);
         font-size: clamp(1.2rem, 5vw, 1.5rem);
         font-weight: 700;
         font-variant-numeric: tabular-nums;
@@ -196,7 +320,7 @@ a,
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: #f5b400;
+        background: var(--xq-loader-gold);
         opacity: 0.3;
         animation: xqare-dot-pulse 1.1s ease-in-out infinite;
     }
@@ -288,21 +412,6 @@ a,
    EXISTING APPLICATION STYLES
    ========================================================= */
 
-code {
-    color: #c02d76;
-}
-
-.form-floating > .form-control-plaintext::placeholder,
-.form-floating > .form-control::placeholder {
-    color: var(--bs-secondary-color);
-    text-align: end;
-}
-
-.form-floating > .form-control-plaintext:focus::placeholder,
-.form-floating > .form-control:focus::placeholder {
-    text-align: start;
-}
-
 /* SnackBar */
 .mud-snackbar {
     background: linear-gradient(135deg, #243f5a, #1b334b) !important;
@@ -320,5 +429,336 @@ code {
 }
 
 .mud-input-root {
-    padding-left: 10px !important;
+    padding-left: var(--xq-padding-control-inline) !important;
+}
+
+/* Authenticated workspace: this layout has its own mobile top bar,
+   so MudMainContent must not reserve space for a MudBlazor AppBar. */
+/* =========================================================
+   XQARE GLOBAL PAGE LAYOUT
+   Layout shells own outer positioning. Page components own
+   only their internal content and component spacing.
+   ========================================================= */
+
+/* Public pages do not use a MudBlazor AppBar. */
+.mud-main-content.xq-public-main {
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.xq-public-content {
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+}
+
+/* Login and Register start at the top of the public content area. */
+.xq-public-content .login-wrapper {
+    margin-block-start: 0;
+    min-height: 100vh;
+}
+
+/* Authenticated pages use a custom mobile top bar. */
+.mud-layout.xq-app-layout .mud-main-content.xq-app-main {
+    min-width: 0;
+    padding: 0 !important;
+}
+
+.xq-app-main .xq-route-content {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Shared legal structure; no page-specific wrapper class is required. */
+.legal-hero {
+    background: var(--xq-legal-hero-bg);
+    padding-block: var(--xq-padding-legal-hero-block);
+    color: var(--xq-text-inverse);
+}
+
+.privacy-hero {
+    background: var(--xq-privacy-hero-bg);
+    padding-block: var(--xq-padding-legal-hero-block);
+    color: var(--xq-text-inverse);
+}
+
+.legal-container,
+.privacy-container {
+    margin-block-start: -40px;
+    margin-block-end: 60px;
+}
+
+.legal-card,
+.privacy-card {
+    padding: var(--xq-padding-card);
+    border-radius: var(--xq-card-radius);
+}
+
+
+/* Shared Google multicolour mark, built from the existing MudBlazor icon. */
+.google-icon-stack {
+    position: relative;
+    display: inline-block;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+.google-icon-stack .google-icon-layer {
+    position: absolute;
+    inset: 0;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+}
+.google-icon-stack .google-icon-blue {
+    color: #4285F4 !important;
+    clip-path: polygon(50% 0, 100% 0, 100% 50%, 50% 50%);
+}
+.google-icon-stack .google-icon-red {
+    color: #EA4335 !important;
+    clip-path: polygon(0 0, 50% 0, 50% 50%, 0 50%);
+}
+.google-icon-stack .google-icon-yellow {
+    color: #FBBC05 !important;
+    clip-path: polygon(0 50%, 50% 50%, 50% 100%, 0 100%);
+}
+.google-icon-stack .google-icon-green {
+    color: #34A853 !important;
+    clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%);
+}
+
+/* Shared provider button styling for login and registration. */
+/* Provider-branded social buttons. Explicitly override MudBlazor filled-button theme rules. */
+.xq-auth-page .social-grid button.social-btn {
+    width: 100% !important;
+    min-width: 0;
+    min-height: 46px;
+    height: 46px !important;
+    border-radius: 10px !important;
+    border: 1px solid transparent !important;
+    text-transform: none !important;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .1px;
+    box-shadow: 0 1px 3px rgba(15, 42, 68, .08);
+    transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+
+.xq-auth-page .social-grid button.social-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 42, 68, .16);
+}
+
+.xq-auth-page .social-grid button.social-btn .mud-icon-root {
+    font-size: 20px;
+}
+
+.xq-auth-page .social-grid button.social-btn .mud-progress-circular {
+    color: currentColor !important;
+}
+
+.xq-auth-page .social-grid button.social-btn:focus-visible {
+    outline: 2px solid var(--xq-auth-accent);
+    outline-offset: 2px;
+}
+
+.xq-auth-page .social-grid button.social-btn:disabled {
+    opacity: .82;
+    cursor: progress;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Google: white surface with Google's multicolour brand mark. */
+.xq-auth-page .social-grid button.social-btn.social-google {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #3c4043 !important;
+    border-color: #dadce0 !important;
+}
+
+.xq-auth-page .social-grid button.social-btn.social-google:hover {
+    background: #f8faff !important;
+    background-color: #f8faff !important;
+    border-color: #c6c9ce !important;
+}
+
+/* GitHub: dark charcoal surface. */
+.xq-auth-page .social-grid button.social-btn.social-github {
+    background: #24292f !important;
+    background-color: #24292f !important;
+    color: #ffffff !important;
+    border-color: #24292f !important;
+}
+
+.xq-auth-page .social-grid button.social-btn.social-github:hover {
+    background: #1f2328 !important;
+    background-color: #1f2328 !important;
+    border-color: #1f2328 !important;
+}
+
+/* LinkedIn: official brand blue. */
+.xq-auth-page .social-grid button.social-btn.social-linkedin {
+    background: #0a66c2 !important;
+    background-color: #0a66c2 !important;
+    color: #ffffff !important;
+    border-color: #0a66c2 !important;
+}
+
+.xq-auth-page .social-grid button.social-btn.social-linkedin:hover {
+    background: #004182 !important;
+    background-color: #004182 !important;
+    border-color: #004182 !important;
+}
+
+/* X/Twitter: black brand surface with the existing provider icon. */
+.xq-auth-page .social-grid button.social-btn.social-twitter {
+    background: #000000 !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+
+.xq-auth-page .social-grid button.social-btn.social-twitter:hover {
+    background: #202124 !important;
+    background-color: #202124 !important;
+    border-color: #202124 !important;
+}
+
+/* Shared admin page styling. Page-specific layouts remain in their isolated stylesheets. */
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) {
+    min-height: 100%;
+    padding: clamp(12px, 1.5vw, 20px);
+    padding-block-end: max(var(--xq-space-6), env(safe-area-inset-bottom));
+    background: var(--xq-page-bg);
+    color: var(--xq-text-primary);
+}
+
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-page-title {
+    margin: 0;
+    color: var(--xq-navy) !important;
+    font-weight: 800 !important;
+    letter-spacing: -.035em;
+    line-height: 1.15;
+}
+
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-page-subtitle {
+    margin-block-start: var(--xq-space-2);
+    color: var(--xq-text-secondary) !important;
+    max-width: 42rem;
+    line-height: 1.5;
+}
+
+:is(.admin-page, .admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-refresh-button {
+    min-width: 0;
+    white-space: nowrap;
+    text-transform: none;
+}
+
+:is(.admin-page, .admin-users-page, .admin-roles-page) .admin-card-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 2.65rem;
+    width: 2.65rem;
+    height: 2.65rem;
+    border: 1px solid rgba(var(--xq-primary-rgb), .2);
+    border-radius: .875rem;
+    background: rgba(var(--xq-primary-rgb), .12);
+    color: var(--xq-primary-hover);
+}
+
+:is(.admin-page, .admin-users-page, .admin-roles-page) .admin-card-title {
+    color: var(--xq-navy) !important;
+    font-weight: 750 !important;
+    line-height: 1.3;
+}
+
+:is(.admin-page, .admin-users-page, .admin-roles-page) .admin-card-subtitle {
+    margin-block-start: var(--xq-space-1);
+    color: var(--xq-text-secondary) !important;
+    line-height: 1.4;
+}
+
+:is(.admin-users-page, .admin-roles-page, .admin-permissions-page) .admin-users-container {
+    width: 100%;
+    max-width: none;
+    margin-inline: auto;
+    padding-inline: 0;
+}
+
+:is(.admin-users-page, .admin-roles-page) .admin-users-card {
+    height: auto;
+    min-width: 0;
+    padding: var(--xq-padding-card-compact);
+    border: 1px solid var(--xq-border);
+    border-radius: var(--xq-card-radius);
+    background: var(--xq-surface);
+    box-shadow: 0 5px 18px rgba(15, 42, 68, .045);
+}
+
+:is(.admin-users-page, .admin-roles-page) .admin-count-chip {
+    flex: 0 0 auto;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+:is(.admin-users-page, .admin-roles-page) .admin-divider {
+    margin-block: var(--xq-space-4) !important;
+    border-color: var(--xq-border) !important;
+}
+
+:is(.admin-users-page, .admin-roles-page) .admin-field-label {
+    color: var(--xq-text-secondary) !important;
+    font-size: .68rem !important;
+    font-weight: 800 !important;
+    letter-spacing: .06em;
+}
+
+:is(.admin-users-page, .admin-roles-page) .admin-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--xq-space-2);
+    padding: var(--xq-space-10) var(--xq-space-5);
+    background: var(--xq-surface-muted);
+    text-align: center;
+}
+
+:is(.admin-users-page, .admin-roles-page) .admin-empty-icon {
+    color: var(--xq-text-muted);
+    font-size: 2.5rem;
+}
+
+:is(.admin-users-page, .admin-roles-page) .admin-list-alert {
+    margin-block: var(--xq-space-3);
+}
+
+:is(.admin-roles-page, .admin-permissions-page) .admin-users-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--xq-space-4);
+    margin: 0 16px var(--xq-space-6);
+}
+
+:is(.admin-roles-page, .admin-permissions-page) .admin-users-heading-copy {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+
+:is(.admin-roles-page, .admin-permissions-page) .admin-users-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: var(--xq-space-2);
+    margin-inline-start: auto;
 }

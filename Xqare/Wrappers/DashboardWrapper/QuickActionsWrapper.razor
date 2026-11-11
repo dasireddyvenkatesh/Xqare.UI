@@ -1,11 +1,12 @@
 ﻿@using MudBlazor
+@inject NavigationManager Navigation
 
 <section class="quick-actions">
 
     <div class="actions-grid">
 
         <!-- Community -->
-        <div class="action-card">
+        <div class="action-card" role="button" tabindex="0" @onclick='() => Navigation.NavigateTo("/community")'>
             <MudIcon Icon="@Icons.Material.Filled.Group" Class="action-icon" />
 
             <MudText Typo="Typo.h6" Class="action-title">
@@ -18,7 +19,7 @@
         </div>
 
         <!-- Profile -->
-        <div class="action-card">
+        <div class="action-card" role="button" tabindex="0" @onclick='() => Navigation.NavigateTo("/profile")'>
             <MudIcon Icon="@Icons.Material.Filled.Person" Class="action-icon" />
 
             <MudText Typo="Typo.h6" Class="action-title">
@@ -31,7 +32,7 @@
         </div>
 
         <!-- Insights -->
-        <div class="action-card">
+        <div class="action-card" role="button" tabindex="0" @onclick='() => Navigation.NavigateTo("/career-insights")'>
             <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="action-icon" />
 
             <MudText Typo="Typo.h6" Class="action-title">

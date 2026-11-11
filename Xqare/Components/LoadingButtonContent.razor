@@ -1,0 +1,17 @@
+@if (IsLoading)
+{
+    <span class="loading-button-content" role="status" aria-live="polite">
+        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+        <span class="loading-button-text">@LoadingText</span>
+    </span>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string LoadingText { get; set; } = "Processing…";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

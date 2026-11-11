@@ -1,5 +1,6 @@
 ﻿using Xqare.BusinessLayer.DTO;
 using Xqare.BusinessLayer.Interfaces.PartnerShip;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Classes.PartnerShip
 {
@@ -14,7 +15,7 @@ namespace Xqare.BusinessLayer.Classes.PartnerShip
             return new PartnershipInquiryResponse
             {
                 IsSuccess = true,
-                Message = "Success"
+                Message = PartnershipMessages.Success
             };
         }
     }

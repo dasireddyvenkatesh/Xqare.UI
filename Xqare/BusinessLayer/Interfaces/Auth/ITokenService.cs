@@ -3,9 +3,9 @@
     public interface ITokenService
     {
         Task<string?> GetAccessTokenAsync();
-
         Task SetTokenAsync(string accessToken);
-
         Task ClearAsync();
+        Task<bool> HasSessionHintAsync();
+        Task MarkSessionHintAsync();
     }
 }

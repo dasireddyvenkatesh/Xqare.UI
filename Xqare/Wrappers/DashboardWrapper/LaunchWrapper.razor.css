@@ -5,11 +5,11 @@
 
 /* Card */
 ::deep .launch-card {
-    background: linear-gradient(135deg, #1a2540, #223a5f);
+    background: linear-gradient(135deg, var(--xq-navy), var(--xq-navy-gradient-deep));
     border-radius: 20px;
     padding: 50px 30px;
     text-align: center;
-    color: white;
+    color: var(--xq-text-inverse);
     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 
@@ -19,15 +19,15 @@
     height: 70px;
     margin: 0 auto 20px;
     border-radius: 16px;
-    background: rgba(255,255,255,0.05);
+    background: rgba(var(--xq-white-rgb), 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 25px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 0 25px rgba(var(--xq-primary-rgb), 0.3);
 }
 
     ::deep .launch-icon .mud-icon-root {
-        color: #f59e0b;
+        color: var(--xq-primary);
         font-size: 32px;
     }
 
@@ -39,7 +39,7 @@
 
 /* Subtitle */
 ::deep .launch-subtitle {
-    color: rgba(255,255,255,0.7);
+    color: rgba(var(--xq-white-rgb), 0.7);
     max-width: 600px;
     margin: 0 auto 20px;
 }
@@ -54,7 +54,7 @@
 }
 
     ::deep .launch-features span {
-        background: rgba(255,255,255,0.08);
+        background: rgba(var(--xq-white-rgb), 0.08);
         padding: 8px 14px;
         border-radius: 999px;
         font-size: 13px;

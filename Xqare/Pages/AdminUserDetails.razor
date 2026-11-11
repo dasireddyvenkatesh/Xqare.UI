@@ -1,4 +1,5 @@
 @page "/admin/users/{UserId:guid}"
+@using Xqare.BusinessLayer.Constants.Messages
 @layout AuthenticatedLayout
 @using Microsoft.AspNetCore.Authorization
 @using Xqare.BusinessLayer.Classes.Authorization
@@ -11,9 +12,9 @@
 @inject IAdminService AdminService
 @inject IRbacService RbacService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IAuthorizationService AuthorizationService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
-@inject IJSRuntime JS
 
 <PageTitle>User details | XQARE</PageTitle>
 
@@ -56,7 +57,7 @@
         }
         else
         {
-            <MudGrid Spacing="4" Class="admin-detail-grid">
+            <MudGrid Spacing="3" Class="admin-detail-grid">
                 <MudItem xs="12">
                     <MudPaper Class="admin-card admin-detail-profile-card" Elevation="0">
                         <div class="admin-detail-profile">
@@ -84,7 +85,7 @@
                     </MudPaper>
                 </MudItem>
 
-                <MudItem xs="12" lg="8">
+                <MudItem xs="12" lg="6">
                     <MudPaper Class="admin-card admin-detail-section" Elevation="0">
                         <div class="admin-section-heading">
                             <div class="admin-section-heading-left">
@@ -131,11 +132,72 @@
                     </MudPaper>
                 </MudItem>
 
-                <MudItem xs="12" lg="4">
+                <MudItem xs="12">
                     <MudPaper Class="admin-card admin-detail-section" Elevation="0">
                         <div class="admin-section-heading">
                             <div class="admin-section-heading-left">
                                 <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Security" /></span>
+                                <div>
+                                    <MudText Typo="Typo.h6" Class="admin-card-title">Login security</MudText>
+                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">Current lockout and failed sign-in state</MudText>
+                                </div>
+                            </div>
+                        </div>
+                        <MudDivider Class="admin-divider" />
+                        @if (_user.IsLockedOut)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true" Class="mb-3">
+                                This account is temporarily locked until
+                                <strong>@(_user.LockoutEndUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm:ss tt") ?? "the lockout expires")</strong>.
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mb-3">
+                                This account is not currently locked.
+                            </MudAlert>
+                        }
+                        <MudGrid Spacing="3" Class="admin-detail-fields">
+                            <MudItem xs="12" sm="6" md="3">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Failed attempts</MudText>
+                                    <MudText Typo="Typo.h5" Class="admin-session-value">@_user.FailedLoginCount / 5</MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="3">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Lockout escalation</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">
+                                        @(_user.IsLockedOut ? $"Level {_user.LockoutLevel} (active)" : _user.LockoutLevel > 0 ? $"Level {_user.LockoutLevel} reached" : "None")
+                                    </MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="3">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Next lockout</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">
+                                        Level @NextLockoutLevel · @NextLockoutDuration
+                                    </MudText>
+                                </div>
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="3">
+                                <div class="admin-detail-field">
+                                    <MudText Typo="Typo.caption" Class="admin-field-label">Lockout status</MudText>
+                                    <MudText Typo="Typo.body1" Class="admin-field-value">@(_user.IsLockedOut ? "Locked" : "Not locked")</MudText>
+                                </div>
+                            </MudItem>
+                        </MudGrid>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+                            Failed attempts show the current counter only. Historical sign-in events are not stored in this account summary.
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" lg="6">
+                    <MudPaper Class="admin-card admin-detail-section" Elevation="0">
+                        <div class="admin-section-heading">
+                            <div class="admin-section-heading-left">
+                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Devices" /></span>
                                 <div>
                                     <MudText Typo="Typo.h6" Class="admin-card-title">Session summary</MudText>
                                     <MudText Typo="Typo.caption" Class="admin-card-subtitle">Current account sessions</MudText>
@@ -156,8 +218,10 @@
                 </MudItem>
             </MudGrid>
 
+            @* Viewing role assignments and loading the role catalogue requires RBAC_ROLES_VIEW.
+               Assignment mutations are separately gated by RBAC_ASSIGNMENTS_MANAGE below. *@
             <AuthorizeView Policy="@PermissionPolicies.RbacRolesView">
-                <Authorized>
+                <Authorized Context="rolesViewContext">
                     <MudPaper Class="admin-card admin-detail-section mt-4" Elevation="0">
                         <div class="admin-section-heading">
                             <div class="admin-section-heading-left">
@@ -172,43 +236,65 @@
                         </div>
                         <MudDivider Class="admin-divider" />
 
-                        @if (_rolesLoading)
-                        {
-                            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-                        }
-                        else if (_roles.Count == 0)
-                        {
-                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-4">
-                                No roles are available to assign.
-                            </MudText>
-                        }
-                        else
-                        {
-                            <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
-                                <Authorized>
-                                    <MudGrid Spacing="2" Class="pa-3">
-                                        <MudItem xs="12" sm="8" md="6">
-                                            <MudSelect T="string" @bind-Value="_selectedRoleId"
-                                                       Label="Select a role" Variant="Variant.Outlined"
-                                                       Margin="Margin.Dense" FullWidth="true">
-                                                @foreach (var role in AvailableRoles)
-                                                {
-                                                    <MudSelectItem Value="@role.Id.ToString("D")">@role.Name</MudSelectItem>
-                                                }
-                                            </MudSelect>
-                                        </MudItem>
-                                        <MudItem xs="12" sm="4" md="3" Class="d-flex align-center">
-                                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                                                       StartIcon="@Icons.Material.Filled.PersonAdd"
-                                                       Disabled="@(!Guid.TryParse(_selectedRoleId, out _) || _assignmentBusy)"
-                                                       OnClick="AssignSelectedRoleAsync" FullWidth="true">
-                                                Assign role
+                        @* Assignment controls are shown only to actors with RBAC_ASSIGNMENTS_MANAGE. *@
+                        <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
+                            <Authorized Context="assignRoleContext">
+                                @if (_user.IsActive)
+                                {
+                                    @if (_rolesLoading)
+                                    {
+                                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Loading available roles…</MudText>
+                                    }
+                                    else if (_rolesLoadError)
+                                    {
+                                        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">
+                                            Available roles could not be loaded.
+                                            <MudButton Variant="Variant.Text" Size="Size.Small" Disabled="_rolesLoading" OnClick="LoadAssignableRolesAsync">
+                                                @(_rolesLoading ? "Retrying..." : "Retry")
                                             </MudButton>
-                                        </MudItem>
-                                    </MudGrid>
-                                </Authorized>
-                            </AuthorizeView>
-                        }
+                                        </MudAlert>
+                                    }
+                                    else if (AvailableRoles.Any())
+                                    {
+                                        <MudGrid Spacing="2" Class="pa-3">
+                                            <MudItem xs="12" sm="8" md="6">
+                                                <MudSelect T="string" @bind-Value="_selectedRoleId"
+                                                           Label="Select a role" Variant="Variant.Outlined"
+                                                           Margin="Margin.Dense" FullWidth="true">
+                                                    @foreach (var role in AvailableRoles)
+                                                    {
+                                                        <MudSelectItem Value="@role.Id.ToString("D")">@role.Name</MudSelectItem>
+                                                    }
+                                                </MudSelect>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="4" md="3" Class="d-flex align-center">
+                                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                                           Disabled="@(!Guid.TryParse(_selectedRoleId, out _) || _assignmentBusy)"
+                                                           OnClick="AssignSelectedRoleAsync" FullWidth="true">
+                                                    <LoadingButtonContent IsLoading="@(_assignmentBusy && !_confirmRemoveRoleId.HasValue)" LoadingText="Assigning role…">
+                                                        <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="mr-2" />
+                                                        Assign role
+                                                    </LoadingButtonContent>
+                                                </MudButton>
+                                            </MudItem>
+                                        </MudGrid>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-3">
+                                            No roles are available to assign.
+                                        </MudText>
+                                    }
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pa-3">
+                                        Roles cannot be assigned while this account is disabled.
+                                    </MudText>
+                                }
+                            </Authorized>
+                        </AuthorizeView>
 
                         @if (_user.RoleAssignments.Count == 0)
                         {
@@ -218,29 +304,62 @@
                         }
                         else
                         {
-                            <div class="admin-user-list">
+                            <div class="admin-role-assignment-list">
                                 @foreach (var assignment in _user.RoleAssignments)
                                 {
-                                    <div class="admin-user-row" @key="assignment.RoleId">
-                                        <div class="admin-user-identity">
-                                            <MudAvatar Class="admin-user-avatar" Color="Color.Primary" Size="Size.Medium">
-                                                <MudIcon Icon="@Icons.Material.Filled.Badge" />
-                                            </MudAvatar>
-                                            <div class="admin-user-copy">
-                                                <MudText Typo="Typo.subtitle2" Class="admin-user-name">@assignment.RoleName</MudText>
-                                                <MudText Typo="Typo.body2" Class="admin-user-email">@assignment.RoleCode</MudText>
+                                    <div class="admin-role-assignment-item" @key="assignment.RoleId">
+                                        <div class="admin-role-assignment-row">
+                                            <div class="admin-role-assignment-identity">
+                                                <MudAvatar Class="admin-role-assignment-avatar" Color="Color.Primary" Size="Size.Medium">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Badge" />
+                                                </MudAvatar>
+                                                <div class="admin-role-assignment-copy">
+                                                    <MudText Typo="Typo.subtitle2" Class="admin-role-assignment-name">@assignment.RoleName</MudText>
+                                                    <MudText Typo="Typo.caption" Class="admin-role-assignment-code">@assignment.RoleCode</MudText>
+                                                </div>
                                             </div>
+                                            <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
+                                                <Authorized Context="removeRoleContext">
+                                                    @if (!string.Equals(assignment.RoleCode, "SUPERADMIN", StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        @if (_confirmRemoveRoleId == assignment.RoleId)
+                                                        {
+                                                            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                                       Disabled="_assignmentBusy" OnClick="CancelRemoveRole">
+                                                                Cancel
+                                                            </MudButton>
+                                                        }
+                                                        else
+                                                        {
+                                                            <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
+                                                                       StartIcon="@Icons.Material.Filled.PersonRemove"
+                                                                       Disabled="@(_assignmentBusy || _confirmRemoveRoleId.HasValue)"
+                                                                       OnClick="@(() => BeginRemoveRole(assignment.RoleId))">
+                                                                Remove
+                                                            </MudButton>
+                                                        }
+                                                    }
+                                                </Authorized>
+                                            </AuthorizeView>
                                         </div>
-                                        <AuthorizeView Policy="@PermissionPolicies.RbacAssignmentsManage">
-                                            <Authorized>
-                                                <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
-                                                           StartIcon="@Icons.Material.Filled.PersonRemove"
-                                                           Disabled="_assignmentBusy"
-                                                           OnClick="@(() => RemoveRoleAsync(assignment.RoleId, assignment.RoleName))">
-                                                    Remove
-                                                </MudButton>
-                                            </Authorized>
-                                        </AuthorizeView>
+                                        @if (_confirmRemoveRoleId == assignment.RoleId)
+                                        {
+                                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true"
+                                                      Class="admin-role-assignment-confirm">
+                                                Remove the <strong>@assignment.RoleName</strong> role from this account?
+                                                <div class="admin-role-assignment-confirm-actions">
+                                                    <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                                                               Disabled="_assignmentBusy"
+                                                               OnClick="@(() => RemoveRoleAsync(assignment.RoleId, assignment.RoleName))">
+                                                        <LoadingButtonContent IsLoading="_assignmentBusy" LoadingText="Removing role…">Confirm remove</LoadingButtonContent>
+                                                    </MudButton>
+                                                    <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                               Disabled="_assignmentBusy" OnClick="CancelRemoveRole">
+                                                        Keep role
+                                                    </MudButton>
+                                                </div>
+                                            </MudAlert>
+                                        }
                                     </div>
                                 }
                             </div>
@@ -258,27 +377,40 @@
     private bool _loading = true;
     private List<RoleResponse> _roles = new();
     private bool _rolesLoading;
+    private bool _rolesLoadError;
+    private int _detailsRequestVersion;
     private bool _assignmentBusy;
+    private Guid? _confirmRemoveRoleId;
     private string? _selectedRoleId;
 
     private IEnumerable<RoleResponse> AvailableRoles =>
-        _roles.Where(role => _user is not null &&
+        _roles.Where(role =>
+            !string.Equals(role.Code, "SUPERADMIN", StringComparison.OrdinalIgnoreCase) &&
+            _user is not null &&
             !_user.RoleAssignments.Any(assignment => assignment.RoleId == role.Id));
 
     private async Task LoadAssignableRolesAsync()
     {
+        if (_rolesLoading || _assignmentBusy)
+            return;
+
         _rolesLoading = true;
+        _rolesLoadError = false;
         try
         {
-            var result = await RbacService.GetRolesAsync();
+            var result = await RbacService.GetAssignableRolesAsync();
             if (result.IsSuccess)
                 _roles = result.Roles;
             else
+            {
+                _rolesLoadError = true;
                 Snackbar.Add(result.Message, Severity.Error);
+            }
         }
         catch
         {
-            Snackbar.Add("Available roles could not be loaded.", Severity.Error);
+            _rolesLoadError = true;
+            Snackbar.Add(RbacMessages.AvailableRolesLoadFailed, Severity.Error);
         }
         finally
         {
@@ -308,7 +440,7 @@
         }
         catch
         {
-            Snackbar.Add("The role could not be assigned. Please try again.", Severity.Error);
+            Snackbar.Add(RbacMessages.RoleAssignFailedRetry, Severity.Error);
         }
         finally
         {
@@ -316,14 +448,23 @@
         }
     }
 
-    private async Task RemoveRoleAsync(Guid roleId, string roleName)
+    private void BeginRemoveRole(Guid roleId)
     {
-        if (_user is null || _assignmentBusy)
+        if (_assignmentBusy)
             return;
 
-        var confirmed = await JS.InvokeAsync<bool>("confirm",
-            $"Remove the '{roleName}' role from this account?");
-        if (!confirmed)
+        _confirmRemoveRoleId = roleId;
+    }
+
+    private void CancelRemoveRole()
+    {
+        if (!_assignmentBusy)
+            _confirmRemoveRoleId = null;
+    }
+
+    private async Task RemoveRoleAsync(Guid roleId, string roleName)
+    {
+        if (_user is null || _assignmentBusy || _confirmRemoveRoleId != roleId)
             return;
 
         _assignmentBusy = true;
@@ -336,17 +477,29 @@
             });
             Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
             if (result.IsSuccess)
+            {
+                _confirmRemoveRoleId = null;
                 _user = await AdminService.GetUserDetailsAsync(UserId);
+            }
         }
         catch
         {
-            Snackbar.Add("The role assignment could not be removed. Please try again.", Severity.Error);
+            Snackbar.Add(RbacMessages.RoleRemoveFailedRetry, Severity.Error);
         }
         finally
         {
             _assignmentBusy = false;
         }
     }
+
+    private int NextLockoutLevel => Math.Min(3, Math.Max(0, _user?.LockoutLevel ?? 0) + 1);
+
+    private string NextLockoutDuration => NextLockoutLevel switch
+    {
+        1 => "15 minutes",
+        2 => "30 minutes",
+        _ => "60 minutes"
+    };
 
     private string DisplayName => _user is null
         ? string.Empty
@@ -365,15 +518,37 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        var requestVersion = Interlocked.Increment(ref _detailsRequestVersion);
         _loading = true;
+        _user = null;
+        _selectedRoleId = null;
+        _confirmRemoveRoleId = null;
         try
         {
-            _user = await AdminService.GetUserDetailsAsync(UserId);
+            var user = await AdminService.GetUserDetailsAsync(UserId);
+            if (requestVersion != _detailsRequestVersion)
+                return;
+
+            _user = user;
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            if (authState.User.HasClaim("permission", "RBAC_ROLES_VIEW"))
+            if (requestVersion != _detailsRequestVersion)
+                return;
+
+            var canManageAssignments = await AuthorizationService.AuthorizeAsync(
+                authState.User, null, PermissionPolicies.RbacAssignmentsManage);
+
+            if (requestVersion == _detailsRequestVersion && canManageAssignments.Succeeded)
                 await LoadAssignableRolesAsync();
         }
-        catch { _user = null; }
-        finally { _loading = false; }
+        catch
+        {
+            if (requestVersion == _detailsRequestVersion)
+                _user = null;
+        }
+        finally
+        {
+            if (requestVersion == _detailsRequestVersion)
+                _loading = false;
+        }
     }
 }

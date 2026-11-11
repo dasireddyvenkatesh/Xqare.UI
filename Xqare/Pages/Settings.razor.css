@@ -1,0 +1,381 @@
+.settings-page {
+    min-height: 100%;
+    width: 100%;
+    padding: clamp(12px, 1.5vw, 20px);
+    background: #f5f7fb;
+    color: #1a2540;
+}
+
+.settings-page ::deep .settings-container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding-inline: 0;
+}
+
+.settings-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-inline: 8px;
+    margin-bottom: 10px;
+}
+
+.settings-heading > div {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+
+.settings-page ::deep .settings-title {
+    color: #1a2540 !important;
+    font-weight: 800 !important;
+    letter-spacing: -.025em;
+}
+
+.settings-page ::deep .settings-subtitle {
+    margin-top: 4px;
+    color: #64748b !important;
+}
+
+.settings-page ::deep .settings-secure-chip {
+    font-weight: 700;
+}
+
+.settings-page ::deep .settings-grid {
+    align-items: flex-start !important;
+}
+
+.settings-page ::deep .settings-grid > .mud-grid-item {
+    align-self: flex-start;
+}
+
+.settings-page ::deep .settings-card {
+    display: block;
+    height: auto;
+    min-width: 0;
+    padding: clamp(13px, 1.6vw, 19px);
+    border: 1px solid #e7ebf1;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(26,37,64,.045);
+}
+
+.settings-card-heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+}
+
+.settings-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #fff5df;
+    color: #d18b0c;
+}
+
+.settings-icon-danger {
+    background: #fff0f0;
+    color: #c43d3d;
+}
+
+.settings-card-heading-copy {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.settings-page ::deep .settings-card-title {
+    color: #1a2540 !important;
+    font-weight: 750 !important;
+}
+
+.settings-page ::deep .settings-muted {
+    color: #718096 !important;
+}
+
+.settings-page ::deep .settings-divider {
+    margin: 12px 0 !important;
+    border-color: #edf0f4 !important;
+}
+
+.settings-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #e8edf3;
+    border-radius: 12px;
+    background: #f9fbfd;
+}
+
+.settings-summary-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: #eaf2f8;
+    color: #315e7e;
+}
+
+.settings-summary-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.settings-page ::deep .settings-summary-title {
+    color: #1a2540 !important;
+    font-weight: 800 !important;
+}
+
+.settings-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    gap: 10px;
+    margin-top: 13px;
+}
+
+.settings-stat {
+    padding: 12px 13px;
+    border: 1px solid #e9eef4;
+    border-radius: 11px;
+    background: #ffffff;
+}
+
+.settings-page ::deep .settings-stat-value {
+    margin-top: 4px;
+    color: #1a2540 !important;
+    font-weight: 700 !important;
+}
+
+.settings-page ::deep .settings-alert {
+    margin: 13px 0;
+    border-radius: 10px;
+}
+
+.settings-actions,
+.settings-form-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 11px;
+}
+
+.settings-page ::deep .settings-primary {
+    min-height: 39px;
+    padding-inline: 17px;
+    border-radius: 9px;
+    background: #f5a623 !important;
+    color: #1a2540 !important;
+    font-weight: 800;
+    text-transform: none;
+    box-shadow: 0 3px 9px rgba(245,166,35,.18);
+}
+
+.settings-page ::deep .settings-actions .mud-button-root {
+    min-height: 36px;
+    border-radius: 9px;
+    font-weight: 700;
+    text-transform: none;
+}
+
+.settings-page ::deep .settings-action-panel,
+.settings-page ::deep .settings-recovery-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 16px;
+    padding: 17px;
+    border: 1px solid #e2eaf1;
+    border-radius: 12px;
+    background: #fcfdff;
+}
+
+.settings-page ::deep .settings-danger-panel {
+    border-color: #f0d7d7;
+    background: #fffdfd;
+}
+
+.settings-page ::deep .settings-panel-title {
+    color: #1a2540 !important;
+    font-weight: 800 !important;
+}
+
+.settings-qr {
+    display: block;
+    width: min(100%, 220px);
+    height: auto;
+    margin: 16px auto;
+    padding: 9px;
+    border: 1px solid #e6edf3;
+    border-radius: 12px;
+    background: #ffffff;
+    image-rendering: pixelated;
+}
+
+.settings-panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.settings-recovery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+    gap: 8px;
+    margin: 13px 0;
+}
+
+.settings-recovery-code {
+    padding: 10px 8px;
+    border: 1px solid #e7edf3;
+    border-radius: 9px;
+    background: #f6f9fc;
+    color: #1a2540;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 800;
+    font-size: 13px;
+    text-align: center;
+    user-select: all;
+    overflow-wrap: anywhere;
+}
+
+.settings-session-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-session-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    padding: 7px 0;
+}
+
+.settings-session-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: #eef3f8;
+    color: #49677f;
+}
+
+.settings-session-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.settings-page ::deep .settings-session-device {
+    color: #1a2540 !important;
+    font-weight: 750 !important;
+}
+
+.settings-page ::deep .settings-revoke-others {
+    margin-top: 14px;
+    text-transform: none;
+}
+
+.settings-page ::deep .settings-password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.settings-page ::deep .settings-card .mud-input-control {
+    width: 100%;
+    margin-top: 2px;
+}
+
+.settings-page ::deep .settings-card .mud-input-outlined-border {
+    border-color: #dce4ed;
+}
+
+.settings-page ::deep .settings-password-hint {
+    display: block;
+    margin-top: 8px;
+    line-height: 1.5;
+}
+
+.settings-page ::deep .settings-device-count {
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.settings-page ::deep .settings-logout-card {
+    min-height: 0;
+}
+
+.settings-page ::deep .settings-state-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 32px;
+    border: 1px solid #e7ebf1;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(26,37,64,.045);
+}
+
+.settings-page ::deep .settings-state-card .mud-progress-linear {
+    width: 100%;
+}
+
+@supports (padding: max(0px)) {
+    .settings-page {
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
+    }
+}
+
+
+/* Keep cards content-sized and aligned independently of their neighbours. */
+.settings-page ::deep .settings-grid > .mud-grid-item > .settings-card {
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    align-self: flex-start !important;
+}
+
+.settings-session-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: 100%;
+    margin-left: auto;
+}
+
+.settings-page ::deep .settings-session-heading-actions .settings-device-count {
+    flex: 0 0 auto;
+    min-width: max-content;
+    margin-left: 0;
+    white-space: nowrap;
+}
+
+.settings-page ::deep .settings-session-heading-actions .settings-device-count .mud-chip-content {
+    white-space: nowrap;
+}
+
+.settings-page ::deep .settings-session-heading-actions .mud-button-root {
+    min-width: 0;
+    white-space: nowrap;
+}

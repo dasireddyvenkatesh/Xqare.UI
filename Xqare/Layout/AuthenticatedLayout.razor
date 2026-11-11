@@ -1,0 +1,90 @@
+@using MudBlazor
+@using Xqare.Components.Layout
+@using Xqare.Theme
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="@XqareTheme.Create()" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout Class="xq-app-layout">
+    <MudHidden Breakpoint="Breakpoint.SmAndDown">
+        <MudDrawer Open="true"
+                   Variant="DrawerVariant.Persistent"
+                   Elevation="0"
+                   Width="@DesktopDrawerWidth"
+                   Class="@DesktopDrawerClass">
+            <AppNavigation IsCollapsed="_desktopSidebarCollapsed"
+                           OnToggleRequested="ToggleDesktopSidebarAsync" />
+        </MudDrawer>
+    </MudHidden>
+
+    <MudHidden Breakpoint="Breakpoint.MdAndUp">
+        <MudDrawer @bind-Open="_mobileDrawerOpen"
+                   Variant="DrawerVariant.Temporary"
+                   Anchor="Anchor.Left"
+                   Elevation="8"
+                   Width="280px"
+                   Class="xq-mobile-drawer">
+            <AppNavigation IsMobileDrawer="true"
+                           OnCloseRequested="CloseMobileDrawerAsync"
+                           OnNavigate="CloseMobileDrawerAsync" />
+        </MudDrawer>
+    </MudHidden>
+
+    <MudMainContent Class="xq-app-main">
+        <MudHidden Breakpoint="Breakpoint.MdAndUp">
+            <div class="xq-mobile-topbar">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
+                               OnClick="OpenMobileDrawerAsync" AriaLabel="Open navigation"
+                               Class="xq-mobile-menu-button" />
+                <div class="xq-mobile-brand" aria-label="XQARE">
+                    <span class="xq-brand-x">X</span><span class="xq-brand-rest">QARE</span>
+                </div>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.NotificationsNone" Color="Color.Inherit"
+                               Disabled="true" Title="Notifications will be available here"
+                               Class="xq-mobile-action-button" />
+                <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit"
+                               OnClick="OpenProfile" AriaLabel="Open profile"
+                               Class="xq-mobile-action-button" />
+            </div>
+        </MudHidden>
+        <main class="xq-route-content">
+            @Body
+        </main>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _desktopSidebarCollapsed;
+    private bool _mobileDrawerOpen;
+
+    private string DesktopDrawerWidth => _desktopSidebarCollapsed ? "64px" : "240px";
+    private string DesktopDrawerClass => _desktopSidebarCollapsed
+        ? "xq-desktop-drawer xq-desktop-drawer-collapsed"
+        : "xq-desktop-drawer";
+
+    private Task ToggleDesktopSidebarAsync()
+    {
+        _desktopSidebarCollapsed = !_desktopSidebarCollapsed;
+        return Task.CompletedTask;
+    }
+
+    private Task OpenMobileDrawerAsync()
+    {
+        _mobileDrawerOpen = true;
+        return Task.CompletedTask;
+    }
+
+    private Task CloseMobileDrawerAsync()
+    {
+        _mobileDrawerOpen = false;
+        return Task.CompletedTask;
+    }
+
+    private void OpenProfile() => Navigation.NavigateTo("/profile");
+
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+}

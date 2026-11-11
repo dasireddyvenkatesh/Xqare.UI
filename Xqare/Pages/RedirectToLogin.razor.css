@@ -1,0 +1,50 @@
+.session-restore-page {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: clamp(16px, 4vw, 28px);
+    background: #f5f7fb;
+}
+.session-restore-page ::deep .session-restore-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: min(100%, 420px);
+    padding: clamp(20px, 4vw, 30px);
+    border: 1px solid #e5eaf0;
+    border-radius: 16px;
+    background: #ffffff;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(26,37,64,.06);
+}
+.session-restore-brand {
+    margin-bottom: 0;
+    color: #1a2540;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: .04em;
+}
+.session-restore-brand span { color: #f5b400; }
+.session-restore-page ::deep .session-restore-title {
+    color: #1a2540 !important;
+    font-weight: 800 !important;
+}
+.session-restore-page ::deep .session-restore-subtitle {
+    max-width: 360px;
+    color: #64748b !important;
+    line-height: 1.5;
+}
+.session-restore-page ::deep .session-restore-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 2px;
+}
+.session-restore-page ::deep .session-restore-primary {
+    color: #1a2540 !important;
+    font-weight: 800;
+}

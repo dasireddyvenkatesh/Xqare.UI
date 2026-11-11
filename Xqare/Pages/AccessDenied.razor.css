@@ -1,0 +1,80 @@
+.access-denied-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    padding: clamp(16px, 3vw, 32px);
+    padding-block-end: max(clamp(16px, 3vw, 32px), env(safe-area-inset-bottom));
+    background: var(--xq-page-bg);
+    color: var(--xq-text-primary);
+}
+
+.access-denied-page ::deep .access-denied-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 52rem;
+    padding-inline: 0;
+}
+
+.access-denied-page ::deep .access-denied-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 34rem;
+    padding: clamp(24px, 5vw, 44px);
+    border: 1px solid var(--xq-border);
+    border-radius: var(--xq-card-radius);
+    background: var(--xq-surface);
+    box-shadow: 0 5px 18px rgba(15, 42, 68, .045);
+    text-align: center;
+}
+
+.access-denied-icon {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-block-end: var(--xq-space-3);
+    border: 1px solid rgba(var(--xq-primary-rgb), .2);
+    border-radius: 1rem;
+    background: rgba(var(--xq-primary-rgb), .12);
+    color: var(--xq-primary-hover);
+    font-size: 1.75rem;
+}
+
+.access-denied-page ::deep .access-denied-eyebrow {
+    color: var(--xq-text-secondary);
+    font-weight: 750;
+    letter-spacing: .09em;
+}
+
+.access-denied-page ::deep .access-denied-title {
+    margin-block-start: var(--xq-space-2);
+    color: var(--xq-navy);
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.2;
+}
+
+.access-denied-page ::deep .access-denied-description {
+    max-width: 28rem;
+    margin-block-start: var(--xq-space-3);
+    color: var(--xq-text-secondary);
+    line-height: 1.6;
+}
+
+.access-denied-page ::deep .access-denied-actions {
+    width: 100%;
+    margin-block-start: var(--xq-space-5);
+}
+
+.access-denied-page ::deep .access-denied-primary {
+    min-height: 2.5rem;
+    padding-inline: var(--xq-space-4);
+    border-radius: .7rem;
+    color: var(--xq-navy);
+    font-weight: 800;
+    text-transform: none;
+}

@@ -1,12 +1,12 @@
-﻿@page "/career-insights"
+@page "/career-insights"
+@using Microsoft.AspNetCore.Components
 @using Xqare.Models.Carrer_Insights
 @using Xqare.Wrappers.CareerInsightsWrapper
 @using Xqare.Wrappers.CommonWrapper
 @using Xqare.Wrappers.HomePageWrapper
 
 <PageTitle>XQARE Career Insights</PageTitle>
-
-<HeaderWrapper/>
+<HeaderWrapper />
 <div class="career-insights-page">
     <CareerInsightsPageWrapper Model="_model"
                                SelectedCategoryId="@_selectedCategoryId"
@@ -15,28 +15,22 @@
                                SearchTextChanged="SetSearchText"
                                OnArticleSelected="OpenArticle" />
 </div>
-<Footer/>
+<Footer />
+
 @code {
     [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Parameter, SupplyParameterFromQuery(Name = "search")]
+    public string? Search { get; set; }
 
     private string _selectedCategoryId = "all";
-    private string _searchText = "";
+    private string _searchText = string.Empty;
     private CareerInsightArticle? _selectedArticle;
-
     private readonly CareerInsightPageModel _model = CareerInsightSeed.Build();
 
-    private Task SetCategory(string categoryId)
-    {
-        _selectedCategoryId = categoryId;
-        return Task.CompletedTask;
-    }
+    protected override void OnParametersSet() => _searchText = Search ?? string.Empty;
 
-    private Task SetSearchText(string? searchText)
-    {
-        _searchText = searchText ?? "";
-        return Task.CompletedTask;
-    }
-
+    private Task SetCategory(string categoryId) { _selectedCategoryId = categoryId; return Task.CompletedTask; }
+    private Task SetSearchText(string? searchText) { _searchText = searchText ?? string.Empty; return Task.CompletedTask; }
     private Task OpenArticle(CareerInsightArticle article)
     {
         _selectedArticle = article;

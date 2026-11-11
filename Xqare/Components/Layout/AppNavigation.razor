@@ -1,0 +1,210 @@
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Authorization
+@using Xqare.BusinessLayer.Classes.Authorization
+@implements IDisposable
+@inject NavigationManager Navigation
+
+<div class="xq-nav-root @(IsCollapsed ? "xq-nav-root-collapsed" : "") @(IsMobileDrawer ? "xq-nav-root-mobile" : "")">
+    <div class="xq-nav-brand">
+        @if (!IsCollapsed)
+        {
+            <div class="xq-brand-wordmark" aria-label="XQARE">
+                <span class="xq-brand-x">X</span><span class="xq-brand-rest">QARE</span>
+            </div>
+            <MudTooltip Text="@(IsMobileDrawer ? "Close navigation" : "Collapse navigation")" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Inherit" Size="Size.Small"
+                               OnClick="ToggleOrCloseAsync"
+                               AriaLabel="@(IsMobileDrawer ? "Close navigation" : "Collapse navigation")"
+                               Class="xq-sidebar-toggle xq-sidebar-close" />
+            </MudTooltip>
+        }
+        else
+        {
+            <MudTooltip Text="Expand navigation" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Size="Size.Medium"
+                               OnClick="ToggleOrCloseAsync" AriaLabel="Expand navigation"
+                               Class="xq-sidebar-toggle" />
+            </MudTooltip>
+        }
+    </div>
+
+    @if (!IsCollapsed)
+    {
+        <div class="xq-nav-section-label">WORKSPACE</div>
+    }
+    <MudNavMenu Class="xq-nav-menu">
+        <MudTooltip Text="Dashboard" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/dashboard")" OnClick='@(() => NavigateAsync("/dashboard"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Dashboard" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Dashboard</span> }
+            </MudButton>
+        </MudTooltip>
+        <MudTooltip Text="Community" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/community")" OnClick='@(() => NavigateAsync("/community"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Groups" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Community</span> }
+            </MudButton>
+        </MudTooltip>
+        <MudTooltip Text="Insights" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/career-insights")" OnClick='@(() => NavigateAsync("/career-insights"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Lightbulb" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Insights</span> }
+            </MudButton>
+        </MudTooltip>
+    </MudNavMenu>
+
+    <AuthorizeView>
+        <Authorized Context="adminNavigationContext">
+            @if (adminNavigationContext.User.IsInRole("SUPERADMIN") ||
+                 adminNavigationContext.User.HasClaim("permission", "ADMIN_OVERVIEW_VIEW") ||
+                 adminNavigationContext.User.HasClaim("permission", "ADMIN_USERS_VIEW") ||
+                 adminNavigationContext.User.HasClaim("permission", "RBAC_ROLES_VIEW") ||
+                 adminNavigationContext.User.HasClaim("permission", "RBAC_PERMISSIONS_VIEW"))
+            {
+                @if (!IsCollapsed)
+                {
+                    <div class="xq-nav-section-label xq-nav-section-account">ADMINISTRATION</div>
+                }
+                <MudNavMenu Class="xq-nav-menu">
+                    <AuthorizeView Policy="@PermissionPolicies.AdminOverviewView">
+                        <Authorized Context="overviewContext">
+                            <MudTooltip Text="Administration overview" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+                                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin")" OnClick='@(() => NavigateAsync("/admin"))'>
+                                    <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" />
+                                    @if (!IsCollapsed) { <span class="xq-nav-label">Overview</span> }
+                                </MudButton>
+                            </MudTooltip>
+                        </Authorized>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="@PermissionPolicies.AdminUsersView">
+                        <Authorized Context="usersContext">
+                            <MudTooltip Text="User management" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+                                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin/users")" OnClick='@(() => NavigateAsync("/admin/users"))'>
+                                    <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" />
+                                    @if (!IsCollapsed) { <span class="xq-nav-label">User Management</span> }
+                                </MudButton>
+                            </MudTooltip>
+                        </Authorized>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="@PermissionPolicies.RbacRolesView">
+                        <Authorized Context="rolesContext">
+                            <MudTooltip Text="Role management" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+                                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin/roles")" OnClick='@(() => NavigateAsync("/admin/roles"))'>
+                                    <MudIcon Icon="@Icons.Material.Filled.Badge" />
+                                    @if (!IsCollapsed) { <span class="xq-nav-label">Role Management</span> }
+                                </MudButton>
+                            </MudTooltip>
+                        </Authorized>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="@PermissionPolicies.RbacPermissionsView">
+                        <Authorized Context="permissionsContext">
+                            <MudTooltip Text="Permissions catalogue" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+                                <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/admin/permissions")" OnClick='@(() => NavigateAsync("/admin/permissions"))'>
+                                    <MudIcon Icon="@Icons.Material.Filled.Key" />
+                                    @if (!IsCollapsed) { <span class="xq-nav-label">Permissions</span> }
+                                </MudButton>
+                            </MudTooltip>
+                        </Authorized>
+                    </AuthorizeView>
+                </MudNavMenu>
+            }
+        </Authorized>
+    </AuthorizeView>
+
+    @if (!IsCollapsed)
+    {
+        <div class="xq-nav-section-label xq-nav-section-account">ACCOUNT</div>
+    }
+    <MudNavMenu Class="xq-nav-menu">
+        <MudTooltip Text="Profile" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/profile")" OnClick='@(() => NavigateAsync("/profile"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Person" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Profile</span> }
+            </MudButton>
+        </MudTooltip>
+        <MudTooltip Text="Settings" Placement="Placement.Right" Disabled="@(!IsCollapsed || IsMobileDrawer)">
+            <MudButton FullWidth="true" Variant="Variant.Text" Class="@NavClass("/settings")" OnClick='@(() => NavigateAsync("/settings"))'>
+                <MudIcon Icon="@Icons.Material.Filled.Settings" />
+                @if (!IsCollapsed) { <span class="xq-nav-label">Settings</span> }
+            </MudButton>
+        </MudTooltip>
+    </MudNavMenu>
+
+    @if (!IsCollapsed)
+    {
+        <div class="xq-nav-footer">
+            <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" />
+            <div>
+                <MudText Typo="Typo.caption" Class="xq-nav-footer-title">Your space, your growth</MudText>
+                <MudText Typo="Typo.caption" Class="xq-nav-footer-caption">Built with XQARE</MudText>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="xq-nav-footer-collapsed">
+            <MudTooltip Text="Your space, your growth" Placement="Placement.Right">
+                <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" />
+            </MudTooltip>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsCollapsed { get; set; }
+    [Parameter] public bool IsMobileDrawer { get; set; }
+    [Parameter] public EventCallback OnToggleRequested { get; set; }
+    [Parameter] public EventCallback OnCloseRequested { get; set; }
+    [Parameter] public EventCallback OnNavigate { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += HandleLocationChanged;
+    }
+
+    private string NavClass(string path)
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var queryIndex = relative.IndexOfAny(new[] { '?', '#' });
+        if (queryIndex >= 0)
+            relative = relative[..queryIndex];
+
+        var current = "/" + relative.Trim('/');
+        var normalized = path.TrimEnd('/');
+        // The Administration overview must only be active on /admin.
+        // Otherwise /admin/users incorrectly highlights both Overview and User Management.
+        var active = string.Equals(current, normalized, StringComparison.OrdinalIgnoreCase) ||
+                     (!string.Equals(normalized, "/admin", StringComparison.OrdinalIgnoreCase) &&
+                      current.StartsWith(normalized + "/", StringComparison.OrdinalIgnoreCase));
+        return active ? "xq-nav-link xq-nav-link-active" : "xq-nav-link";
+    }
+
+    private async Task NavigateAsync(string path)
+    {
+        Navigation.NavigateTo(path);
+        if (OnNavigate.HasDelegate)
+            await OnNavigate.InvokeAsync();
+    }
+
+    private async Task ToggleOrCloseAsync()
+    {
+        if (IsMobileDrawer)
+        {
+            if (OnCloseRequested.HasDelegate)
+                await OnCloseRequested.InvokeAsync();
+        }
+        else if (OnToggleRequested.HasDelegate)
+        {
+            await OnToggleRequested.InvokeAsync();
+        }
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs args)
+        => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= HandleLocationChanged;
+    }
+}

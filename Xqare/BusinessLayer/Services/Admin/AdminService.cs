@@ -1,0 +1,104 @@
+using Xqare.BusinessLayer.Constants.Messages;
+using System.Text.Json;
+using Xqare.BusinessLayer.DTO.Admin;
+using Xqare.BusinessLayer.Interfaces.Admin;
+using Xqare.BusinessLayer.Interfaces.Common;
+
+namespace Xqare.BusinessLayer.Services.Admin
+{
+    public sealed class AdminService : IAdminService
+    {
+        private readonly IApiClient _api;
+
+        public AdminService(IApiClient api)
+        {
+            _api = api;
+        }
+
+        public async Task<AdminOverviewResponse> GetOverviewAsync()
+        {
+            var response = await _api.GetAsync<AdminOverviewResponse>("api/admin/overview");
+            return response.Data ?? new AdminOverviewResponse
+            {
+                IsSuccess = false,
+                Message = ExtractMessage(response.ErrorMessage) ?? AdminMessages.OverviewLoadFailed
+            };
+        }
+
+        public async Task<AdminUsersResponse> GetUsersAsync(
+            string? search,
+            bool? isActive,
+            string? roleCode,
+            bool? isEmailConfirmed,
+            DateTime? createdFromUtc,
+            DateTime? createdToUtc,
+            int page,
+            int pageSize)
+        {
+            var query = $"api/admin/users?page={page}&pageSize={pageSize}";
+            if (!string.IsNullOrWhiteSpace(search))
+                query += $"&search={Uri.EscapeDataString(search.Trim())}";
+            if (isActive.HasValue)
+                query += $"&isActive={isActive.Value.ToString().ToLowerInvariant()}";
+            if (!string.IsNullOrWhiteSpace(roleCode))
+                query += $"&roleCode={Uri.EscapeDataString(roleCode.Trim())}";
+            if (isEmailConfirmed.HasValue)
+                query += $"&isEmailConfirmed={isEmailConfirmed.Value.ToString().ToLowerInvariant()}";
+            if (createdFromUtc.HasValue)
+                query += $"&createdFromUtc={Uri.EscapeDataString(createdFromUtc.Value.ToString("O"))}";
+            if (createdToUtc.HasValue)
+                query += $"&createdToUtc={Uri.EscapeDataString(createdToUtc.Value.ToString("O"))}";
+
+            var response = await _api.GetAsync<AdminUsersResponse>(query);
+            return response.Data ?? new AdminUsersResponse
+            {
+                IsSuccess = false,
+                Message = ExtractMessage(response.ErrorMessage) ?? AdminMessages.UsersLoadFailed
+            };
+        }
+
+        public async Task<AdminUserDetailsResponse?> GetUserDetailsAsync(Guid userId)
+        {
+            var response = await _api.GetAsync<AdminUserDetailsResponse>($"api/admin/users/{userId:D}");
+            return response.IsSuccess ? response.Data : null;
+        }
+
+        public async Task<AdminUserActionResponse> UpdateUserStatusAsync(Guid userId, bool isActive)
+        {
+            var response = await _api.PutAsync<UpdateAdminUserStatusRequest, AdminUserActionResponse>(
+                $"api/admin/users/{userId:D}/status",
+                new UpdateAdminUserStatusRequest { IsActive = isActive });
+
+            return response.Data ?? new AdminUserActionResponse
+            {
+                IsSuccess = false,
+                Message = ExtractMessage(response.ErrorMessage) ?? AdminMessages.AccountStatusUpdateFailed
+            };
+        }
+
+        private static string? ExtractMessage(string? payload)
+        {
+            if (string.IsNullOrWhiteSpace(payload))
+                return null;
+
+            try
+            {
+                using var document = JsonDocument.Parse(payload);
+                foreach (var name in new[] { "message", "Message", "title", "Title" })
+                {
+                    if (document.RootElement.ValueKind == JsonValueKind.Object &&
+                        document.RootElement.TryGetProperty(name, out var value) &&
+                        value.ValueKind == JsonValueKind.String &&
+                        !string.IsNullOrWhiteSpace(value.GetString()))
+                        return value.GetString();
+                }
+            }
+            catch (JsonException)
+            {
+                // Raw server payloads are never displayed in the UI.
+            }
+
+            return null;
+        }
+    }
+}
