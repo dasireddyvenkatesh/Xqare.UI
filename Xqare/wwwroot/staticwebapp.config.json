@@ -10,7 +10,8 @@
       "/Xqare.styles.css",
       "/appsettings.json",
       "/appsettings.*.json",
-      "/favicon.png"
+      "/favicon.png",
+      "/manifest.webmanifest"
     ]
   },
   "globalHeaders": {
