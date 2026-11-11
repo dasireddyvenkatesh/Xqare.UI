@@ -1,0 +1,935 @@
+@page "/admin/roles"
+@using Xqare.BusinessLayer.Constants.Messages
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
+@using Xqare.BusinessLayer.Classes.Authorization
+@using Xqare.BusinessLayer.DTO.Rbac
+@using Xqare.BusinessLayer.Interfaces.Rbac
+@attribute [Authorize(Policy = PermissionPolicies.RbacRolesView)]
+@inject IRbacService RbacService
+@inject ISnackbar Snackbar
+
+<PageTitle>Role Management | XQARE</PageTitle>
+
+<section class="admin-users-page admin-roles-page" aria-labelledby="admin-roles-title">
+    <MudContainer MaxWidth="MaxWidth.False" Class="admin-users-container">
+        <div class="admin-users-heading">
+            <div class="admin-users-heading-copy">
+                <MudText Typo="Typo.h4" Class="admin-page-title" id="admin-roles-title">Role Management</MudText>
+                <MudText Typo="Typo.body2" Class="admin-page-subtitle">
+                    Review platform roles, inspect permissions and manage custom role definitions.
+                </MudText>
+            </div>
+            <div class="admin-users-heading-actions">
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadRolesAsync"
+                           Disabled="_loading" Class="admin-refresh-button">
+                    <LoadingButtonContent IsLoading="_loading" LoadingText="Refreshing...">Refresh</LoadingButtonContent>
+                </MudButton>
+                <AuthorizeView Policy="@PermissionPolicies.RbacRolesManage">
+                    <Authorized>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Add" OnClick="BeginCreateAsync"
+                                   Disabled="@(_saving || _permissionsLoading || _formVisible)">
+                            <LoadingButtonContent IsLoading="_permissionsLoading" LoadingText="Preparing...">Create role</LoadingButtonContent>
+                        </MudButton>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </div>
+
+        @if (_formVisible && !_editingRoleId.HasValue)
+        {
+            <MudPaper Class="admin-users-card admin-role-form-card mb-4" Elevation="0">
+                <div class="admin-section-heading">
+                    <div class="admin-section-heading-left">
+                        <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Badge" /></span>
+                        <div>
+                            <MudText Typo="Typo.h6" Class="admin-card-title">@(_editingRoleId.HasValue ? "Rename role" : "Create a role")</MudText>
+                            <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                                @(_editingRoleId.HasValue ? "Update the display name for this custom role." : "Create a custom role for a specific set of platform responsibilities.")
+                            </MudText>
+                        </div>
+                    </div>
+                </div>
+                <MudDivider Class="admin-divider" />
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string" @bind-Value="_roleName" Label="Role name"
+                                      Variant="Variant.Outlined" Margin="Margin.Dense"
+                                      MaxLength="80" Immediate="true" Required="true" FullWidth="true" />
+                    </MudItem>
+                    @if (!_editingRoleId.HasValue)
+                    {
+                        <MudItem xs="12" md="6">
+                            <MudTextField T="string" Value="@GeneratedRoleCode" Label="Role code"
+                                          Variant="Variant.Outlined" Margin="Margin.Dense"
+                                          ReadOnly="true" HelperText="Generated automatically from the role name."
+                                          FullWidth="true" />
+                        </MudItem>
+                    }
+                </MudGrid>
+
+                <div class="admin-create-permissions">
+                    <div class="admin-create-permissions-heading">
+                        <div>
+                            <MudText Typo="Typo.subtitle1" Class="admin-card-title">Assign permissions</MudText>
+                            <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                                Choose the actions members with this role should be allowed to perform.
+                            </MudText>
+                        </div>
+                        <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                            @_selectedPermissionCodes.Count selected
+                        </MudChip>
+                    </div>
+                    @if (_permissionsLoading)
+                    {
+                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                    }
+                    else if (_permissionsLoadError)
+                    {
+                        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                            Permissions could not be loaded. Retry before creating the role.
+                            <MudButton Variant="Variant.Text" OnClick="LoadCreatePermissionsAsync" Disabled="_permissionsLoading">
+                                <LoadingButtonContent IsLoading="_permissionsLoading" LoadingText="Retrying...">Retry</LoadingButtonContent>
+                            </MudButton>
+                        </MudAlert>
+                    }
+                    else if (_availablePermissions.Count == 0)
+                    {
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                            No permissions are currently available in the catalogue.
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="admin-create-permissions-hint">
+                            Select only the permissions required for this role. You can leave this empty and configure permissions later.
+                        </MudText>
+                        <MudGrid Spacing="2" Class="admin-create-permission-groups">
+                            @foreach (var moduleGroup in _availablePermissions
+                                .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
+                                .OrderBy(group => group.Key))
+                            {
+                                <MudItem xs="12" md="6">
+                                    <MudPaper Class="admin-create-permission-module" Elevation="0">
+                                        <div class="admin-permission-module-heading">
+                                            <MudText Typo="Typo.subtitle2" Class="admin-card-title">@moduleGroup.Key</MudText>
+                                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                                                       OnClick="@(() => ToggleModulePermissions(moduleGroup.Select(permission => permission.Code)))">
+                                                @(moduleGroup.All(permission => _selectedPermissionCodes.Contains(permission.Code)) ? "Clear" : "Select all")
+                                            </MudButton>
+                                        </div>
+                                        <MudDivider Class="admin-divider" />
+                                        <div class="admin-create-permission-list">
+                                            @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
+                                            {
+                                                <MudCheckBox T="bool"
+                                                             Value="@_selectedPermissionCodes.Contains(permission.Code)"
+                                                             ValueChanged="@((bool selected) => TogglePermission(permission.Code, selected))"
+                                                             Color="Color.Primary"
+                                                             Label="@permission.Name"
+                                                             Size="Size.Small" />
+                                            }
+                                        </div>
+                                    </MudPaper>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
+                </div>
+
+                <div class="admin-role-form-actions">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save"
+                               OnClick="SaveRoleAsync" Disabled="@(_saving || !CanSave)">
+                        <LoadingButtonContent IsLoading="_saving" LoadingText="@(_savingAction == "create" ? "Creating role..." : "Saving changes...")">Save role</LoadingButtonContent>
+                    </MudButton>
+                    <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="CancelForm"
+                               Disabled="_saving">
+                        Cancel
+                    </MudButton>
+                </div>
+            </MudPaper>
+        }
+
+        <MudPaper Class="admin-users-card admin-roles-list-card" Elevation="0">
+            <div class="admin-section-heading">
+                <div class="admin-section-heading-left">
+                    <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Badge" /></span>
+                    <div>
+                        <MudText Typo="Typo.h6" Class="admin-card-title">Platform roles</MudText>
+                        <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                            System roles are protected; custom roles can be managed here.
+                        </MudText>
+                    </div>
+                </div>
+                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default" Class="admin-count-chip">
+                    @_roles.Count roles
+                </MudChip>
+            </div>
+
+            <MudDivider Class="admin-divider" />
+
+            @if (_loading)
+            {
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+            }
+            else if (_error)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
+                    Roles could not be loaded.
+                    <MudButton Variant="Variant.Text" OnClick="LoadRolesAsync" Disabled="_loading">
+                        <LoadingButtonContent IsLoading="_loading" LoadingText="Retrying...">Retry</LoadingButtonContent>
+                    </MudButton>
+                </MudAlert>
+            }
+            else if (_roles.Count == 0)
+            {
+                <MudPaper Class="admin-empty-state" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.Badge" Class="admin-empty-icon" />
+                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">No roles found</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">There are no platform roles to display.</MudText>
+                </MudPaper>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true"
+                          Icon="@Icons.Material.Filled.Info" Class="admin-roles-guidance">
+                    Built-in roles are protected to preserve platform access. Create a custom role to enable rename and delete actions.
+                </MudAlert>
+
+                <MudGrid Spacing="3" Class="admin-roles-grid">
+                    @foreach (var role in _roles)
+                    {
+                        <MudItem xs="12" md="6" xl="4" @key="role.Id">
+                            <MudPaper Class="admin-role-card" Elevation="0">
+                                <div class="admin-role-card-header">
+                                    <div class="admin-role-identity">
+                                        <MudAvatar Class="admin-role-avatar" Color="Color.Primary" Size="Size.Large">
+                                            <MudIcon Icon="@(role.IsSystem ? Icons.Material.Filled.Security : Icons.Material.Filled.Badge)" />
+                                        </MudAvatar>
+                                        <div class="admin-role-title-copy">
+                                            <MudText Typo="Typo.subtitle1" Class="admin-role-name">@role.Name</MudText>
+                                            <MudText Typo="Typo.caption" Class="admin-role-code">@role.Code</MudText>
+                                        </div>
+                                    </div>
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                                             Color="@(IsProtectedRole(role) ? Color.Info : Color.Success)">
+                                        @(IsProtectedRole(role) ? "System" : "Custom")
+                                    </MudChip>
+                                </div>
+
+                                @if (_editingRoleId == role.Id)
+                                {
+                                    <div class="admin-role-inline-editor">
+                                        <MudTextField T="string" @bind-Value="_roleName" Label="Role name"
+                                                      Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                      MaxLength="80" Immediate="true" Required="true" FullWidth="true" />
+                                        <div class="admin-role-inline-editor-actions">
+                                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                                       StartIcon="@Icons.Material.Filled.Save"
+                                                       OnClick="SaveRoleAsync" Disabled="@(_saving || !CanSave)">
+                                                <LoadingButtonContent IsLoading="_saving" LoadingText="@(_savingAction == "create" ? "Creating role..." : "Saving changes...")">Save</LoadingButtonContent>
+                                            </MudButton>
+                                            <MudButton Variant="Variant.Text" Color="Color.Default"
+                                                       OnClick="CancelForm" Disabled="_saving">
+                                                Cancel
+                                            </MudButton>
+                                        </div>
+                                    </div>
+                                }
+
+                                <MudDivider Class="admin-divider" />
+
+                                <MudGrid Spacing="2" Class="admin-role-stats">
+                                    <MudItem xs="6">
+                                        <div class="admin-role-stat">
+                                            <MudText Typo="Typo.caption" Class="admin-field-label">Assigned users</MudText>
+                                            <MudText Typo="Typo.h6" Class="admin-role-stat-value">@role.AssignedUsers</MudText>
+                                        </div>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <div class="admin-role-stat">
+                                            <MudText Typo="Typo.caption" Class="admin-field-label">Permissions</MudText>
+                                            <MudText Typo="Typo.h6" Class="admin-role-stat-value">@role.PermissionCount</MudText>
+                                        </div>
+                                    </MudItem>
+                                </MudGrid>
+
+                                <MudDivider Class="admin-divider" />
+
+                                <div class="admin-role-actions">
+                                    <AuthorizeView Policy="@PermissionPolicies.RbacPermissionsView">
+                                        <Authorized>
+                                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                                                       StartIcon="@Icons.Material.Filled.Visibility"
+                                                       OnClick="@(() => ToggleRolePermissionsAsync(role))"
+                                                       Disabled="_permissionsLoading">
+                                                <LoadingButtonContent IsLoading="@(_permissionsLoading && _viewingPermissionsRoleId == role.Id)" LoadingText="Loading permissions...">@( _viewingPermissionsRoleId == role.Id ? "Hide permissions" : "View permissions")</LoadingButtonContent>
+                                            </MudButton>
+                                        </Authorized>
+                                    </AuthorizeView>
+                                    <MudSpacer />
+                                    <AuthorizeView Policy="@PermissionPolicies.RbacPermissionsManage">
+                                        <Authorized>
+                                            @if (!IsProtectedRole(role))
+                                            {
+                                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                                           StartIcon="@Icons.Material.Filled.Tune"
+                                                           OnClick="@(() => ToggleManagePermissionsAsync(role))"
+                                                           Disabled="@(_saving || _permissionEditorLoading)">
+                                                    <LoadingButtonContent IsLoading="@(_permissionEditorLoading && _managingPermissionsRoleId == role.Id)" LoadingText="Loading permissions...">@( _managingPermissionsRoleId == role.Id ? "Close editor" : "Manage permissions")</LoadingButtonContent>
+                                                </MudButton>
+                                            }
+                                        </Authorized>
+                                    </AuthorizeView>
+                                    <AuthorizeView Policy="@PermissionPolicies.RbacRolesManage">
+                                        <Authorized>
+                                            <MudTooltip Text="@RenameDisabledReason(role)">
+                                                <span>
+                                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                                               StartIcon="@Icons.Material.Filled.Edit"
+                                                               Disabled="@(IsProtectedRole(role) || _saving || _editingRoleId.HasValue)"
+                                                               OnClick="@(() => BeginRename(role))">
+                                                        Rename
+                                                    </MudButton>
+                                                </span>
+                                            </MudTooltip>
+                                            @if (_confirmDeleteRoleId == role.Id)
+                                            {
+                                                <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                           Disabled="_saving" OnClick="CancelDeleteRole">
+                                                    Cancel
+                                                </MudButton>
+                                            }
+                                            else
+                                            {
+                                                <MudTooltip Text="@DeleteDisabledReason(role)">
+                                                    <span>
+                                                        <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
+                                                                   StartIcon="@Icons.Material.Filled.Delete"
+                                                                   Disabled="@(IsProtectedRole(role) || role.AssignedUsers > 0 || _saving || _editingRoleId.HasValue || _confirmDeleteRoleId.HasValue)"
+                                                                   OnClick="@(() => BeginDeleteRole(role))">
+                                                            Delete
+                                                        </MudButton>
+                                                    </span>
+                                                </MudTooltip>
+                                            }
+                                        </Authorized>
+                                    </AuthorizeView>
+                                </div>
+
+                                @if (_confirmDeleteRoleId == role.Id)
+                                {
+                                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true"
+                                              Class="admin-role-delete-confirm mt-3">
+                                        Delete the <strong>@role.Name</strong> role? This action cannot be undone.
+                                        <div class="admin-role-form-actions">
+                                            <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                                                       Disabled="_saving" OnClick="@(() => DeleteRoleAsync(role))">
+                                                <LoadingButtonContent IsLoading="@(_saving && _savingAction == "delete")" LoadingText="Deleting role...">Confirm delete</LoadingButtonContent>
+                                            </MudButton>
+                                            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                       Disabled="_saving" OnClick="CancelDeleteRole">
+                                                Cancel
+                                            </MudButton>
+                                        </div>
+                                    </MudAlert>
+                                }
+
+                                @if (_managingPermissionsRoleId == role.Id)
+                                {
+                                    <MudPaper Class="admin-role-inline-permissions admin-role-permission-editor mt-3" Elevation="0">
+                                        <div class="admin-section-heading">
+                                            <div class="admin-section-heading-left">
+                                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Tune" /></span>
+                                                <div>
+                                                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">Manage permissions — @role.Name</MudText>
+                                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                                                        Select the permissions assigned to this custom role.
+                                                    </MudText>
+                                                </div>
+                                            </div>
+                                            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                       StartIcon="@Icons.Material.Filled.Close" OnClick="CloseManagePermissions"
+                                                       Disabled="_saving">
+                                                Close
+                                            </MudButton>
+                                        </div>
+                                        <MudDivider Class="admin-divider" />
+                                        @if (_permissionEditorLoading)
+                                        {
+                                            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                                        }
+                                        else if (_permissionEditorLoadError)
+                                        {
+                                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                                                Permissions could not be loaded.
+                                                <MudButton Variant="Variant.Text" OnClick="@(() => LoadManagePermissionsAsync(role.Id))" Disabled="_permissionEditorLoading">
+                                                    <LoadingButtonContent IsLoading="_permissionEditorLoading" LoadingText="Retrying...">Retry</LoadingButtonContent>
+                                                </MudButton>
+                                            </MudAlert>
+                                        }
+                                        else
+                                        {
+                                            <div class="admin-create-permissions-heading">
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    Changes apply to every member assigned to this role.
+                                                </MudText>
+                                                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                                                    @_managedPermissionCodes.Count selected
+                                                </MudChip>
+                                            </div>
+                                            <MudGrid Spacing="2" Class="admin-create-permission-groups">
+                                                @foreach (var moduleGroup in _availablePermissions
+                                                    .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
+                                                    .OrderBy(group => group.Key))
+                                                {
+                                                    <MudItem xs="12" md="6">
+                                                        <MudPaper Class="admin-create-permission-module" Elevation="0">
+                                                            <div class="admin-permission-module-heading">
+                                                                <MudText Typo="Typo.subtitle2" Class="admin-card-title">@moduleGroup.Key</MudText>
+                                                                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                                                                           OnClick="@(() => ToggleManagedModulePermissions(moduleGroup.Select(permission => permission.Code)))">
+                                                                    @(moduleGroup.All(permission => _managedPermissionCodes.Contains(permission.Code)) ? "Clear" : "Select all")
+                                                                </MudButton>
+                                                            </div>
+                                                            <MudDivider Class="admin-divider" />
+                                                            <div class="admin-create-permission-list">
+                                                                @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
+                                                                {
+                                                                    <MudCheckBox T="bool"
+                                                                                 Value="@_managedPermissionCodes.Contains(permission.Code)"
+                                                                                 ValueChanged="@((bool selected) => ToggleManagedPermission(permission.Code, selected))"
+                                                                                 Color="Color.Primary"
+                                                                                 Label="@permission.Name"
+                                                                                 Size="Size.Small" />
+                                                                }
+                                                            </div>
+                                                        </MudPaper>
+                                                    </MudItem>
+                                                }
+                                            </MudGrid>
+                                            <div class="admin-role-form-actions">
+                                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                                           StartIcon="@Icons.Material.Filled.Save"
+                                                           OnClick="@(() => SaveManagedPermissionsAsync(role))"
+                                                           Disabled="@(_saving || _managedPermissionCodes.SetEquals(_originalManagedPermissionCodes))">
+                                                    <LoadingButtonContent IsLoading="@(_saving && _savingAction == "permissions")" LoadingText="Saving permissions...">Save permissions</LoadingButtonContent>
+                                                </MudButton>
+                                                <MudButton Variant="Variant.Text" Color="Color.Default"
+                                                           OnClick="@(() => ResetManagedPermissions())"
+                                                           Disabled="@(_saving || _managedPermissionCodes.SetEquals(_originalManagedPermissionCodes))">
+                                                    Reset
+                                                </MudButton>
+                                            </div>
+                                        }
+                                    </MudPaper>
+                                }
+
+                                @if (_viewingPermissionsRoleId == role.Id)
+                                {
+                                    <MudPaper Class="admin-role-inline-permissions mt-3" Elevation="0">
+                                        <div class="admin-section-heading">
+                                            <div class="admin-section-heading-left">
+                                                <span class="admin-card-icon"><MudIcon Icon="@Icons.Material.Filled.Policy" /></span>
+                                                <div>
+                                                    <MudText Typo="Typo.subtitle1" Class="admin-card-title">
+                                                        Permissions — @role.Name
+                                                    </MudText>
+                                                    <MudText Typo="Typo.caption" Class="admin-card-subtitle">
+                                                        Read-only permissions assigned to this role.
+                                                    </MudText>
+                                                </div>
+                                            </div>
+                                            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                                                       StartIcon="@Icons.Material.Filled.Close" OnClick="CloseRolePermissions">
+                                                Close
+                                            </MudButton>
+                                        </div>
+                                        <MudDivider Class="admin-divider" />
+                                        @if (_permissionsLoading)
+                                        {
+                                            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                                        }
+                                        else if (_rolePermissions is null || !_rolePermissions.IsSuccess || _rolePermissions.Role is null)
+                                        {
+                                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="admin-list-alert">
+                                                @(_rolePermissions?.Message ?? "Role permissions could not be loaded.")
+                                                <MudButton Variant="Variant.Text" OnClick="ReloadRolePermissionsAsync"><LoadingButtonContent IsLoading="_permissionsLoading" LoadingText="Retrying...">Retry</LoadingButtonContent></MudButton>
+                                            </MudAlert>
+                                        }
+                                        else if (_rolePermissions.Role.Permissions.Count == 0)
+                                        {
+                                            <MudPaper Class="admin-empty-state" Elevation="0">
+                                                <MudIcon Icon="@Icons.Material.Filled.Policy" Class="admin-empty-icon" />
+                                                <MudText Typo="Typo.subtitle1" Class="admin-card-title">No permissions assigned</MudText>
+                                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                    This role does not currently have any permission mappings.
+                                                </MudText>
+                                            </MudPaper>
+                                        }
+                                        else
+                                        {
+                                            <MudGrid Spacing="2" Class="admin-permission-groups">
+                                                @foreach (var moduleGroup in _rolePermissions.Role.Permissions
+                                                    .GroupBy(permission => string.IsNullOrWhiteSpace(permission.Module) ? "General" : permission.Module)
+                                                    .OrderBy(group => group.Key))
+                                                {
+                                                    <MudItem xs="12">
+                                                        <MudPaper Class="admin-permission-module" Elevation="0">
+                                                            <div class="admin-permission-module-heading">
+                                                                <MudText Typo="Typo.subtitle2" Class="admin-card-title">@moduleGroup.Key</MudText>
+                                                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
+                                                                    @moduleGroup.Count()
+                                                                </MudChip>
+                                                            </div>
+                                                            <MudDivider Class="admin-divider" />
+                                                            <div class="admin-permission-chips">
+                                                                @foreach (var permission in moduleGroup.OrderBy(item => item.Name))
+                                                                {
+                                                                    <MudTooltip Text="@permission.Code">
+                                                                        <MudChip T="string" Variant="Variant.Outlined" Color="Color.Default"
+                                                                                 Size="Size.Small">
+                                                                            @permission.Name
+                                                                        </MudChip>
+                                                                    </MudTooltip>
+                                                                }
+                                                            </div>
+                                                        </MudPaper>
+                                                    </MudItem>
+                                                }
+                                            </MudGrid>
+                                        }
+                                    </MudPaper>
+                                }
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+        </MudPaper>
+
+    </MudContainer>
+</section>
+
+@code {
+    private List<RoleResponse> _roles = new();
+    private bool _loading = true;
+    private bool _error;
+    private bool _saving;
+    private bool _rolesLoadInProgress;
+    private string? _savingAction;
+    private Guid? _confirmDeleteRoleId;
+    private bool _formVisible;
+    private Guid? _editingRoleId;
+    private string _roleName = string.Empty;
+    private Guid? _viewingPermissionsRoleId;
+    private RolePermissionsResult? _rolePermissions;
+    private bool _permissionsLoading;
+    private List<PermissionResponse> _availablePermissions = new();
+    private HashSet<string> _selectedPermissionCodes = new(StringComparer.OrdinalIgnoreCase);
+    private bool _permissionsLoadError;
+    private Guid? _managingPermissionsRoleId;
+    private HashSet<string> _managedPermissionCodes = new(StringComparer.OrdinalIgnoreCase);
+    private HashSet<string> _originalManagedPermissionCodes = new(StringComparer.OrdinalIgnoreCase);
+    private bool _permissionEditorLoading;
+    private bool _permissionEditorLoadError;
+
+    private string GeneratedRoleCode
+    {
+        get
+        {
+            var code = new string(_roleName.Trim().ToUpperInvariant()
+                .Select(character =>
+                    character is >= 'A' and <= 'Z' or >= '0' and <= '9' ? character : '_')
+                .ToArray());
+            while (code.Contains("__", StringComparison.Ordinal))
+                code = code.Replace("__", "_", StringComparison.Ordinal);
+            return code.Trim('_');
+        }
+    }
+
+    private bool CanSave => _roleName.Trim().Length is >= 2 and <= 80 &&
+                            (_editingRoleId.HasValue || GeneratedRoleCode.Length is >= 2 and <= 50 &&
+                             GeneratedRoleCode[0] is >= 'A' and <= 'Z') &&
+                            (!_formVisible || (!_permissionsLoading && !_permissionsLoadError));
+
+    protected override Task OnInitializedAsync() => LoadRolesAsync();
+
+    private async Task LoadRolesAsync()
+    {
+        if (_rolesLoadInProgress)
+            return;
+
+        _rolesLoadInProgress = true;
+        _loading = true;
+        _error = false;
+        try
+        {
+            var response = await RbacService.GetRolesAsync();
+            if (!response.IsSuccess)
+            {
+                _error = true;
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
+            }
+
+            _roles = response.Roles;
+        }
+        catch
+        {
+            _error = true;
+            Snackbar.Add(RbacMessages.RolesLoadFailed, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+            _rolesLoadInProgress = false;
+        }
+    }
+
+    private async Task BeginCreateAsync()
+    {
+        if (_saving || _permissionsLoading || _formVisible)
+            return;
+
+        _editingRoleId = null;
+        _roleName = string.Empty;
+        _selectedPermissionCodes.Clear();
+        _formVisible = true;
+        await LoadCreatePermissionsAsync();
+    }
+
+    private async Task LoadCreatePermissionsAsync()
+    {
+        if (_permissionsLoading)
+            return;
+
+        _permissionsLoading = true;
+        _permissionsLoadError = false;
+        try
+        {
+            var response = await RbacService.GetPermissionsAsync();
+            if (!response.IsSuccess)
+            {
+                _permissionsLoadError = true;
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
+            }
+
+            _availablePermissions = response.Permissions;
+        }
+        catch
+        {
+            _permissionsLoadError = true;
+            Snackbar.Add(RbacMessages.PermissionsLoadFailedRetry, Severity.Error);
+        }
+        finally
+        {
+            _permissionsLoading = false;
+        }
+    }
+
+    private void TogglePermission(string permissionCode, bool selected)
+    {
+        if (selected)
+            _selectedPermissionCodes.Add(permissionCode);
+        else
+            _selectedPermissionCodes.Remove(permissionCode);
+    }
+
+    private void ToggleModulePermissions(IEnumerable<string> permissionCodes)
+    {
+        var codes = permissionCodes.ToArray();
+        var shouldSelect = codes.Any(code => !_selectedPermissionCodes.Contains(code));
+
+        foreach (var code in codes)
+        {
+            if (shouldSelect)
+                _selectedPermissionCodes.Add(code);
+            else
+                _selectedPermissionCodes.Remove(code);
+        }
+    }
+
+    private static bool IsProtectedRole(RoleResponse role) =>
+        role.IsSystem ||
+        string.Equals(role.Code, "SUPERADMIN", StringComparison.OrdinalIgnoreCase);
+
+    private static string RenameDisabledReason(RoleResponse role) =>
+        IsProtectedRole(role)
+            ? RbacMessages.SystemRoleRenameProtected
+            : RbacMessages.RenameCustomRoleTooltip;
+
+    private static string DeleteDisabledReason(RoleResponse role) =>
+        IsProtectedRole(role)
+            ? RbacMessages.SystemRoleDeleteProtected
+            : role.AssignedUsers > 0
+                ? RbacMessages.RemoveAssignmentsBeforeDelete
+                : RbacMessages.DeleteCustomRoleTooltip;
+
+    private void BeginRename(RoleResponse role)
+    {
+        if (IsProtectedRole(role))
+            return;
+
+        _editingRoleId = role.Id;
+        _roleName = role.Name;
+        _formVisible = false;
+    }
+
+    private void CancelForm()
+    {
+        _formVisible = false;
+        _editingRoleId = null;
+        _roleName = string.Empty;
+    }
+
+    private async Task SaveRoleAsync()
+    {
+        if (!CanSave || _saving)
+            return;
+
+        _savingAction = _editingRoleId.HasValue ? "rename" : "create";
+        _saving = true;
+        try
+        {
+            var result = _editingRoleId.HasValue
+                ? await RbacService.UpdateRoleAsync(_editingRoleId.Value,
+                    new UpdateRoleRequest { Name = _roleName.Trim() })
+                : await RbacService.CreateRoleAsync(new CreateRoleRequest
+                    {
+                        Name = _roleName.Trim(),
+                        Code = GeneratedRoleCode,
+                        PermissionCodes = _selectedPermissionCodes.OrderBy(code => code).ToList()
+                    });
+
+            Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
+            if (result.IsSuccess)
+            {
+                CancelForm();
+                await LoadRolesAsync();
+            }
+        }
+        catch
+        {
+            Snackbar.Add(RbacMessages.RoleSaveFailedRetry, Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+            _savingAction = null;
+        }
+    }
+
+    private async Task ToggleRolePermissionsAsync(RoleResponse role)
+    {
+        if (_saving || _permissionsLoading)
+            return;
+
+        if (_viewingPermissionsRoleId == role.Id)
+        {
+            CloseRolePermissions();
+            return;
+        }
+
+        _viewingPermissionsRoleId = role.Id;
+        await ReloadRolePermissionsAsync();
+    }
+
+    private async Task ReloadRolePermissionsAsync()
+    {
+        if (!_viewingPermissionsRoleId.HasValue || _permissionsLoading)
+            return;
+
+        _permissionsLoading = true;
+        _rolePermissions = null;
+        try
+        {
+            _rolePermissions = await RbacService.GetRolePermissionsAsync(_viewingPermissionsRoleId.Value);
+        }
+        catch
+        {
+            _rolePermissions = new RolePermissionsResult
+            {
+                IsSuccess = false,
+                Message = RbacMessages.RolePermissionsLoadFailedRetry
+            };
+        }
+        finally
+        {
+            _permissionsLoading = false;
+        }
+    }
+
+    private void CloseRolePermissions()
+    {
+        _viewingPermissionsRoleId = null;
+        _rolePermissions = null;
+    }
+
+    private async Task ToggleManagePermissionsAsync(RoleResponse role)
+    {
+        if (IsProtectedRole(role) || _saving || _permissionEditorLoading || _permissionsLoading)
+            return;
+
+        if (_managingPermissionsRoleId == role.Id)
+        {
+            CloseManagePermissions();
+            return;
+        }
+
+        _managingPermissionsRoleId = role.Id;
+        _viewingPermissionsRoleId = null;
+        _rolePermissions = null;
+        await LoadManagePermissionsAsync(role.Id);
+    }
+
+    private async Task LoadManagePermissionsAsync(Guid roleId)
+    {
+        if (_permissionEditorLoading || _saving)
+            return;
+
+        _permissionEditorLoading = true;
+        _permissionEditorLoadError = false;
+        try
+        {
+            var catalogue = await RbacService.GetPermissionsAsync();
+            var assigned = await RbacService.GetRolePermissionsAsync(roleId);
+            if (!catalogue.IsSuccess || !assigned.IsSuccess || assigned.Role is null)
+            {
+                _permissionEditorLoadError = true;
+                Snackbar.Add(!catalogue.IsSuccess ? catalogue.Message : assigned.Message, Severity.Error);
+                return;
+            }
+
+            _availablePermissions = catalogue.Permissions;
+            _managedPermissionCodes = assigned.Role.Permissions
+                .Select(permission => permission.Code)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            _originalManagedPermissionCodes = _managedPermissionCodes.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            _permissionEditorLoadError = true;
+            Snackbar.Add(RbacMessages.RolePermissionsLoadFailedRetry, Severity.Error);
+        }
+        finally
+        {
+            _permissionEditorLoading = false;
+        }
+    }
+
+    private void ToggleManagedPermission(string code, bool selected)
+    {
+        if (selected)
+            _managedPermissionCodes.Add(code);
+        else
+            _managedPermissionCodes.Remove(code);
+    }
+
+    private void ToggleManagedModulePermissions(IEnumerable<string> permissionCodes)
+    {
+        var codes = permissionCodes.ToArray();
+        var shouldSelect = codes.Any(code => !_managedPermissionCodes.Contains(code));
+        foreach (var code in codes)
+        {
+            if (shouldSelect)
+                _managedPermissionCodes.Add(code);
+            else
+                _managedPermissionCodes.Remove(code);
+        }
+    }
+
+    private void ResetManagedPermissions()
+    {
+        _managedPermissionCodes = _originalManagedPermissionCodes.ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private async Task SaveManagedPermissionsAsync(RoleResponse role)
+    {
+        if (IsProtectedRole(role) || _saving ||
+            _managedPermissionCodes.SetEquals(_originalManagedPermissionCodes))
+            return;
+
+        _savingAction = "permissions";
+        _saving = true;
+        try
+        {
+            var result = await RbacService.SetRolePermissionsAsync(
+                role.Id, _managedPermissionCodes.OrderBy(code => code).ToList());
+            Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
+            if (result.IsSuccess)
+            {
+                _originalManagedPermissionCodes = _managedPermissionCodes.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                await LoadRolesAsync();
+                await ReloadRolePermissionsAsync();
+            }
+        }
+        catch
+        {
+            Snackbar.Add(RbacMessages.RolePermissionsUpdateFailedRetry, Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+            _savingAction = null;
+        }
+    }
+
+    private void CloseManagePermissions()
+    {
+        if (_saving || _permissionEditorLoading)
+            return;
+
+        _managingPermissionsRoleId = null;
+        _managedPermissionCodes.Clear();
+        _originalManagedPermissionCodes.Clear();
+        _permissionEditorLoadError = false;
+    }
+
+
+    private void BeginDeleteRole(RoleResponse role)
+    {
+        if (IsProtectedRole(role) || role.AssignedUsers > 0 || _saving)
+            return;
+
+        _confirmDeleteRoleId = role.Id;
+    }
+
+    private void CancelDeleteRole()
+    {
+        if (!_saving)
+            _confirmDeleteRoleId = null;
+    }
+
+    private async Task DeleteRoleAsync(RoleResponse role)
+    {
+        if (IsProtectedRole(role) || role.AssignedUsers > 0 ||
+            _saving || _confirmDeleteRoleId != role.Id)
+            return;
+
+        _savingAction = "delete";
+        _saving = true;
+        try
+        {
+            var result = await RbacService.DeleteRoleAsync(role.Id);
+            Snackbar.Add(result.Message, result.IsSuccess ? Severity.Success : Severity.Error);
+            if (result.IsSuccess)
+            {
+                _confirmDeleteRoleId = null;
+                await LoadRolesAsync();
+            }
+        }
+        catch
+        {
+            Snackbar.Add(RbacMessages.RoleDeleteFailedRetry, Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+            _savingAction = null;
+        }
+    }
+}

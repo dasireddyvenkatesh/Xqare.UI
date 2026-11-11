@@ -1,0 +1,196 @@
+.admin-users-page ::deep .admin-users-container {
+    width: 100%;
+    max-width: none;
+    margin-inline: auto;
+    padding-inline: 0;
+}
+
+.admin-users-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--xq-space-4);
+    margin: 0 16px var(--xq-space-6);
+}
+
+.admin-users-heading-copy {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+
+.admin-users-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+}
+
+.admin-users-page ::deep .admin-page-title {
+    margin: 0;
+    color: var(--xq-navy) !important;
+    font-weight: 800 !important;
+    letter-spacing: -.035em;
+    line-height: 1.15;
+}
+.admin-users-page ::deep .admin-refresh-button {
+    min-width: 0;
+    white-space: nowrap;
+    text-transform: none;
+}
+.admin-section-heading,
+.admin-section-heading-left {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.admin-section-heading {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--xq-space-3);
+}
+
+.admin-section-heading-left {
+    flex: 1 1 auto;
+    gap: var(--xq-space-3);
+}
+
+.admin-users-page ::deep .admin-card-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 2.65rem;
+    width: 2.65rem;
+    height: 2.65rem;
+    border: 1px solid rgba(var(--xq-primary-rgb), .2);
+    border-radius: .875rem;
+    background: rgba(var(--xq-primary-rgb), .12);
+    color: var(--xq-primary-hover);
+}
+.admin-users-page ::deep .admin-card-subtitle {
+    margin-block-start: var(--xq-space-1);
+    color: var(--xq-text-secondary) !important;
+    line-height: 1.4;
+}
+.admin-users-page ::deep .admin-divider {
+    margin-block: var(--xq-space-4) !important;
+    border-color: var(--xq-border) !important;
+}
+
+.admin-users-filters { margin-block-end: var(--xq-space-3); }
+
+.admin-users-page ::deep .admin-users-card .mud-input-control { width: 100%; }
+
+.admin-users-page ::deep .admin-users-card .mud-input-outlined-border {
+    border-color: var(--xq-border);
+}
+
+.admin-user-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-user-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--xq-space-4);
+    min-width: 0;
+    padding-block: var(--xq-space-4);
+    border-top: 1px solid var(--xq-border);
+}
+
+.admin-user-identity {
+    display: flex;
+    align-items: center;
+    flex: 1 1 16rem;
+    gap: var(--xq-space-3);
+    min-width: 0;
+}
+
+.admin-users-page ::deep .admin-user-avatar {
+    flex: 0 0 3.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 2px solid var(--xq-surface);
+    background: linear-gradient(145deg, var(--xq-primary), var(--xq-primary-hover)) !important;
+    color: var(--xq-navy) !important;
+    font-weight: 800;
+}
+
+.admin-user-copy { min-width: 0; }
+
+.admin-users-page ::deep .admin-user-name {
+    color: var(--xq-navy) !important;
+    font-weight: 750 !important;
+    overflow-wrap: anywhere;
+}
+
+.admin-users-page ::deep .admin-user-email {
+    color: var(--xq-text-secondary) !important;
+    overflow-wrap: anywhere;
+}
+
+.admin-user-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--xq-space-2);
+    margin-block-start: var(--xq-space-2);
+}
+
+.admin-user-meta {
+    display: flex;
+    flex: 0 1 9rem;
+    flex-direction: column;
+    gap: var(--xq-space-1);
+    min-width: 0;
+}
+.admin-users-page ::deep .admin-field-value {
+    color: var(--xq-navy) !important;
+    font-weight: 650 !important;
+    overflow-wrap: anywhere;
+}
+
+.admin-user-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    gap: var(--xq-space-2);
+    margin-inline-start: auto;
+}
+
+.admin-users-page ::deep .admin-user-actions .mud-button-root {
+    min-height: 2.3rem;
+    border-radius: .65rem;
+    font-weight: 700;
+    text-transform: none;
+}
+.admin-users-page ::deep .admin-empty-icon {
+    color: var(--xq-text-muted);
+    font-size: 2.5rem;
+}
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--xq-space-3);
+    margin-block-start: var(--xq-space-2);
+    padding-block-start: var(--xq-space-3);
+    border-top: 1px solid var(--xq-border);
+}
+
+.admin-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--xq-space-1);
+}
+
+.admin-users-page ::deep .admin-page-indicator {
+    color: var(--xq-text-secondary);
+    white-space: nowrap;
+}

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Xqare.BusinessLayer.Interfaces.Auth;
@@ -17,25 +17,50 @@ namespace Xqare.BusinessLayer.Classes.Auth
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             var token = await _tokenService.GetAccessTokenAsync();
-
             if (string.IsNullOrWhiteSpace(token))
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                return Anonymous();
 
-            var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.ReadJwtToken(token);
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(token);
 
-            var identity = new ClaimsIdentity(jwt.Claims, "jwt");
+                // Require the session-bound claim contract used by the API.
+                // This clears pre-reset tokens immediately instead of briefly showing
+                // an authenticated UI for a session the API will reject.
+                if (!Guid.TryParse(jwt.Claims.FirstOrDefault(x => x.Type == "uid")?.Value, out _) ||
+                    !Guid.TryParse(jwt.Claims.FirstOrDefault(x => x.Type == "sid")?.Value, out _))
+                {
+                    await _tokenService.ClearAsync();
+                    return Anonymous();
+                }
 
-            var user = new ClaimsPrincipal(identity);
+                // UI-only expiry check. The API remains authoritative for signature and claims validation.
+                if (jwt.ValidTo <= DateTime.UtcNow.AddSeconds(15))
+                {
+                    await _tokenService.ClearAsync();
+                    return Anonymous();
+                }
 
-            return new AuthenticationState(user);
+                // The API emits role claims using the standard ClaimTypes.Role URI.
+                // Use the same claim type so AuthorizeView Roles="SUPERADMIN" can match them.
+                return new AuthenticationState(new ClaimsPrincipal(
+                    new ClaimsIdentity(jwt.Claims, "jwt", "name", ClaimTypes.Role)));
+            }
+            catch
+            {
+                await _tokenService.ClearAsync();
+                return Anonymous();
+            }
         }
 
+        private static AuthenticationState Anonymous()
+            => new(new ClaimsPrincipal(new ClaimsIdentity()));
 
         public void NotifyUserAuthentication()
             => NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
 
         public void NotifyUserLogout()
-            => NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            => NotifyAuthenticationStateChanged(Task.FromResult(Anonymous()));
     }
 }

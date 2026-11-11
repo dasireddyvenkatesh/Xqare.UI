@@ -1,0 +1,20 @@
+.loading-button-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
+    min-width: 0;
+    line-height: 1.2;
+    vertical-align: middle;
+    pointer-events: none;
+}
+
+::deep .loading-button-content .mud-progress-circular {
+    flex: 0 0 auto;
+}
+
+.loading-button-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}

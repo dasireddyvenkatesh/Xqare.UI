@@ -1,7 +1,7 @@
 ﻿::deep .privacy-hero {
-    background: #1f3f5b;
+    background: var(--xq-privacy-hero-bg);
     padding: 80px 0;
-    color: white;
+    color: var(--xq-text-inverse);
 }
 
 ::deep .hero-title {
@@ -30,5 +30,5 @@
 
 ::deep .section-text {
     margin-top: 10px;
-    color: #555;
+    color: var(--xq-legal-text);
 }

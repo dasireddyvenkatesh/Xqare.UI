@@ -1,4 +1,5 @@
 ﻿@page "/contact"
+@using Xqare.BusinessLayer.Constants.Messages
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.ContactUs
 @using Xqare.BusinessLayer.Validators
@@ -135,6 +136,7 @@
                          OnValidSubmit="Submit" Spacing="3">
 
                     <MudTextField Label="Full Name"
+                                  MaxLength="100"
                                   Variant="Variant.Outlined"
                                   @bind-Value="_model.FullName"
                                   For="@(() => _model.FullName)"
@@ -142,18 +144,21 @@
                                   Immediate=" true" />
 
                     <MudTextField Label="Email Address"
+                                  MaxLength="256"
                                   Variant="Variant.Outlined"
                                   @bind-Value="_model.Email"
                                   For="@(() => _model.Email)"
                                   Placeholder="you@example.com" />
 
                     <MudTextField Label="Subject"
+                                  MaxLength="100"
                                   Variant="Variant.Outlined"
                                   @bind-Value="_model.Subject"
                                   For="@(() => _model.Subject)"
                                   Placeholder="What's this about?" />
 
                     <MudTextField Label="Message"
+                                  MaxLength="500"
                                   Variant="Variant.Outlined"
                                   Lines="5"
                                   @bind-Value="_model.Message"
@@ -167,19 +172,7 @@
                                StartIcon="@(!_processing ? Icons.Material.Filled.Send : null)"
                                Size="Size.Large">
 
-                        <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
-
-                            @if (_processing)
-                            {
-                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                <MudText>Processing...</MudText>
-                            }
-                            else
-                            {
-                                <MudText>Send Message</MudText>
-                            }
-
-                        </MudStack>
+                        <LoadingButtonContent IsLoading="_processing" LoadingText="Sending message…">Send Message</LoadingButtonContent>
 
                     </MudButton>
 
@@ -262,15 +255,18 @@
 
     async Task Submit()
     {
-        await _form.ValidateAsync();
-
-        if (!_form.IsValid)
+        if (_processing)
             return;
 
         _processing = true;
 
         try
         {
+            await _form.ValidateAsync();
+
+            if (!_form.IsValid)
+                return;
+
             var response = await ContactUsService.SendContactUsMessageAsync(_model);
 
             if (response.IsSuccess)
@@ -287,12 +283,11 @@
         }
         catch
         {
-            Snackbar.Add("Something went wrong. Please try again.", Severity.Error);
+            Snackbar.Add(CommonMessages.GenericFailure, Severity.Error);
         }
         finally
         {
             _processing = false;
         }
-        
     }
 }

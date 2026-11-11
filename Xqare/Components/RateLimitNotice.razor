@@ -1,0 +1,39 @@
+@using Xqare.BusinessLayer.Services.Common
+@using Xqare.BusinessLayer.Constants.Messages
+@implements IDisposable
+@inject RateLimitState RateLimits
+
+@if (RemainingSeconds > 0)
+{
+    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mt-3 mb-3">
+        @RateLimitMessages.TooManyRequests <strong>@FormatCountdown(RemainingSeconds)</strong>.
+        @RateLimitMessages.TemporaryNetworkProtection
+    </MudAlert>
+}
+
+@code {
+    [Parameter, EditorRequired] public string Policy { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnTick { get; set; }
+
+    private int RemainingSeconds => RateLimits.GetRemainingSeconds(Policy);
+
+    protected override void OnInitialized() => RateLimits.Changed += HandleChanged;
+
+    private void HandleChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            StateHasChanged();
+            await OnTick.InvokeAsync();
+        });
+    }
+
+    private static string FormatCountdown(int totalSeconds)
+    {
+        var minutes = totalSeconds / 60;
+        var seconds = totalSeconds % 60;
+        return minutes > 0 ? $"{minutes}m {seconds:D2}s" : $"{seconds}s";
+    }
+
+    public void Dispose() => RateLimits.Changed -= HandleChanged;
+}

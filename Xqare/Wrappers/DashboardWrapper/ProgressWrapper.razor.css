@@ -4,10 +4,10 @@
 }
 
 ::deep.progress-card {
-    background: #ffffff;
+    background: var(--xq-surface);
     border-radius: 16px;
     padding: 22px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--xq-border);
     box-shadow: 0 4px 14px rgba(0,0,0,0.05);
 }
 
@@ -27,12 +27,12 @@
 
 /* Label */
 ::deep .progress-label {
-    color: #374151;
+    color: var(--xq-text-primary);
 }
 
 /* Percentage */
 ::deep .progress-percent {
-    color: #f59e0b;
+    color: var(--xq-primary);
     font-weight: 600;
 }
 
@@ -62,18 +62,18 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        color: #374151;
+        color: var(--xq-text-primary);
     }
 
     /* Icon styles */
     ::deep .progress-item .mud-icon-root {
         font-size: 20px;
-        color: #9ca3af;
+        color: var(--xq-text-muted);
     }
 
     /* Done */
     ::deep .progress-item.done .mud-icon-root {
-        color: #f59e0b;
+        color: var(--xq-primary);
     }
 
 /* Status */
@@ -83,11 +83,11 @@
 
     /* Success */
     ::deep .status.success {
-        color: #f59e0b;
+        color: var(--xq-primary);
         font-weight: 500;
     }
 
     /* Pending */
     ::deep .status.pending {
-        color: #6b7280;
+        color: var(--xq-text-secondary);
     }

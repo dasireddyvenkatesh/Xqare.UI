@@ -1,0 +1,27 @@
+@page "/community"
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<PageTitle>Community | XQARE</PageTitle>
+
+<section class="community-page" aria-labelledby="community-title">
+    <div class="community-content">
+        <div class="community-hero">
+            <p class="community-eyebrow">XQARE COMMUNITY</p>
+
+            <h1 id="community-title" class="community-title">
+                Connect. Learn. Build. Grow.
+            </h1>
+
+            <p class="community-description">
+                A professional network where knowledge becomes opportunity, conversations become collaborations, and communities help people grow.
+            </p>
+
+            <div class="community-coming-soon" role="status" aria-live="polite">
+                <span class="community-status-dot" aria-hidden="true"></span>
+                <span>Coming Soon</span>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,4 +1,7 @@
-﻿@inject IJSRuntime JS
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Xqare.BusinessLayer.Interfaces.Auth
+@inject IJSRuntime JS
+@inject IAuthService AuthService
 
 <section class="header-wrapper">
     <MudAppBar Fixed="true" Elevation="0" Class="@HeaderClass">
@@ -6,22 +9,40 @@
 
             <div class="logo">XQARE</div>
 
-            <!-- DESKTOP NAV: visible on md and above -->
+            <!-- DESKTOP NAV: switch links based on authentication state -->
             <div class="nav-desktop d-none d-lg-flex">
-                <div class="nav-links">
-                    <MudLink Href="/">Home</MudLink>
-                    <MudLink Disabled="true" Href="/mentors">Mentors</MudLink>
-                    <MudLink Disabled="true" Href="/community">Community</MudLink>
-                    <MudLink Disabled="true" Href="/jobs">Jobs</MudLink>
-                    <MudLink Href="/contact">Contact</MudLink>
-                    <MudLink Href="/login">Login</MudLink>
-                </div>
-                <MudButton Href="/register" Class="signup-btn">SIGN UP</MudButton>
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="nav-links">
+                            <MudLink Href="/">Home</MudLink>
+                            <MudLink Href="/profile">Profile</MudLink>
+                        </div>
+                        <MudButton Class="signup-btn" OnClick="Logout">LOG OUT</MudButton>
+                    </Authorized>
+                    <NotAuthorized>
+                        <div class="nav-links">
+                            <MudLink Href="/">Home</MudLink>
+                            <MudLink Disabled="true" Href="/mentors">Mentors</MudLink>
+                            <MudLink Disabled="true" Href="/community">Community</MudLink>
+                            <MudLink Disabled="true" Href="/jobs">Jobs</MudLink>
+                            <MudLink Href="/contact">Contact</MudLink>
+                            <MudLink Href="/login">Login</MudLink>
+                        </div>
+                        <MudButton Href="/register" Class="signup-btn">SIGN UP</MudButton>
+                    </NotAuthorized>
+                </AuthorizeView>
             </div>
 
             <!-- MOBILE NAV: visible below md only -->
             <div class="nav-mobile d-flex d-lg-none align-items-center gap-2">
-                <MudLink Href="/login" Class="mobile-login">Login</MudLink>
+                <AuthorizeView>
+                    <Authorized>
+                        <MudLink Href="/profile" Class="mobile-login">Profile</MudLink>
+                    </Authorized>
+                    <NotAuthorized>
+                        <MudLink Href="/login" Class="mobile-login">Login</MudLink>
+                    </NotAuthorized>
+                </AuthorizeView>
                 <MudIconButton Icon="@Icons.Material.Filled.Menu"
                                Color="Color.Inherit"
                                OnClick="ToggleDrawer" />
@@ -47,12 +68,22 @@
     </div>
 
     <nav class="drawer-content">
-        <MudLink Href="/" OnClick="CloseDrawer">Home</MudLink>
-        <MudLink Disabled="true" Href="/mentors" OnClick="CloseDrawer">Mentors</MudLink>
-        <MudLink Disabled="true" Href="/community" OnClick="CloseDrawer">Community</MudLink>
-        <MudLink Disabled="true" Href="/jobs" OnClick="CloseDrawer">Jobs</MudLink>
-        <MudLink Href="/contact" OnClick="CloseDrawer">Contact</MudLink>
-        <MudButton Href="/register" Class="signup-btn drawer-signup" OnClick="CloseDrawer">SIGN UP</MudButton>
+        <AuthorizeView>
+            <Authorized>
+                <MudLink Href="/" OnClick="CloseDrawer">Home</MudLink>
+                <MudLink Href="/profile" OnClick="CloseDrawer">Profile</MudLink>
+                <MudButton Class="signup-btn drawer-signup" OnClick="LogoutAndClose">LOG OUT</MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudLink Href="/" OnClick="CloseDrawer">Home</MudLink>
+                <MudLink Disabled="true" Href="/mentors" OnClick="CloseDrawer">Mentors</MudLink>
+                <MudLink Disabled="true" Href="/community" OnClick="CloseDrawer">Community</MudLink>
+                <MudLink Disabled="true" Href="/jobs" OnClick="CloseDrawer">Jobs</MudLink>
+                <MudLink Href="/contact" OnClick="CloseDrawer">Contact</MudLink>
+                <MudLink Href="/login" OnClick="CloseDrawer">Login</MudLink>
+                <MudButton Href="/register" Class="signup-btn drawer-signup" OnClick="CloseDrawer">SIGN UP</MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
     </nav>
 </div>
 
@@ -72,6 +103,17 @@
     private void ToggleDrawer()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.Logout();
+    }
+
+    private async Task LogoutAndClose()
+    {
+        _drawerOpen = false;
+        await AuthService.Logout();
     }
 
     private void CloseDrawer()

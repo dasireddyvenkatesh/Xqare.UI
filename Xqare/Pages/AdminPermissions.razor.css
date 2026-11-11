@@ -1,0 +1,195 @@
+.admin-permissions-page ::deep .admin-users-container {
+    width: 100%;
+    max-width: none;
+    margin-inline: auto;
+    padding-inline: 0;
+}
+.admin-permissions-page .admin-users-heading-copy {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+.admin-permissions-page ::deep .admin-page-title {
+    margin: 0;
+    color: var(--xq-navy) !important;
+    font-weight: 800 !important;
+    letter-spacing: -.035em;
+    line-height: 1.15;
+}
+.admin-permissions-page ::deep .admin-refresh-button {
+    min-width: 0;
+    white-space: nowrap;
+    text-transform: none;
+}
+
+.admin-permissions-page ::deep .admin-permissions-catalogue {
+    padding: var(--xq-padding-card-compact);
+}
+
+.admin-permissions-page .admin-permissions-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--xq-space-2);
+}
+
+.admin-permissions-page .admin-permissions-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--xq-space-3);
+    margin-block-end: var(--xq-space-4);
+}
+
+.admin-permissions-page .admin-permissions-toolbar .mud-input-control {
+    flex: 1 1 20rem;
+    min-width: 0;
+}
+
+.admin-permissions-page ::deep .admin-permissions-result-count {
+    color: var(--xq-text-secondary);
+    white-space: nowrap;
+}
+
+.admin-permissions-page .admin-permissions-loading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xq-space-3);
+    padding-block: var(--xq-space-5);
+}
+
+.admin-permissions-page ::deep .admin-permissions-module-grid {
+    align-items: stretch;
+}
+
+.admin-permissions-page ::deep .admin-permissions-module {
+    height: 100%;
+    min-width: 0;
+    padding: var(--xq-space-4);
+    border: 1px solid var(--xq-border);
+    border-radius: .875rem;
+    background: var(--xq-surface);
+    box-shadow: 0 3px 12px rgba(15, 42, 68, .035);
+}
+
+.admin-permissions-page .admin-permissions-module-heading,
+.admin-permissions-page .admin-permissions-module-title {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.admin-permissions-page .admin-permissions-module-heading {
+    justify-content: space-between;
+    gap: var(--xq-space-3);
+}
+
+.admin-permissions-page .admin-permissions-module-title {
+    flex: 1 1 auto;
+    gap: var(--xq-space-3);
+}
+
+.admin-permissions-page ::deep .admin-permissions-module-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid rgba(var(--xq-primary-rgb), .2);
+    border-radius: .8rem;
+    background: rgba(var(--xq-primary-rgb), .12);
+    color: var(--xq-primary-hover);
+}
+
+.admin-permissions-page .admin-permissions-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-permissions-page .admin-permission-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--xq-space-2);
+    min-width: 0;
+    padding-block: var(--xq-space-3);
+    border-bottom: 1px solid var(--xq-border);
+}
+
+.admin-permissions-page .admin-permission-entry:last-child {
+    padding-block-end: 0;
+    border-bottom: 0;
+}
+
+.admin-permissions-page .admin-permission-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.admin-permissions-page ::deep .admin-permission-name {
+    color: var(--xq-navy);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.admin-permissions-page ::deep .admin-permission-code {
+    display: block;
+    margin-block-start: .2rem;
+    color: var(--xq-text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.admin-permissions-page .admin-permissions-footnote {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--xq-space-2);
+    margin-block-start: var(--xq-space-4);
+    padding-block-start: var(--xq-space-3);
+    border-top: 1px solid var(--xq-border);
+    color: var(--xq-text-secondary);
+}
+
+.admin-permissions-page .admin-permissions-footnote ::deep .mud-icon-root {
+    flex: 0 0 auto;
+    margin-block-start: .1rem;
+}
+
+.admin-permissions-page ::deep .admin-permission-expand {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    min-width: 0;
+    padding: .35rem .5rem;
+    text-align: start;
+    text-transform: none;
+}
+
+.admin-permissions-page ::deep .admin-permission-expand .mud-button-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;
+    gap: var(--xq-space-2);
+}
+
+.admin-permissions-page .admin-permission-details {
+    margin-block-end: var(--xq-space-3);
+    margin-inline: .5rem;
+    padding: var(--xq-space-3);
+    border-inline-start: 3px solid var(--xq-primary);
+    border-radius: .5rem;
+    background: rgba(var(--xq-primary-rgb), .07);
+}
+
+.admin-permissions-page ::deep .admin-permission-details-label {
+    display: block;
+    color: var(--xq-primary-hover);
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+.admin-permissions-page ::deep .admin-permission-description {
+    margin-block-start: var(--xq-space-1);
+    color: var(--xq-text-secondary);
+    line-height: 1.6;
+}

@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
-using MudBlazor;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.JSInterop;
+using Xqare.BusinessLayer.Classes.Auth;
 using Xqare.BusinessLayer.DTO;
 using Xqare.BusinessLayer.Interfaces.Auth;
 using Xqare.BusinessLayer.Interfaces.Common;
+using Xqare.BusinessLayer.Constants.Messages;
 
 namespace Xqare.BusinessLayer.Services.Common
 {
@@ -15,152 +16,355 @@ namespace Xqare.BusinessLayer.Services.Common
     {
         private readonly HttpClient _http;
         private readonly ITokenService _tokenService;
-        private readonly NavigationManager _nav;
-        private readonly ISnackbar Snackbar;
-        private bool _isRefreshing;
+        private readonly JwtAuthStateProvider _authStateProvider;
+        private readonly IJSRuntime _js;
+        private readonly RateLimitState _rateLimitState;
+        private readonly SemaphoreSlim _refreshLock = new(1, 1);
+        private volatile bool _refreshSessionRejected;
 
-        public ApiClient(HttpClient http, ITokenService tokenService, NavigationManager nav, ISnackbar snackbar)
+        public ApiClient(HttpClient http, ITokenService tokenService, JwtAuthStateProvider authStateProvider, IJSRuntime js, RateLimitState rateLimitState)
         {
             _http = http;
             _tokenService = tokenService;
-            _nav = nav;
-            Snackbar = snackbar;
+            _authStateProvider = authStateProvider;
+            _js = js;
+            _rateLimitState = rateLimitState;
         }
 
-        private async Task AttachTokenAsync()
+        private async Task<string?> AttachTokenAsync(HttpRequestMessage request)
         {
-            _http.DefaultRequestHeaders.Authorization = null;
-
             var token = await _tokenService.GetAccessTokenAsync();
-
             if (!string.IsNullOrWhiteSpace(token))
-            {
-                _http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token);
-            }
-        }
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        private async Task<bool> TryRefreshTokenAsync()
-        {
-            if (_isRefreshing) return false;
-            _isRefreshing = true;
-
-            try
-            {
-
-                var response = await _http.SendAsync(CreateRequest(HttpMethod.Post, "api/auth/refresh-token", new StringContent("")));
-
-                if (!response.IsSuccessStatusCode)
-                    return false;
-
-                var result = await response.Content
-                    .ReadFromJsonAsync<LoginResponse>(
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (result?.AccessToken == null) return false;
-
-                await _tokenService.SetTokenAsync(result.AccessToken);
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-            finally
-            {
-                _isRefreshing = false;
-            }
-        }
-
-        private async Task<ApiResponse<T>> SendAsync<T>(Func<Task<HttpResponseMessage>> httpCall)
-        {
-            try
-            {
-
-                await AttachTokenAsync();
-
-                var response = await httpCall();
-
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-
-                    var refreshed = await TryRefreshTokenAsync();
-
-                    if (!refreshed)
-                    {
-                        await _tokenService.ClearAsync();
-                        return new ApiResponse<T>
-                        {
-                            IsSuccess = false,
-                            StatusCode = HttpStatusCode.Unauthorized,
-                            ErrorMessage = "Session expired"
-                        };
-                    }
-
-                    await AttachTokenAsync();
-                    response = await httpCall();
-                }
-
-                string json = await response.Content.ReadAsStringAsync();
-
-                var result = new ApiResponse<T>
-                {
-                    StatusCode = response.StatusCode,
-                    RawJson = json,
-                    IsSuccess = response.IsSuccessStatusCode,
-                };
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    result.ErrorMessage = json;
-                    return result;
-                }
-
-                if (!string.IsNullOrWhiteSpace(json))
-                {
-                    result.Data = JsonSerializer.Deserialize<T>(
-                        json,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? default!;
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Snackbar.Add($"API call failed: {ex.Message}", Severity.Error);
-
-                return new ApiResponse<T>
-                {
-                    IsSuccess = false,
-                    StatusCode = HttpStatusCode.InternalServerError,
-                    ErrorMessage = ex.Message
-                };
-            }
+            return token;
         }
 
         private HttpRequestMessage CreateRequest(HttpMethod method, string url, HttpContent? content = null)
         {
             var request = new HttpRequestMessage(method, url);
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-            if (content != null) request.Content = content;
+            if (content != null)
+                request.Content = content;
             return request;
         }
 
+        private async Task<SessionRestoreOutcome> TryRefreshTokenAsync(string? accessTokenUsed)
+        {
+            // Web Locks serialize refresh-token rotation across tabs on this UI origin.
+            // The access token remains tab-scoped in sessionStorage; each tab obtains
+            // its own access token after it acquires the lock.
+            using var dotNetReference = DotNetObjectReference.Create(this);
+
+            try
+            {
+                var outcome = await _js.InvokeAsync<string>(
+                    "sessionRefreshCoordinator.runExclusive",
+                    dotNetReference,
+                    nameof(RefreshTokenUnderBrowserLockAsync),
+                    accessTokenUsed);
+
+                return Enum.TryParse<SessionRestoreOutcome>(outcome, out var parsedOutcome)
+                    ? parsedOutcome
+                    : SessionRestoreOutcome.Unavailable;
+            }
+            catch (JSException)
+            {
+                // A failed browser-coordination call is not proof that the refresh
+                // session is invalid. Leave the session intact and allow a retry.
+                return SessionRestoreOutcome.Unavailable;
+            }
+            catch (OperationCanceledException)
+            {
+                return SessionRestoreOutcome.Unavailable;
+            }
+        }
+
+        [JSInvokable]
+        public async Task<string> RefreshTokenUnderBrowserLockAsync(string? accessTokenUsed)
+            => (await TryRefreshTokenCoreAsync(accessTokenUsed)).ToString();
+
+        private async Task<SessionRestoreOutcome> TryRefreshTokenCoreAsync(string? accessTokenUsed)
+        {
+            await _refreshLock.WaitAsync();
+            try
+            {
+                // A rejected refresh cookie remains rejected for this client until
+                // a successful sign-in explicitly resets this state. This stops
+                // concurrent 401 responses from repeatedly posting refresh-token.
+                if (_refreshSessionRejected)
+                    return SessionRestoreOutcome.Rejected;
+
+                // A different request may have refreshed the session while this
+                // request was waiting. Reuse that token instead of rotating the
+                // refresh cookie again.
+                var currentToken = await _tokenService.GetAccessTokenAsync();
+                var currentState = await _authStateProvider.GetAuthenticationStateAsync();
+                var hasValidCurrentToken = currentState.User.Identity?.IsAuthenticated == true;
+
+                if (hasValidCurrentToken &&
+                    (string.IsNullOrWhiteSpace(accessTokenUsed) ||
+                     !string.Equals(currentToken, accessTokenUsed, StringComparison.Ordinal)))
+                {
+                    return SessionRestoreOutcome.Restored;
+                }
+
+                // Each environment uses a distinct API host and therefore a distinct
+                // host-only refresh cookie. Tabs for this UI origin are serialized by
+                // the Web Lock above, so a rejected refresh response must not be retried.
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(12));
+                using var request = CreateRequest(
+                    HttpMethod.Post,
+                    "api/auth/refresh-token",
+                    new StringContent(string.Empty));
+
+                using var response = await _http.SendAsync(request, timeout.Token);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    _refreshSessionRejected = true;
+                    return SessionRestoreOutcome.Rejected;
+                }
+
+                if (!response.IsSuccessStatusCode)
+                    return SessionRestoreOutcome.Unavailable;
+
+                var result = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>(
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
+                    timeout.Token);
+
+                if (result == null || !result.IsSuccess || string.IsNullOrWhiteSpace(result.AccessToken))
+                    return SessionRestoreOutcome.Unavailable;
+
+                _refreshSessionRejected = false;
+                await _tokenService.SetTokenAsync(result.AccessToken);
+                _authStateProvider.NotifyUserAuthentication();
+                return SessionRestoreOutcome.Restored;
+            }
+            catch (OperationCanceledException)
+            {
+                return SessionRestoreOutcome.Unavailable;
+            }
+            catch (HttpRequestException)
+            {
+                return SessionRestoreOutcome.Unavailable;
+            }
+            catch
+            {
+                return SessionRestoreOutcome.Unavailable;
+            }
+            finally
+            {
+                _refreshLock.Release();
+            }
+        }
+
+        // Startup session restoration and 401 recovery use this exact same
+        // serialized refresh operation.
+        public Task<SessionRestoreOutcome> RestoreSessionAsync()
+            => TryRefreshTokenAsync(accessTokenUsed: null);
+
+        public void ResetRefreshState()
+        {
+            _refreshSessionRejected = false;
+        }
+
+        // Called when this tab or another tab confirms logout. Prevents protected
+        // route restoration and late 401 handlers from posting another refresh.
+        public void RejectRefreshState()
+        {
+            _refreshSessionRejected = true;
+        }
+
+
+        private void CaptureRateLimit(HttpResponseMessage response, string responseBody)
+        {
+            var policy = response.Headers.TryGetValues("X-RateLimit-Policy", out var policyValues)
+                ? policyValues.FirstOrDefault()
+                : null;
+            var retryAfterSeconds = 0;
+
+            if (response.Headers.TryGetValues("Retry-After", out var retryValues))
+            {
+                var retryValue = retryValues.FirstOrDefault();
+                if (int.TryParse(retryValue, out var parsedSeconds))
+                    retryAfterSeconds = parsedSeconds;
+                else if (DateTimeOffset.TryParse(retryValue, out var retryAt))
+                    retryAfterSeconds = (int)Math.Ceiling((retryAt - DateTimeOffset.UtcNow).TotalSeconds);
+            }
+
+            // The JSON body is a fallback for non-browser clients or proxies that
+            // preserve the body but strip response headers.
+            if ((string.IsNullOrWhiteSpace(policy) || retryAfterSeconds <= 0) &&
+                !string.IsNullOrWhiteSpace(responseBody))
+            {
+                try
+                {
+                    using var document = JsonDocument.Parse(responseBody);
+                    var root = document.RootElement;
+                    if (string.IsNullOrWhiteSpace(policy) &&
+                        root.TryGetProperty("policy", out var policyElement))
+                        policy = policyElement.GetString();
+
+                    if (retryAfterSeconds <= 0 &&
+                        root.TryGetProperty("retryAfterSeconds", out var retryElement) &&
+                        retryElement.TryGetInt32(out var bodySeconds))
+                        retryAfterSeconds = bodySeconds;
+                }
+                catch (JsonException)
+                {
+                    // Keep the generic API error path if the server returned non-JSON.
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(policy) && retryAfterSeconds > 0)
+                _rateLimitState.SetBlocked(policy, retryAfterSeconds);
+        }
+
+        private async Task<ApiResponse<T>> SendAsync<T>(
+            Func<HttpRequestMessage> requestFactory,
+            bool retryAfterRefresh = true,
+            bool attachAccessToken = true)
+        {
+            try
+            {
+                // After an explicit refresh rejection, do not send further protected
+                // requests until a successful sign-in resets the client state.
+                if (attachAccessToken && retryAfterRefresh && _refreshSessionRejected)
+                {
+                    return new ApiResponse<T>
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.Unauthorized,
+                        ErrorMessage = SessionMessages.Expired
+                    };
+                }
+
+                using var request = requestFactory();
+                string? accessTokenUsed = null;
+                if (attachAccessToken)
+                    accessTokenUsed = await AttachTokenAsync(request);
+                using var response = await _http.SendAsync(request);
+
+                HttpResponseMessage responseToRead = response;
+                HttpResponseMessage? retryResponse = null;
+
+                // A missing bearer token means there is no authenticated request
+                // to recover. Startup restoration is handled explicitly by the
+                // protected-route restoration component; do not create a refresh
+                // request for every anonymous endpoint call.
+                if (response.StatusCode == HttpStatusCode.Unauthorized &&
+                    retryAfterRefresh &&
+                    !string.IsNullOrWhiteSpace(accessTokenUsed))
+                {
+                    var refreshOutcome = await TryRefreshTokenAsync(accessTokenUsed);
+                    if (refreshOutcome == SessionRestoreOutcome.Rejected)
+                    {
+                        await _tokenService.ClearAsync();
+                        _authStateProvider.NotifyUserLogout();
+                        return new ApiResponse<T>
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.Unauthorized,
+                            ErrorMessage = SessionMessages.Expired
+                        };
+                    }
+
+                    if (refreshOutcome == SessionRestoreOutcome.Unavailable)
+                    {
+                        return new ApiResponse<T>
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.ServiceUnavailable,
+                            ErrorMessage = SessionMessages.ValidationUnavailable
+                        };
+                    }
+
+                    using var retryRequest = requestFactory();
+                    if (attachAccessToken)
+                        await AttachTokenAsync(retryRequest);
+                    retryResponse = await _http.SendAsync(retryRequest);
+                    responseToRead = retryResponse;
+
+                    if (retryResponse.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await _tokenService.ClearAsync();
+                        _authStateProvider.NotifyUserLogout();
+                    }
+                }
+
+                using (retryResponse)
+                {
+                    var json = await responseToRead.Content.ReadAsStringAsync();
+
+                    if (responseToRead.StatusCode == HttpStatusCode.TooManyRequests)
+                        CaptureRateLimit(responseToRead, json);
+
+                    var result = new ApiResponse<T>
+                    {
+                        StatusCode = responseToRead.StatusCode,
+                        RawJson = json,
+                        IsSuccess = responseToRead.IsSuccessStatusCode
+                    };
+
+                    if (!responseToRead.IsSuccessStatusCode)
+                    {
+                        result.ErrorMessage = json;
+                        return result;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        result.Data = JsonSerializer.Deserialize<T>(
+                            json,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? default!;
+                    }
+
+                    return result;
+                }
+            }
+            catch
+            {
+                return new ApiResponse<T>
+                {
+                    IsSuccess = false,
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    ErrorMessage = CommonMessages.RequestFailed
+                };
+            }
+        }
+
         public Task<ApiResponse<TResponse>> GetAsync<TResponse>(string url)
-            => SendAsync<TResponse>(() => _http.GetAsync(url));
+            => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Get, url));
 
         public Task<ApiResponse<TResponse>> PostAsync<TRequest, TResponse>(string url, TRequest data)
-            => SendAsync<TResponse>(() => _http.PostAsJsonAsync(url, data));
+            => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Post, url, JsonContent.Create(data)));
+
+        // Anonymous authentication requests must not attach a stale bearer token
+        // or recursively attempt refresh when a challenge is rejected.
+        public Task<ApiResponse<TResponse>> PostAnonymousAsync<TRequest, TResponse>(string url, TRequest data)
+            => SendAsync<TResponse>(
+                () => CreateRequest(HttpMethod.Post, url, JsonContent.Create(data)),
+                retryAfterRefresh: false,
+                attachAccessToken: false);
 
         public Task<ApiResponse<TResponse>> PutAsync<TRequest, TResponse>(string url, TRequest data)
-            => SendAsync<TResponse>(() => _http.PutAsJsonAsync(url, data));
+            => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Put, url, JsonContent.Create(data)));
 
         public Task<ApiResponse<bool>> DeleteAsync(string url)
-            => SendAsync<bool>(() => _http.DeleteAsync(url));
+            => SendAsync<bool>(() => CreateRequest(HttpMethod.Delete, url));
 
-        public Task CookieCredential<TResponse>(string url)
-            => SendAsync<TResponse>(() => _http.SendAsync(CreateRequest(HttpMethod.Post, url,
-                new StringContent(""))));
+        public Task<ApiResponse<TResponse>> DeleteAsync<TResponse>(string url)
+            => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Delete, url));
+
+        public Task<ApiResponse<TResponse>> DeleteAsync<TRequest, TResponse>(string url, TRequest data)
+            => SendAsync<TResponse>(() => CreateRequest(HttpMethod.Delete, url, JsonContent.Create(data)));
+
+        // Refresh and logout must not recursively trigger another refresh request.
+        public Task<ApiResponse<TResponse>> CookieCredential<TResponse>(string url)
+            => SendAsync<TResponse>(
+                () => CreateRequest(HttpMethod.Post, url, new StringContent(string.Empty)),
+                retryAfterRefresh: false,
+                attachAccessToken: false);
     }
 }

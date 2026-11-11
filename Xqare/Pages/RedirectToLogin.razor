@@ -1,10 +1,160 @@
-﻿@using Xqare.BusinessLayer.Interfaces.Auth
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Authorization
+@using Xqare.BusinessLayer.DTO
+@using Xqare.BusinessLayer.Interfaces.Auth
+@inject NavigationManager Nav
 @inject IAuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (_checkingSession)
+{
+    <section class="session-restore-page">
+        <MudPaper Class="session-restore-card" Elevation="0">
+            <div class="session-restore-brand"><span>X</span>QARE</div>
+            <MudProgressCircular Indeterminate="true" Color="Color.Warning" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Class="session-restore-title">Restoring your session</MudText>
+            <MudText Typo="Typo.body2" Class="session-restore-subtitle">
+                Checking your secure connection...
+            </MudText>
+        </MudPaper>
+    </section>
+}
+else if (_restoreUnavailable)
+{
+    <section class="session-restore-page">
+        <MudPaper Class="session-restore-card session-restore-error" Elevation="0">
+            <div class="session-restore-brand"><span>X</span>QARE</div>
+            <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Warning" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Class="session-restore-title">We couldn't verify your session</MudText>
+            <MudText Typo="Typo.body2" Class="session-restore-subtitle">
+                The authentication service did not respond. Your saved session has not been cleared.
+                Check your connection and try again.
+            </MudText>
+            <MudStack Direction="Row" Spacing="2" Class="session-restore-actions" Justify="Justify.Center" Wrap="Wrap.Wrap">
+                <MudButton Variant="Variant.Filled" Color="Color.Warning"
+                           Disabled="_checkingSession" OnClick="RetrySessionRestore"
+                           Class="session-restore-primary">
+                    Try again
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="NavigateToLogin">
+                    Go to sign in
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    </section>
+}
+else if (_restorationSucceeded)
+{
+    <section class="session-restore-page">
+        <MudPaper Class="session-restore-card" Elevation="0">
+            <div class="session-restore-brand"><span>X</span>QARE</div>
+            <MudProgressCircular Indeterminate="true" Color="Color.Warning" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Class="session-restore-title">Session restored</MudText>
+            <MudText Typo="Typo.body2" Class="session-restore-subtitle">
+                Checking your access to this page...
+            </MudText>
+        </MudPaper>
+    </section>
+}
 
 @code {
-    protected override void OnInitialized()
-    {
-        AuthService.Logout();
+    [Parameter, EditorRequired]
+    public AuthenticationState AuthenticationState { get; set; } = default!;
 
+    private bool _checkingSession = true;
+    private bool _restoreUnavailable;
+    private bool _restorationSucceeded;
+    private bool _restoreStarted;
+    private bool _redirectingToAccessDenied;
+    private string? _lastRequestedUri;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // AuthorizeRouteView may reuse this component when the user navigates
+        // between protected routes. A new URL gets its own restoration attempt.
+        var requestedUri = Nav.Uri;
+        if (!string.Equals(_lastRequestedUri, requestedUri, StringComparison.Ordinal))
+        {
+            _lastRequestedUri = requestedUri;
+            _restoreStarted = false;
+            _restoreUnavailable = false;
+            _restorationSucceeded = false;
+            _redirectingToAccessDenied = false;
+        }
+        // AuthorizeRouteView renders this fragment for both anonymous users and
+        // authenticated users who fail the route's authorization requirements.
+        // The supplied state lets us distinguish those cases correctly.
+        if (AuthenticationState.User.Identity?.IsAuthenticated == true)
+        {
+            if (!_redirectingToAccessDenied)
+            {
+                _redirectingToAccessDenied = true;
+                Nav.NavigateTo("/access-denied", replace: true);
+            }
+
+            return;
+        }
+
+        if (!_restoreStarted)
+            await RestoreSessionAsync();
+    }
+
+    private async Task RestoreSessionAsync()
+    {
+        _restoreStarted = true;
+        _checkingSession = true;
+        _restoreUnavailable = false;
+        _restorationSucceeded = false;
+
+        try
+        {
+            var outcome = await AuthService.InitializeAsync();
+
+            if (outcome == SessionRestoreOutcome.Restored)
+            {
+                var restoredState = await AuthStateProvider.GetAuthenticationStateAsync();
+                if (restoredState.User.Identity?.IsAuthenticated != true)
+                {
+                    // A successful HTTP response is not enough: the returned JWT
+                    // must also satisfy the UI's session/expiry validation.
+                    NavigateToLogin();
+                    return;
+                }
+
+                // Do not navigate here. AuthorizeRouteView re-evaluates the
+                // original route against the refreshed principal.
+                _restorationSucceeded = true;
+                return;
+            }
+
+            if (outcome == SessionRestoreOutcome.Unavailable)
+            {
+                _restoreUnavailable = true;
+                return;
+            }
+
+            NavigateToLogin();
+        }
+        catch
+        {
+            // Network/client failures are retryable and must not clear credentials.
+            _restoreUnavailable = true;
+        }
+        finally
+        {
+            _checkingSession = false;
+        }
+    }
+
+    private Task RetrySessionRestore() => RestoreSessionAsync();
+
+    private void NavigateToLogin()
+    {
+        var returnUrl = Nav.ToBaseRelativePath(Nav.Uri);
+        var destination = string.IsNullOrWhiteSpace(returnUrl)
+            ? "/login"
+            : $"/login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+
+        Nav.NavigateTo(destination, replace: true);
     }
 }

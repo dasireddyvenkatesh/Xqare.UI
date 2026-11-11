@@ -1,15 +1,40 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Xqare.Pages
+@using Xqare.BusinessLayer.Interfaces.Auth
+@inject IAuthService AuthService
 
 <CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+    <Router AppAssembly="@typeof(App).Assembly"
+            NotFoundPage="typeof(Pages.NotFound)">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
-                <NotAuthorized>
-                    <RedirectToLogin />
+                <NotAuthorized Context="authState">
+                    <RedirectToLogin AuthenticationState="authState" />
                 </NotAuthorized>
             </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
     </Router>
 </CascadingAuthenticationState>
+
+@code {
+    private bool _crossTabSessionInitialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _crossTabSessionInitialized)
+            return;
+
+        _crossTabSessionInitialized = true;
+
+        try
+        {
+            // Register logout notifications only; do not restore a session here.
+            await AuthService.InitializeCrossTabSessionAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Cross-tab session listener initialization failed: {ex}");
+        }
+    }
+}

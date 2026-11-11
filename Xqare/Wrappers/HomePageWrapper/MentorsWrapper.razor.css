@@ -1,5 +1,5 @@
 ﻿.mentors-section {
-    background: #f9f8f6;
+    background: var(--xq-mentors-section-bg);
 }
 
 /* HEADER */
@@ -14,7 +14,7 @@
 
 ::deep .section-subtitle {
     max-width: 640px;
-    color: #64748b;
+    color: var(--xq-text-secondary);
 }
 
 /* GRID */
@@ -28,8 +28,8 @@
 ::deep .mentor-card {
     padding: 32px 24px;
     border-radius: 18px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
+    border: 1px solid var(--xq-mentors-card-border);
+    background: var(--xq-surface);
     transition: all .35s ease;
     opacity: 0;
     transform: translateY(40px);
@@ -58,7 +58,7 @@
 /* AVATAR */
 
 ::deep .mentor-avatar {
-    border: 3px solid #fbbf24;
+    border: 3px solid var(--xq-mentors-avatar-border);
 }
 
 /* TEXT */
@@ -68,7 +68,7 @@
 }
 
 ::deep .mentor-role {
-    color: #64748b;
+    color: var(--xq-text-secondary);
     font-size: .9rem;
 }
 
@@ -88,6 +88,6 @@
 }
 
     ::deep .mentor-cta:hover {
-        background: #f59e0b;
-        color: white;
+        background: var(--xq-mentors-cta-hover);
+        color: var(--xq-text-inverse);
     }

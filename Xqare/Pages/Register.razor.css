@@ -3,11 +3,11 @@
 }
 
 ::deep .left-panel {
-    background: linear-gradient(135deg, #1e3a5f, #0f2a44);
-    color: white;
+    background: linear-gradient(135deg, var(--xq-auth-hero-start), var(--xq-auth-hero-end));
+    color: var(--xq-text-inverse);
     display: flex;
-    padding: 80px;
-    padding-top:200px;
+    padding: var(--xq-padding-auth-hero);
+    padding-top: var(--xq-padding-auth-hero-top);
 }
 
 ::deep .left-content {
@@ -21,7 +21,7 @@
 }
 
     ::deep .logo-text span {
-        color: #fbbf24;
+        color: var(--xq-auth-highlight);
     }
 
 ::deep .hero-title {
@@ -31,7 +31,7 @@
 }
 
     ::deep .hero-title span {
-        color: #fbbf24;
+        color: var(--xq-auth-highlight);
     }
 
 ::deep .hero-sub {
@@ -41,7 +41,7 @@
 ::deep .stat-number {
     font-size: 20px;
     font-weight: 800;
-    color: #fbbf24;
+    color: var(--xq-auth-highlight);
 }
 
 ::deep .stat-label {
@@ -50,10 +50,12 @@
 }
 
 ::deep .right-panel {
-    background: #f9fafb;
+    background: var(--xq-auth-panel-bg);
     display: flex;
     justify-content: center;
-    padding: 80px 20px;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--xq-padding-auth-panel-block) var(--xq-padding-auth-panel-inline);
 }
 
 ::deep .mud-grid-item-md-6.right-panel {
@@ -61,32 +63,35 @@
 }
 
 ::deep .auth-container {
-    width: 420px;
+    width: 100%;
+    max-width: 420px;
+    min-width: 0;
+    box-sizing: border-box;
     background-color: transparent;
 }
 
 ::deep .auth-title {
     font-size: 24px;
     font-weight: 800;
-    color: #0f2a44;
+    color: var(--xq-navy-deep);
     text-align: center;
 }
 
 ::deep .auth-subtitle {
     font-size: 14px;
-    color: #64748b;
+    color: var(--xq-text-secondary);
     text-align: center;
 }
 
     ::deep .auth-subtitle span {
-        color: #f59e0b;
+        color: var(--xq-auth-accent);
         font-weight: 600;
     }
 
 ::deep .social-grid .mud-button-root {
     border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    background: white;
+    border: 1px solid var(--xq-auth-input-border);
+    background: var(--xq-surface);
     text-transform: none;
     font-weight: 600;
     height: 44px;
@@ -98,19 +103,19 @@
     }
 
 ::deep .divider-text {
-    font-size: 12px;
-    color: #94a3b8;
+    font-size: 11px;
+    color: var(--xq-auth-muted);
     font-weight: 600;
     white-space: nowrap;
 }
 
 ::deep .divider-line-1 {
-    margin-right: 30px;
+    margin-right: 10px;
     width: auto;
 }
 
 ::deep .divider-line-2 {
-    margin-left: 30px;
+    margin-left: 10px;
     width: auto;
 }
 
@@ -119,48 +124,48 @@
 }
 
 ::deep .mud-input-outlined-border {
-    border-color: #e2e8f0 !important;
+    border-color: var(--xq-auth-input-border) !important;
 }
 
 ::deep .mud-input-root:hover .mud-input-outlined-border {
-    border-color: #f59e0b !important;
+    border-color: var(--xq-auth-accent) !important;
 }
 
 ::deep .register-btn {
     margin-top: 20px;
     height: 48px;
     border-radius: 10px;
-    background: #f59e0b;
-    color: white;
+    background: var(--xq-auth-accent);
+    color: var(--xq-text-inverse);
     font-weight: 700;
     text-transform: none;
 }
 
     ::deep .register-btn:hover {
-        background: #d97706;
+        background: var(--xq-auth-accent-hover);
     }
 
 ::deep .resend-btn {
-    color: #f59e0b;
+    color: var(--xq-auth-accent);
     font-weight: 600;
 }
 
 ::deep .back-btn {
-    color: #64748b;
+    color: var(--xq-text-secondary);
     font-weight: 600;
 }
 
 ::deep .security-text {
     margin-top: 18px;
     font-size: 13px;
-    color: #64748b;
+    color: var(--xq-text-secondary);
     text-align: center;
 }
 
 ::deep .signup-text {
     margin-top: 10px;
     font-size: 10px;
-    color: #64748b;
+    color: var(--xq-text-secondary);
     text-align: center;
 }
 
@@ -172,7 +177,7 @@
 }
 
     ::deep .mobile-logo span {
-        color: #f59e0b;
+        color: var(--xq-auth-accent);
     }
 
 ::deep .trial-badge {
@@ -196,7 +201,7 @@
 ::deep .trial-price {
     font-size: 28px;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--xq-text-inverse);
 }
 
     ::deep .trial-price span {
@@ -207,5 +212,12 @@
 ::deep .trial-note {
     font-size: 12px;
     font-weight: 700;
-    color: #fbbf24;
+    color: var(--xq-auth-highlight);
+}
+
+::deep .signup-link {
+    color: var(--xq-primary-hover);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }

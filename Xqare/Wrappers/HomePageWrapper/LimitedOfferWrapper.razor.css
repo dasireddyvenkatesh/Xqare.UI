@@ -1,5 +1,5 @@
 ﻿.offer-section {
-    background: linear-gradient(135deg, rgba(218, 155, 47, 0.12), rgba(23, 51, 79, 0.08));
+    background: linear-gradient(135deg, var(--xq-offer-section-warm), var(--xq-offer-section-cool));
 }
 
 /* CONTENT WIDTH */
@@ -14,7 +14,7 @@
 ::deep .offer-title {
     font-size: 2.2rem;
     font-weight: 800;
-    color: #0f2a44;
+    color: var(--xq-navy-deep);
 }
 
 @media (min-width: 960px) {
@@ -27,12 +27,12 @@
 
 ::deep .old-price {
     text-decoration: line-through;
-    color: #94a3b8;
+    color: var(--xq-auth-muted);
     font-size: 1.4rem;
 }
 
 ::deep .new-price {
-    color: #f59e0b;
+    color: var(--xq-marketing-highlight);
     font-weight: 900;
     font-size: 2.4rem;
 }
@@ -47,13 +47,13 @@
 /* TEXT */
 
 ::deep .offer-subtitle {
-    color: #6b7a90;
+    color: var(--xq-marketing-subtitle);
     max-width: 600px;
 }
 
 ::deep .timer-label {
     font-weight: 600;
-    color: #0f2a44;
+    color: var(--xq-navy-deep);
 }
 
 /* TIMER */
@@ -66,8 +66,8 @@
     width: 72px;
     height: 72px;
     border-radius: 14px;
-    background: #1e3a5f;
-    color: white;
+    background: var(--xq-offer-timer-bg);
+    color: var(--xq-text-inverse);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -79,7 +79,7 @@
 }
 
 ::deep .time-label {
-    color: #6b7a90;
+    color: var(--xq-marketing-subtitle);
     font-size: 0.75rem;
 }
 
@@ -89,20 +89,20 @@
     margin-top: 12px;
     padding: 14px 34px;
     border-radius: 999px;
-    background: #1e3a5f;
-    color: white;
+    background: var(--xq-offer-timer-bg);
+    color: var(--xq-text-inverse);
     font-weight: 700;
     text-transform: none;
 }
 
     ::deep .offer-cta:hover {
-        background: #16304d;
+        background: var(--xq-offer-timer-hover);
         transform: translateY(-2px);
     }
 
 /* FOOTNOTE */
 
 ::deep .offer-footnote {
-    color: #94a3b8;
+    color: var(--xq-auth-muted);
     font-size: 0.8rem;
 }

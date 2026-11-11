@@ -1,159 +1,504 @@
-﻿@* @page "/profile"
+@page "/profile"
+@using Xqare.BusinessLayer.Constants.Messages
+@layout AuthenticatedLayout
+@using Microsoft.AspNetCore.Authorization
 @using Xqare.BusinessLayer.DTO
 @using Xqare.BusinessLayer.Interfaces.Profile
+@using Xqare.BusinessLayer.Validators
+@using Xqare.BusinessLayer.Validators.FluentValidation
+@attribute [Authorize]
 @inject IProfileService ProfileService
 @inject ISnackbar Snackbar
-@inject IDialogService DialogService
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
+<PageTitle>Profile | XQARE</PageTitle>
 
-    @if (IsLoading)
-    {
-        <MudProgressCircular Indeterminate="true" />
-    }
-    else
-    {
-        <MudGrid>
+<section class="profile-page" aria-labelledby="profile-page-title">
+    <MudContainer MaxWidth="MaxWidth.False" Class="profile-container">
+        <div class="profile-heading">
+            <div class="profile-heading-copy">
+                <MudText Typo="Typo.h4" Class="profile-page-title" id="profile-page-title">Profile</MudText>
+                <MudText Typo="Typo.body2" Class="profile-page-subtitle">
+                    Manage your personal information and keep your account details up to date.
+                </MudText>
+            </div>
 
-            <!-- Profile Info -->
-            <MudItem xs="12" md="6">
-                <MudPaper Class="pa-5 profile-card">
+            <div class="profile-heading-actions">
+                @if (_profile is { IsSuccess: true })
+                {
+                    <MudChip T="string" Variant="Variant.Outlined"
+                             Color="@(_profile.IsActive ? Color.Success : Color.Warning)"
+                             Class="profile-status-chip">
+                        <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Class="mr-2" />
+                        @(_profile.IsActive ? "Account active" : "Account inactive")
+                    </MudChip>
+                }
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                           OnClick="LoadProfileAsync"
+                           Disabled="_loading || _saving" Class="profile-refresh-button">
+                    <LoadingButtonContent IsLoading="_loading" LoadingText="Refreshing…">
+                        <MudIcon Icon="@Icons.Material.Filled.Refresh" Class="mr-1" />
+                        Refresh
+                    </LoadingButtonContent>
+                </MudButton>
+            </div>
+        </div>
 
-                    <MudText Typo="Typo.h6">Profile Information</MudText>
+        @if (_loading)
+        {
+            <MudPaper Class="profile-state-card" Elevation="0">
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                <MudText Typo="Typo.subtitle1" Class="profile-state-title">Loading your profile</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Your account information will appear here in a moment.</MudText>
+            </MudPaper>
+        }
+        else if (_profile is null || !_profile.IsSuccess)
+        {
+            <MudPaper Class="profile-state-card" Elevation="0">
+                <MudIcon Icon="@Icons.Material.Filled.PersonOff" Class="profile-state-icon" />
+                <MudText Typo="Typo.h6" Class="profile-state-title">We couldn't load your profile</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @(_profile?.Message ?? "Check your connection and try again.")
+                </MudText>
+                <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                           OnClick="LoadProfileAsync" Disabled="@(_loading || _saving)"
+                           Class="profile-primary-button">
+                    <LoadingButtonContent IsLoading="_loading" LoadingText="Retrying…">
+                        <MudIcon Icon="@Icons.Material.Filled.Refresh" Class="mr-2" />
+                        Try again
+                    </LoadingButtonContent>
+                </MudButton>
+            </MudPaper>
+        }
+        else
+        {
+            <MudGrid Spacing="4" Class="profile-cards-grid">
+                <MudItem xs="12" lg="8">
+                    <MudPaper Class="profile-card profile-main-card" Elevation="0">
+                        <div class="profile-card-heading">
+                            <div class="profile-card-heading-left">
+                                <span class="profile-card-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.PersonOutline" />
+                                </span>
+                                <div class="profile-card-heading-copy">
+                                    <MudText Typo="Typo.h6" Class="profile-card-title">Personal information</MudText>
+                                    <MudText Typo="Typo.caption" Class="profile-card-subtitle">
+                                        Your name and contact details
+                                    </MudText>
+                                </div>
+                            </div>
 
-                    @ProfileRow("Full Name", Profile.FullName, () => EditField("Full Name", Profile.FullName, "FullName"))
-                    @ProfileRow("Email", Profile.Email, null)
-                    @ProfileRow("Phone", Profile.Phone, () => EditField("Phone", Profile.Phone, "Phone"))
-                    @ProfileRow("Bio", Profile.Bio, () => EditField("Bio", Profile.Bio, "Bio"))
+                            @if (!_editing)
+                            {
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.Edit"
+                                           Class="profile-edit-button" OnClick="BeginEdit">
+                                    Edit profile
+                                </MudButton>
+                            }
+                        </div>
 
-                </MudPaper>
-            </MudItem>
-
-            <!-- Security -->
-            <MudItem xs="12" md="6">
-                <MudPaper Class="pa-5 profile-card">
-
-                    <MudText Typo="Typo.h6">Security</MudText>
-
-                    <div class="setting-row">
-                        <div>
-                            <div class="title">Password</div>
-                            <div class="subtitle">
-                                @(Profile.HasPassword ? "Change your password" : "Set password for your account")
+                        <div class="profile-identity-panel">
+                            <MudAvatar Image="@_profile.ProfileImageUrl" Class="profile-avatar"
+                                       Color="Color.Primary" Size="Size.Large">
+                                @Initials
+                            </MudAvatar>
+                            <div class="profile-identity-copy">
+                                <MudText Typo="Typo.h6" Class="profile-person-name">@DisplayName</MudText>
+                                <div class="profile-identity-email">
+                                    <MudText Typo="Typo.body2" Class="profile-email-value">@_profile.Email</MudText>
+                                    <MudChip T="string" Size="Size.Small"
+                                             Color="@(_profile.IsEmailConfirmed ? Color.Success : Color.Warning)"
+                                             Variant="Variant.Outlined" Class="profile-email-chip">
+                                        <MudIcon Icon="@(_profile.IsEmailConfirmed ? Icons.Material.Filled.Verified : Icons.Material.Filled.Info)"
+                                                 Size="Size.Small" Class="mr-1" />
+                                        @(_profile.IsEmailConfirmed ? "Verified" : "Not verified")
+                                    </MudChip>
+                                </div>
                             </div>
                         </div>
 
-                        <MudButton Color="Color.Warning" OnClick="OpenPasswordDialog">
-                            @(Profile.HasPassword ? "Update" : "Set Password")
-                        </MudButton>
-                    </div>
+                        <MudDivider Class="profile-divider" />
 
-                </MudPaper>
-            </MudItem>
+                        @if (_editing)
+                        {
+                            <MudForm @ref="_form" Model="_edit"
+                                     Validation="_editValidator.ToMudValidator()"
+                                     Class="profile-edit-form">
+                                <MudGrid Spacing="3">
+                                    <MudItem xs="12" sm="6">
+                                        <MudTextField T="string" Label="First name" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" Required="true"
+                                                      RequiredError="@ProfileValidationMessages.FirstNameRequired" MaxLength="80"
+                                                      For="@(() => _edit.FirstName)" @bind-Value="_edit.FirstName" />
+                                    </MudItem>
+                                    <MudItem xs="12" sm="6">
+                                        <MudTextField T="string" Label="Last name" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" Required="true"
+                                                      RequiredError="@ProfileValidationMessages.LastNameRequired" MaxLength="80"
+                                                      For="@(() => _edit.LastName)" @bind-Value="_edit.LastName" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" Label="Phone number" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" MaxLength="10"
+                                                      InputType="InputType.Telephone" InputMode="InputMode.numeric"
+                                                      Pattern="[0-9]*" Immediate="true"
+                                                      Adornment="Adornment.Start" AdornmentText="+91"
+                                                      AdornmentColor="Color.Secondary"
+                                                      For="@(() => _edit.PhoneNumber)"
+                                                      Value="_edit.PhoneNumber" ValueChanged="HandlePhoneNumberChanged"
+                                                      HelperText="@ProfileValidationMessages.PhoneHelper" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" Label="About you" Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense" FullWidth="true" Lines="3"
+                                                      MaxLength="600" Counter="600"
+                                                      For="@(() => _edit.Bio)" @bind-Value="_edit.Bio"
+                                                      Placeholder="Add a short introduction about yourself." />
+                                    </MudItem>
+                                </MudGrid>
 
-        </MudGrid>
-    }
+                                <div class="profile-form-actions">
+                                    <MudButton Variant="Variant.Text" Color="Color.Secondary"
+                                               Disabled="_saving" OnClick="CancelEdit">
+                                        Cancel
+                                    </MudButton>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                               Disabled="_saving" OnClick="SaveProfileAsync"
+                                               Class="profile-primary-button">
+                                        <LoadingButtonContent IsLoading="_saving" LoadingText="Saving…">
+                                            <MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-2" />
+                                            Save changes
+                                        </LoadingButtonContent>
+                                    </MudButton>
+                                </div>
+                            </MudForm>
+                        }
+                        else
+                        {
+                            <div class="profile-details-grid">
+                                <div class="profile-detail">
+                                    <MudText Typo="Typo.overline" Class="profile-field-label">FIRST NAME</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-field-value">
+                                        @ValueOrFallback(_profile.FirstName)
+                                    </MudText>
+                                </div>
+                                <div class="profile-detail">
+                                    <MudText Typo="Typo.overline" Class="profile-field-label">LAST NAME</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-field-value">
+                                        @ValueOrFallback(_profile.LastName)
+                                    </MudText>
+                                </div>
+                                <div class="profile-detail">
+                                    <MudText Typo="Typo.overline" Class="profile-field-label">PHONE NUMBER</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-field-value">
+                                        @FormatPhoneNumber(_profile.PhoneNumber)
+                                    </MudText>
+                                </div>
+                                <div class="profile-detail profile-detail-bio">
+                                    <MudText Typo="Typo.overline" Class="profile-field-label">ABOUT</MudText>
+                                    <MudText Typo="Typo.body1" Class="profile-field-value profile-bio-value">
+                                        @ValueOrFallback(_profile.Bio, "Add a short introduction about yourself.")
+                                    </MudText>
+                                </div>
+                            </div>
+                        }
 
-</MudContainer>
+                        <div class="profile-account-meta">
+                            <div class="profile-member-since">
+                                <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" />
+                                <MudText Typo="Typo.caption">
+                                    Member since @_profile.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
+                                </MudText>
+                            </div>
+
+                            @if (_profile.Roles is { Count: > 0 })
+                            {
+                                <div class="profile-role-list" aria-label="Account roles">
+                                    @foreach (var role in _profile.Roles)
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                                                 Color="Color.Secondary">@role</MudChip>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" lg="4">
+                    <MudPaper Class="profile-card notification-card" Elevation="0">
+                        <div class="profile-card-heading">
+                            <div class="profile-card-heading-left">
+                                <span class="profile-card-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.NotificationsNone" />
+                                </span>
+                                <div class="profile-card-heading-copy">
+                                    <MudText Typo="Typo.h6" Class="profile-card-title">Notifications</MudText>
+                                    <MudText Typo="Typo.caption" Class="profile-card-subtitle">
+                                        Updates you may be able to manage here
+                                    </MudText>
+                                </div>
+                            </div>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default"
+                                     Variant="Variant.Outlined" Class="profile-coming-soon">
+                                Coming soon
+                            </MudChip>
+                        </div>
+
+                        <MudDivider Class="profile-divider" />
+
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined"
+                                  Dense="true" Icon="@Icons.Material.Outlined.Info"
+                                  Class="notification-note">
+                            Notification preferences are not active yet. No settings can be changed from this section today.
+                        </MudAlert>
+
+                        <div class="notification-preview-list">
+                            <div class="notification-preview-row">
+                                <span class="notification-preview-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.MailOutline" />
+                                </span>
+                                <div class="notification-preview-copy">
+                                    <MudText Typo="Typo.body2" Class="notification-title">Email updates</MudText>
+                                    <MudText Typo="Typo.caption" Class="notification-description">
+                                        Important account and platform news
+                                    </MudText>
+                                </div>
+                            </div>
+                            <div class="notification-preview-row">
+                                <span class="notification-preview-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.NotificationsActive" />
+                                </span>
+                                <div class="notification-preview-copy">
+                                    <MudText Typo="Typo.body2" Class="notification-title">Browser notifications</MudText>
+                                    <MudText Typo="Typo.caption" Class="notification-description">
+                                        Relevant activity and account alerts
+                                    </MudText>
+                                </div>
+                            </div>
+                            <div class="notification-preview-row">
+                                <span class="notification-preview-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.EventAvailable" />
+                                </span>
+                                <div class="notification-preview-copy">
+                                    <MudText Typo="Typo.body2" Class="notification-title">Mentor reminders</MudText>
+                                    <MudText Typo="Typo.caption" Class="notification-description">
+                                        Reminders before mentoring sessions
+                                    </MudText>
+                                </div>
+                            </div>
+                            <div class="notification-preview-row">
+                                <span class="notification-preview-icon">
+                                    <MudIcon Icon="@Icons.Material.Filled.CalendarViewWeek" />
+                                </span>
+                                <div class="notification-preview-copy">
+                                    <MudText Typo="Typo.body2" Class="notification-title">Weekly digest</MudText>
+                                    <MudText Typo="Typo.caption" Class="notification-description">
+                                        A summary of your weekly activity
+                                    </MudText>
+                                </div>
+                            </div>
+                        </div>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudContainer>
+</section>
 
 @code {
-    private UserProfileDto Profile = new();
-    private bool IsLoading = true;
+    private bool _loading = true;
+    private bool _profileLoadInProgress;
+    private bool _editing;
+    private bool _saving;
+    private MyProfileResponse? _profile;
+    private UpdateMyProfileRequest _edit = new();
+    private readonly UpdateMyProfileRequestValidator _editValidator = new();
+    private MudForm? _form;
 
-    protected override async Task OnInitializedAsync()
+    private string DisplayName
     {
-        await LoadProfile();
+        get
+        {
+            if (_profile is null) return "XQARE member";
+
+            var name = string.Join(" ", new[] { _profile.FirstName, _profile.LastName }
+                .Where(value => !string.IsNullOrWhiteSpace(value)));
+
+            return string.IsNullOrWhiteSpace(name)
+                ? (_profile.DisplayName ?? "XQARE member")
+                : name;
+        }
     }
 
-    private async Task LoadProfile()
+    private string Initials
     {
+        get
+        {
+            var names = DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (names.Length > 1)
+                return string.Concat(names[0][0], names[^1][0]).ToUpperInvariant();
+
+            return names.Length == 1 ? names[0][..1].ToUpperInvariant() : "X";
+        }
+    }
+
+    protected override Task OnInitializedAsync() => LoadProfileAsync();
+
+    private async Task LoadProfileAsync()
+    {
+        if (_profileLoadInProgress || _saving)
+            return;
+
+        _profileLoadInProgress = true;
+        _loading = true;
+
         try
         {
-            Profile = await ProfileService.GetProfileAsync();
+            _profile = await ProfileService.GetMyProfileAsync();
+            if (_profile.IsSuccess)
+                CopyProfileToEdit();
+            else
+                Snackbar.Add(_profile.Message, Severity.Error);
         }
         catch
         {
-            Snackbar.Add("Failed to load profile", Severity.Error);
+            _profile = null;
+            Snackbar.Add(ProfileMessages.LoadFailed, Severity.Error);
         }
         finally
         {
-            IsLoading = false;
+            _loading = false;
+            _profileLoadInProgress = false;
         }
     }
 
-    private RenderFragment ProfileRow(string label, string value, Func<Task> onEdit) => builder =>
+    private void CopyProfileToEdit()
     {
-        builder.AddMarkupContent(0, $@"
-        <div class='setting-row'>
-            <div>
-                <div class='title'>{label}</div>
-                <div class='subtitle'>{value}</div>
-            </div>
-        </div>
-        ");
+        if (_profile is null) return;
 
-        if (onEdit != null)
+        _edit = new UpdateMyProfileRequest
         {
-            builder.OpenComponent<MudButton>(1);
-            builder.AddAttribute(2, "OnClick", EventCallback.Factory.Create(this, onEdit));
-            builder.AddAttribute(3, "ChildContent", (RenderFragment)(b => b.AddContent(0, "Edit")));
-            builder.CloseComponent();
-        }
-    };
-
-    private async Task EditField(string label, string value, string field)
-    {
-        var parameters = new DialogParameters
-        {
-            ["Label"] = label,
-            ["Value"] = value
+            FirstName = _profile.FirstName,
+            LastName = _profile.LastName,
+            PhoneNumber = ToIndianPhoneDigits(_profile.PhoneNumber),
+            Bio = _profile.Bio
         };
-
-        var dialog = DialogService.Show<EditFieldDialog>("Edit " + label, parameters);
-        var result = await dialog.Result;
-
-        if (!result.Cancelled)
-        {
-            var newValue = result.Data.ToString();
-
-            var request = new UpdateProfileRequest();
-
-            switch (field)
-            {
-                case "FullName": request.FullName = newValue; break;
-                case "Phone": request.Phone = newValue; break;
-                case "Bio": request.Bio = newValue; break;
-            }
-
-            await ProfileService.UpdateProfileAsync(request);
-            await LoadProfile();
-
-            Snackbar.Add($"{label} updated", Severity.Success);
-        }
     }
 
-    private async Task OpenPasswordDialog()
+    private void BeginEdit()
     {
-        var dialog = DialogService.Show<PasswordDialog>("Password");
+        if (_saving) return;
 
-        var result = await dialog.Result;
+        CopyProfileToEdit();
+        _editing = true;
+    }
 
-        if (!result.Cancelled)
+    private void CancelEdit()
+    {
+        if (_saving) return;
+
+        CopyProfileToEdit();
+        _editing = false;
+    }
+
+    private async Task SaveProfileAsync()
+    {
+        if (_saving || !_editing) return;
+
+        _saving = true;
+
+        try
         {
-            try
+            if (_form is not null)
             {
-                if (!Profile.HasPassword)
-                    await ProfileService.SetPasswordAsync((SetPasswordRequest)result.Data);
-                else
-                    await ProfileService.ChangePasswordAsync((ChangePasswordRequest)result.Data);
+                await _form.ValidateAsync();
+                if (!_form.IsValid) return;
+            }
 
-                Snackbar.Add("Password updated", Severity.Success);
-                Profile.HasPassword = true;
-            }
-            catch
+            // Normalize values before sending so the API receives the same trimmed values
+            // that the UI validator accepts.
+            _edit.FirstName = _edit.FirstName.Trim();
+            _edit.LastName = _edit.LastName.Trim();
+            _edit.PhoneNumber = string.IsNullOrWhiteSpace(_edit.PhoneNumber)
+                ? null
+                : _edit.PhoneNumber.Trim();
+            _edit.Bio = string.IsNullOrWhiteSpace(_edit.Bio)
+                ? null
+                : _edit.Bio.Trim();
+
+            var request = new UpdateMyProfileRequest
             {
-                Snackbar.Add("Failed to update password", Severity.Error);
+                FirstName = _edit.FirstName,
+                LastName = _edit.LastName,
+                PhoneNumber = string.IsNullOrWhiteSpace(_edit.PhoneNumber)
+                    ? null
+                    : $"+91{_edit.PhoneNumber}",
+                Bio = _edit.Bio
+            };
+
+            var response = await ProfileService.UpdateMyProfileAsync(request);
+            if (!response.IsSuccess)
+            {
+                Snackbar.Add(response.Message, Severity.Error);
+                return;
             }
+
+            _profile = response;
+            CopyProfileToEdit();
+            _editing = false;
+            Snackbar.Add(response.Message, Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add(ProfileMessages.SaveFailed, Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
         }
     }
-} *@
+
+    private Task HandlePhoneNumberChanged(string? value)
+    {
+        var digits = new string((value ?? string.Empty).Where(char.IsAsciiDigit).ToArray());
+
+        if (digits.Length == 13 && digits.StartsWith("910", StringComparison.Ordinal))
+            digits = digits[3..];
+        else if (digits.Length == 12 && digits.StartsWith("91", StringComparison.Ordinal))
+            digits = digits[2..];
+        else if (digits.Length == 11 && digits.StartsWith("0", StringComparison.Ordinal))
+            digits = digits[1..];
+
+        _edit.PhoneNumber = digits.Length > 10 ? digits[..10] : digits;
+        return Task.CompletedTask;
+    }
+
+    private static string ToIndianPhoneDigits(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var digits = new string(value.Where(char.IsAsciiDigit).ToArray());
+
+        if (digits.Length == 13 && digits.StartsWith("910", StringComparison.Ordinal))
+            digits = digits[3..];
+        else if (digits.Length == 12 && digits.StartsWith("91", StringComparison.Ordinal))
+            digits = digits[2..];
+        else if (digits.Length == 11 && digits.StartsWith("0", StringComparison.Ordinal))
+            digits = digits[1..];
+
+        return digits.Length > 10 ? digits[..10] : digits;
+    }
+
+    private static string FormatPhoneNumber(string? value)
+    {
+        var digits = ToIndianPhoneDigits(value);
+        return digits.Length == 10
+            ? $"+91 {digits[..5]} {digits[5..]}"
+            : ValueOrFallback(value);
+    }
+
+    private static string ValueOrFallback(string? value, string fallback = "Not added yet")
+        => string.IsNullOrWhiteSpace(value) ? fallback : value;
+}
